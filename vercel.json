@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "src/app/api/reports/*/export/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/upload-master-file/route.ts": {
+      "maxDuration": 60
+    }
+  }
+}

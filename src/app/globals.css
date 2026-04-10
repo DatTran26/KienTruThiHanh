@@ -1,0 +1,223 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+/* ─── Map CSS vars → Tailwind color utilities (Government Design System) ─── */
+@theme inline {
+  --color-background:          var(--background);
+  --color-foreground:          var(--foreground);
+  --color-card:                var(--card);
+  --color-card-foreground:     var(--card-foreground);
+  --color-popover:             var(--popover);
+  --color-popover-foreground:  var(--popover-foreground);
+  
+  --color-primary:             var(--primary);
+  --color-primary-foreground:  var(--primary-foreground);
+  --color-secondary:           var(--secondary);
+  --color-secondary-foreground:var(--secondary-foreground);
+  --color-muted:               var(--muted);
+  --color-muted-foreground:    var(--muted-foreground);
+  
+  --color-accent:              var(--accent);
+  --color-accent-foreground:   var(--accent-foreground);
+  
+  --color-destructive:         var(--destructive);
+  --color-warning:             var(--warning);
+  --color-success:             var(--success);
+  
+  --color-border:              var(--border);
+  --color-input:               var(--input);
+  --color-ring:                var(--ring);
+  
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-full: 9999px;
+  
+  /* Strict Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  --shadow-card: 0 2px 8px -2px rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+}
+
+/* ─── Institutional System — Light Mode ─── */
+:root {
+  --radius: 0.5rem;
+
+  /* Baseline */
+  --background:          oklch(0.98 0.005 250); /* #F8FAFC - Soft Off-White */
+  --foreground:          oklch(0.20 0.03 250);  /* #0F172A - Very Dark Navy text */
+
+  /* Surfaces */
+  --card:                oklch(1 0 0);          /* #FFFFFF - Pure White */
+  --card-foreground:     oklch(0.25 0.04 250);  /* #1E293B */
+
+  /* Popovers */
+  --popover:             oklch(1 0 0);
+  --popover-foreground:  oklch(0.25 0.04 250);
+
+  /* Primary — Deep Navy Blue (Trust/Official) */
+  --primary:             oklch(0.30 0.06 250); /* #0F172A Base Dark Navy */
+  --primary-foreground:  oklch(0.98 0.01 250); /* White/Off-white */
+
+  /* Secondary — Slate Gray (Structure/Muted) */
+  --secondary:           oklch(0.95 0.01 250); /* #F1F5F9 */
+  --secondary-foreground:oklch(0.35 0.04 250); /* #334155 */
+
+  /* Muted */
+  --muted:               oklch(0.96 0.01 250); /* #F1F5F9 */
+  --muted-foreground:    oklch(0.55 0.02 250); /* #64748B */
+
+  /* Accent — Teal/Cyan (AI Highlights) */
+  --accent:              oklch(0.93 0.05 210); /* Soft Teal bg */
+  --accent-foreground:   oklch(0.40 0.10 210); /* Deep Teal text */
+
+  /* Status Colors (Restrained) */
+  --destructive:         oklch(0.60 0.15 20);  /* Controlled Red */
+  --warning:             oklch(0.75 0.15 60);  /* Muted Amber */
+  --success:             oklch(0.65 0.10 150); /* Restrained Green */
+
+  /* Borders & Inputs */
+  --border:              oklch(0.90 0.01 250); /* #E2E8F0 */
+  --input:               oklch(0.90 0.01 250); /* #E2E8F0 */
+  --ring:                oklch(0.60 0.10 210); /* Focus Ring - Teal */
+}
+
+/* ─── Global Scope ─── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 14px; /* Standardize on slightly smaller professional text */
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--foreground);
+}
+
+/* ─── Typography ─── */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--primary);
+}
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1.125rem; }
+
+p { text-wrap: pretty; }
+
+/* ─── Metric Mono Data ─── */
+.metric-mono {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+/* ─── Structured Panels (Clean UI replace glass-panel) ─── */
+.structured-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition: all 0.2s ease;
+}
+
+/* Optional hover state for interactive structured panels */
+.structured-panel-hoverable:hover {
+  border-color: oklch(0.8 0.02 250);
+  box-shadow: var(--shadow-md);
+}
+
+/* ─── Simple Animations ─── */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.delay-100 { animation-delay: 50ms; }
+.delay-200 { animation-delay: 100ms; }
+.delay-300 { animation-delay: 150ms; }
+.delay-400 { animation-delay: 200ms; }
+
+/* Input overrides for crisp official look */
+input, textarea, select {
+  font-family: var(--font-sans);
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px oklch(0.60 0.10 210 / 0.2);
+}
+
+/* Basic utility to match exact text styles based on user prompt */
+.text-label {
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
