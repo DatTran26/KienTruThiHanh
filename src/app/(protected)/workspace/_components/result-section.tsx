@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { ResultCard } from './result-card';
 import type { AnalysisResponse, AnalysisResult, ExpenseGroup } from '@/types/analysis';
-import { AlertTriangle, Zap, ListTree, Receipt, Info, Plus, Save, Pencil, Minus, Check, X } from 'lucide-react';
+import { AlertTriangle, Zap, ListTree, Receipt, Info, Plus, Save, Pencil, Minus, Check, X, ChevronRight } from 'lucide-react';
 
 interface ResultSectionProps {
   response: AnalysisResponse;
@@ -248,10 +249,11 @@ export function ResultSection({ response, onAddToReport, savedTargetInfo }: Resu
                             Xử lý <strong className="text-white">{bestItems.length}</strong> khoản chi tự động
                           </p>
                           {savedTargetInfo && (
-                            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[9.5px] font-black tracking-widest uppercase ml-1 animate-fade-in shadow-sm">
+                            <Link href={`/reports/${savedTargetInfo.id}`} className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[9.5px] font-black tracking-widest uppercase ml-1 animate-fade-in shadow-sm hover:bg-emerald-500/35 hover:border-emerald-400/50 hover:text-emerald-200 transition-all cursor-pointer group/saved">
                               <Check size={10} strokeWidth={3} />
                               Đã lưu: {savedTargetInfo.name}
-                            </span>
+                              <ChevronRight size={10} strokeWidth={3} className="opacity-0 -ml-1 group-hover/saved:opacity-100 group-hover/saved:ml-0 transition-all" />
+                            </Link>
                           )}
                         </div>
                      </div>
