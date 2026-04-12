@@ -27,25 +27,33 @@ export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const [{ data: recentAnalyses }, { data: recentReports }, { count: totalAnalyses }, { data: allReports }] = await Promise.all([
+  const [
+    { data: recentAnalyses }, 
+    { data: recentReportsRaw }, 
+    { count: totalAnalyses }, 
+    { data: allReportsRaw }
+  ] = await Promise.all([
     supabase
       .from('analysis_requests')
       .select('id, raw_description, confidence, created_at')
       .order('created_at', { ascending: false })
       .limit(5),
-    supabase
+    (supabase
       .from('reports')
       .select('id, report_name, status, created_at, report_items(amount)')
       .order('created_at', { ascending: false })
-      .limit(4),
+      .limit(4) as any),
     supabase
       .from('analysis_requests')
       .select('*', { count: 'exact', head: true }),
-    supabase
+    (supabase
       .from('reports')
       .select('created_at, report_items(amount)')
-      .order('created_at', { ascending: true })
+      .order('created_at', { ascending: true }) as any)
   ]);
+
+  const recentReports = (recentReportsRaw || []) as any[];
+  const allReports = (allReportsRaw || []) as any[];
 
   // Aggregate monthly data for chart
   const monthlyData: Record<string, number> = {

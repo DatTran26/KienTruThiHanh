@@ -16,10 +16,11 @@ function formatCurrency(n: number) {
 export default async function ReportsPage() {
   const supabase = await createClient();
 
-  const { data: reports } = await supabase
+  const response = (await supabase
     .from('reports')
     .select('id, report_name, report_code, status, created_at, report_items(amount)')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })) as any;
+  const reports = response.data as any[];
 
   const mappedReports = reports?.map(r => {
     const realTotal = (r.report_items as any[])?.reduce((k, i) => k + (i.amount || 0), 0) || 0;

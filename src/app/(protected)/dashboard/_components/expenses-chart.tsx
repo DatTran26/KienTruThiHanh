@@ -414,16 +414,14 @@ export function ExpensesChart({ data: realData, totalExpectedAmount }: ExpensesC
             {chartType === 'radial' && (
               <ResponsiveContainer width="100%" height="100%" minHeight={280} minWidth={0}>
                 <RadialBarChart cx="50%" cy="50%" innerRadius="25%" outerRadius="90%" barSize={12} data={data}
-                  onMouseMove={(e) => e.activePayload?.length && setHoverData(e.activePayload[0].payload)}
+                  onMouseMove={(e: any) => e?.activePayload?.length && setHoverData(e.activePayload[0].payload)}
                   onMouseLeave={() => setHoverData(null)}
                 >
                   <RadialBar
-                    minAngle={15}
-                    background={{ fill: '#f8fafc' }}
-                    clockWise
                     dataKey="amount"
-                    cornerRadius={10}
-                    animationDuration={1200}
+                    background={{ fill: '#e2e8f0' }}
+                    cornerRadius={15}
+                    animationDuration={1500}
                   >
                     {data.map((_, i) => <Cell key={i} fill={PALETTE[i % PALETTE.length]} />)}
                   </RadialBar>

@@ -40,13 +40,25 @@ export interface Database {
           checksum: string | null;
           item_count: number | null;
           parse_errors: Json | null;
+          doc_title: string | null;
+          doc_period: string | null;
+          effective_date: string | null;
+          ai_model: string | null;
+          doc_unit: string | null;
+          parsed_at: string | null;
         };
-        Insert: Omit<Database['public']['Tables']['master_document_versions']['Row'], 'id' | 'uploaded_at'> & {
+        Insert: Omit<Database['public']['Tables']['master_document_versions']['Row'], 'id' | 'uploaded_at' | 'doc_title' | 'doc_period' | 'effective_date' | 'ai_model' | 'doc_unit' | 'parsed_at'> & {
           id?: string;
           uploaded_at?: string;
           is_active?: boolean;
           item_count?: number | null;
           parse_errors?: Json | null;
+          doc_title?: string | null;
+          doc_period?: string | null;
+          effective_date?: string | null;
+          ai_model?: string | null;
+          doc_unit?: string | null;
+          parsed_at?: string | null;
         };
         Update: Partial<Database['public']['Tables']['master_document_versions']['Insert']>;
         Relationships: [];
@@ -63,10 +75,14 @@ export interface Database {
           normalized_text: string | null;
           keywords: string[] | null;
           is_active: boolean;
+          notes: string | null;
+          source_row: number | null;
         };
-        Insert: Omit<Database['public']['Tables']['master_items']['Row'], 'id'> & {
+        Insert: Omit<Database['public']['Tables']['master_items']['Row'], 'id' | 'notes' | 'source_row'> & {
           id?: string;
           is_active?: boolean;
+          notes?: string | null;
+          source_row?: number | null;
         };
         Update: Partial<Database['public']['Tables']['master_items']['Insert']>;
         Relationships: [];
