@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { generateReportPdf } from '@/lib/pdf/generate-report-pdf';
 import type { PdfOrgProfile } from '@/lib/pdf/report-pdf-template';
 
@@ -56,14 +56,31 @@ export async function GET(
         .limit(1)
         .maybeSingle();
       orgProfile = orgFallback ?? null;
+
+      if (!orgProfile) {
+        const serviceSupabase = createServiceClient();
+        const { data: userRow } = await serviceSupabase.from('users').select('role').eq('id', user.id).single();
+        if ((userRow as any)?.role === 'admin') {
+           const { data: refData } = await serviceSupabase.from('org_reference').select('unit_name, address, tax_code').limit(1).maybeSingle();
+           if (refData) {
+             orgProfile = {
+               unit_name: refData.unit_name || '',
+               address: refData.address || '',
+               tax_code: refData.tax_code || '',
+             };
+           }
+        }
+      }
     }
 
     const exportDate = new Date().toLocaleDateString('vi-VN');
 
+    const calculatedTotalAmount = items?.reduce((acc, item) => acc + (Number(item.amount) || 0), 0) ?? report.total_amount;
+
     const pdfBuffer = await generateReportPdf({
       reportName: report.report_name,
       reportCode: report.report_code,
-      totalAmount: report.total_amount,
+      totalAmount: calculatedTotalAmount,
       items,
       orgProfile,
       exportDate,
