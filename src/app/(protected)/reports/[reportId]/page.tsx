@@ -139,7 +139,7 @@ export default async function ReportDetailPage({
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tổng cộng</p>
-                  <p className="text-lg font-bold text-slate-900 leading-none font-mono">{formatCurrency(computedTotal)}₫</p>
+                  <p className="text-lg font-bold text-slate-900 leading-none font-mono">{formatCurrency(computedTotal)} VNĐ</p>
                 </div>
               </div>
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex items-center gap-3">

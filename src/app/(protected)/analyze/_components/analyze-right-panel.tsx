@@ -221,7 +221,7 @@ export function AnalyzeRightPanel({
                         <>
                           <span className="opacity-40">•</span>
                           <span className="text-slate-500 bg-slate-100 px-2 py-0.5 rounded-[6px] border border-slate-200 shadow-inner">
-                            {new Intl.NumberFormat('vi-VN').format(item.extracted_amount)} đ
+                            {new Intl.NumberFormat('vi-VN').format(item.extracted_amount)} VNĐ
                           </span>
                         </>
                       )}

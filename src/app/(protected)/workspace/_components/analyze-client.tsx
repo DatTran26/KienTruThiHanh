@@ -284,7 +284,7 @@ export default function AnalyzeClient({
             group_title:     item.groupTitle,
             sub_code:        item.subCode,
             sub_title:       item.subTitle,
-            expense_content: `${item.subCode} – ${item.subTitle}`,
+            expense_content: item.description || item.subTitle || '',
             amount:          item.amount ?? 0,
           }),
         })
@@ -729,7 +729,7 @@ export default function AnalyzeClient({
                          </div>
                          {item.amount != null && item.amount > 0 && (
                            <span className="text-[13px] font-black text-slate-800 shrink-0 whitespace-nowrap mt-0.5">
-                             {new Intl.NumberFormat('vi-VN').format(item.amount)} đ
+                             {new Intl.NumberFormat('vi-VN').format(item.amount)} VNĐ
                            </span>
                          )}
                        </div>

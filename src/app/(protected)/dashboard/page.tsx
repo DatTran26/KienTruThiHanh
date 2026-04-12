@@ -117,7 +117,7 @@ export default async function DashboardPage() {
       borderColor: 'border-violet-200/50',
       textColor: 'text-violet-600',
       textGradient: 'from-violet-600 to-purple-600',
-      change: formatCurrency(totalReportAmount) + ' đ',
+      change: formatCurrency(totalReportAmount) + ' VNĐ',
     },
     {
       label: 'Độ Chính Xác',
@@ -279,7 +279,7 @@ export default async function DashboardPage() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tổng chi phí</p>
-                  <p className="text-[15px] font-black text-indigo-700 tracking-tight tabular-nums">{formatCurrency(totalExpectedAmount)} đ</p>
+                  <p className="text-[15px] font-black text-indigo-700 tracking-tight tabular-nums">{formatCurrency(totalExpectedAmount)} VNĐ</p>
                 </div>
               </div>
 
@@ -354,7 +354,7 @@ export default async function DashboardPage() {
                         </div>
                       </div>
                       <span className="text-[11.5px] font-black text-indigo-600 shrink-0 tabular-nums">
-                        {formatCurrency(report.total_amount)} đ
+                        {formatCurrency(report.total_amount)} VNĐ
                       </span>
                     </Link>
                   ))}

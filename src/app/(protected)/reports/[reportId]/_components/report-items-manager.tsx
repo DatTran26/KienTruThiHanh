@@ -96,7 +96,7 @@ export function ReportItemsManager({
       ...prev,
       group_code: item.groupCode || '',
       sub_code: item.subCode || '',
-      expense_content: item.subTitle || item.groupTitle || '',
+      expense_content: item.description || item.subTitle || item.groupTitle || '',
     }));
     setInputTab('manual');
     toast.success(`Đã tự động điền mã ${item.subCode || item.groupCode}`);
@@ -540,7 +540,7 @@ export function ReportItemsManager({
                           {a.raw_description}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[10px] text-slate-400 font-mono">{a.extracted_amount ? formatCurrency(a.extracted_amount) + '₫' : '—'}</span>
+                          <span className="text-[10px] text-slate-400 font-mono">{a.extracted_amount ? formatCurrency(a.extracted_amount) + ' VNĐ' : '—'}</span>
                           {a.confidence != null && (
                             <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded ${
                               a.confidence >= 0.8 ? 'bg-emerald-50 text-emerald-600' :

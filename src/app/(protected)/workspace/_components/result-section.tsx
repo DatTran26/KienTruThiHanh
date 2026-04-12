@@ -365,7 +365,7 @@ export function ResultSection({ response, onAddToReport, savedTargetInfo }: Resu
                              }`}>
                                <span className={`font-mono text-[12px] font-black ${
                                  isEditMode ? 'text-amber-500' : 'text-slate-400'
-                               }`}>₫</span>
+                               }`}>VNĐ</span>
                              </div>
                              <input
                                type="text"
@@ -541,7 +541,7 @@ export function ResultSection({ response, onAddToReport, savedTargetInfo }: Resu
                             {(r.confidence * 100).toFixed(0)}%
                           </span>
                           <span className="font-mono text-[13px] font-black text-slate-800">
-                             {r.amount ? new Intl.NumberFormat('vi-VN').format(r.amount) : '---'} <span className="text-[11px] font-sans font-bold text-slate-400">₫</span>
+                             {r.amount ? new Intl.NumberFormat('vi-VN').format(r.amount) : '---'} <span className="text-[11px] font-sans font-bold text-slate-400">VNĐ</span>
                           </span>
                       </div>
                     </div>

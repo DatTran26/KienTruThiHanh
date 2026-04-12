@@ -132,7 +132,7 @@ export function ReportItemsTable({ items }: { items: ReportItem[] }) {
           <div className="flex flex-col text-right">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em]">Tổng số tiền biểu</span>
             <span className="text-sm font-semibold tracking-tight text-primary">
-              {formatCurrency(totalAmount)} đ
+              {formatCurrency(totalAmount)} VNĐ
             </span>
           </div>
           <div className="w-px h-8 bg-border" />
