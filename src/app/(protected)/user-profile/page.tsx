@@ -1,6 +1,7 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { Mail, ShieldCheck, Building2, KeyRound, CalendarDays, Zap, FileSymlink, LogOut, ExternalLink, ShieldAlert, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
+import { AdminOrgConfig } from './_components/admin-org-config';
 
 export default async function UserProfilePage() {
   const supabase = await createClient();
@@ -216,6 +217,8 @@ export default async function UserProfilePage() {
               </button>
             </div>
           </div>
+
+          {isAdmin && <AdminOrgConfig />}
         </div>
       </div>
     </div>
