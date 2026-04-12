@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import AnalyzeClient from '../workspace/_components/analyze-client';
 import { AnalyzeRightPanel } from './_components/analyze-right-panel';
@@ -63,16 +64,18 @@ export default async function AnalyzePage() {
 
       {/* ── Main workspace (left) ── */}
       <div className="flex-1 min-w-0 overflow-y-auto">
-        <AnalyzeClient 
-          isAdmin={isAdmin} 
-          activeMaster={activeMaster ?? null} 
-          popularItems={popularItems}
-          aiModel={aiModel} 
-        />
+        <Suspense fallback={<div className="p-8 text-sm text-slate-500">Đang tải Workspace...</div>}>
+          <AnalyzeClient 
+            isAdmin={isAdmin} 
+            activeMaster={activeMaster ?? null} 
+            popularItems={popularItems}
+            aiModel={aiModel} 
+          />
+        </Suspense>
       </div>
 
       {/* ── Context panel (right) — desktop only ── */}
-      <aside className="hidden xl:flex flex-col w-[300px] shrink-0 border-l border-slate-200 bg-white overflow-y-auto">
+      <aside className="hidden xl:flex flex-col w-[440px] 2xl:w-[480px] shrink-0 border-l border-slate-200/80 bg-white overflow-y-auto z-10 shadow-[-10px_0_30px_rgba(0,0,0,0.01)] relative">
         <AnalyzeRightPanel
           recentAnalyses={recentAnalyses ?? []}
           totalAnalyses={totalAnalyses ?? 0}

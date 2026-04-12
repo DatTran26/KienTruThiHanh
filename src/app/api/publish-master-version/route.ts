@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
@@ -9,12 +9,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'versionId required' }, { status: 400 });
     }
 
-    const supabase = await createServiceClient();
-
-    const { data: { user } } = await supabase.auth.getUser();
+    // ── Auth check via cookie session ──
+    const authClient = await createClient();
+    const { data: { user } } = await authClient.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // ── DB writes via service client (bypasses RLS) ──
+    const supabase = createServiceClient();
 
     // Verify version exists
     const { data: version } = await supabase

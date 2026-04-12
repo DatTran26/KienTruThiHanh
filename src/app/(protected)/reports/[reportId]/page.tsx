@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { ArrowLeft, FileText, CheckCircle2, Clock, Receipt } from 'lucide-react';
+import { ArrowLeft, FileText, CheckCircle2, Clock, Receipt, Sparkles, Plus, BrainCircuit, ArrowRight, CalendarDays, Hash, TrendingUp, Database } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { ReportItemsTable } from './_components/report-items-table';
+import { ReportItemsManager } from './_components/report-items-manager';
 import { ExportButton } from './_components/export-button';
 
 export default async function ReportDetailPage({
@@ -30,131 +30,150 @@ export default async function ReportDetailPage({
     .eq('report_id', reportId)
     .order('sort_order', { ascending: true });
 
+  // Fetch recent AI analyses for the sidebar
+  const { data: recentAnalyses } = await supabase
+    .from('analysis_requests')
+    .select('id, raw_description, confidence, extracted_amount, created_at, selected_item_id')
+    .eq('user_id', user!.id)
+    .order('created_at', { ascending: false })
+    .limit(15);
+
   const isExported = report.status === 'exported';
+  const itemCount = items?.length ?? 0;
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 max-w-3xl animate-fade-in">
+    <div className="min-h-full pb-20 lg:pb-8 animate-fade-in">
 
-      {/* Back */}
-      <Link
-        href="/reports"
-        className="inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:opacity-70"
-        style={{ color: 'var(--muted-foreground)', textDecoration: 'none' }}
-      >
-        <ArrowLeft className="size-4" />
-        Danh sách phiếu
-      </Link>
+      {/* ── Page Header ── */}
+      <div className="relative px-6 py-6 lg:px-8 bg-white border-b border-slate-200/80 shadow-sm">
+        <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px] [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-30 pointer-events-none" />
+        
+        <div className="relative z-10 max-w-6xl mx-auto">
+          <Link
+            href="/reports"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors mb-4"
+          >
+            <ArrowLeft className="size-4" />
+            Danh sách phiếu
+          </Link>
 
-      {/* Header card */}
-      <div
-        className="rounded-2xl p-6"
-        style={{
-          border: `1.5px solid ${isExported ? 'oklch(0.56 0.17 145 / 0.3)' : 'oklch(0.52 0.24 265 / 0.2)'}`,
-          background: isExported
-            ? 'linear-gradient(135deg, oklch(0.56 0.17 145 / 0.05) 0%, var(--card) 100%)'
-            : 'linear-gradient(135deg, oklch(0.52 0.24 265 / 0.04) 0%, var(--card) 100%)',
-          boxShadow: '0 2px 12px oklch(0 0 0 / 0.06)',
-        }}
-      >
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div className="flex items-start gap-4">
-            <div
-              className="size-12 rounded-2xl flex items-center justify-center shrink-0"
-              style={{
-                background: isExported ? 'oklch(0.56 0.17 145 / 0.1)' : 'oklch(0.52 0.24 265 / 0.08)',
-              }}
-            >
-              {isExported
-                ? <CheckCircle2 className="size-6" style={{ color: 'oklch(0.56 0.17 145)' }} />
-                : <FileText className="size-6" style={{ color: 'oklch(0.52 0.24 265)' }} />
-              }
-            </div>
-            <div>
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="text-xl font-bold" style={{ letterSpacing: '-0.02em' }}>
-                  {report.report_name}
-                </h1>
-                <span
-                  className="text-xs font-bold px-2.5 py-1 rounded-full"
-                  style={{
-                    background: isExported ? 'oklch(0.56 0.17 145 / 0.1)' : 'oklch(0.52 0.24 265 / 0.08)',
-                    color: isExported ? 'oklch(0.56 0.17 145)' : 'oklch(0.52 0.24 265)',
-                  }}
-                >
-                  {isExported ? 'Đã xuất' : 'Nháp'}
-                </span>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div
+                className={`size-12 rounded-xl flex items-center justify-center shrink-0 border shadow-sm ${
+                  isExported 
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-600' 
+                    : 'bg-indigo-50 border-indigo-200 text-indigo-600'
+                }`}
+              >
+                {isExported
+                  ? <CheckCircle2 className="size-6" />
+                  : <FileText className="size-6" />
+                }
               </div>
-              <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                {report.report_code && (
+              <div>
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+                    {report.report_name}
+                  </h1>
                   <span
-                    className="font-mono text-xs font-semibold px-2.5 py-0.5 rounded-lg"
-                    style={{
-                      background: 'oklch(0.52 0.24 265 / 0.06)',
-                      color: 'oklch(0.52 0.24 265)',
-                    }}
+                    className={`text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border ${
+                      isExported 
+                        ? 'bg-emerald-50 text-emerald-600 border-emerald-200' 
+                        : 'bg-amber-50 text-amber-600 border-amber-200'
+                    }`}
                   >
-                    Số: {report.report_code}
+                    {isExported ? 'Đã xuất' : 'Nháp'}
                   </span>
-                )}
-                <span className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                  <Clock className="size-3" />
-                  {formatDate(report.created_at)}
-                </span>
+                </div>
+                <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                  {report.report_code && (
+                    <span className="font-mono text-xs font-semibold px-2.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-200">
+                      Số: {report.report_code}
+                    </span>
+                  )}
+                  <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                    <Clock className="size-3" />
+                    {formatDate(report.created_at)}
+                  </span>
+                </div>
               </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Link
+                href={`/analyze?reportId=${reportId}`}
+                className="flex items-center gap-2 h-10 px-4 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-600 text-white font-bold text-sm shadow-sm hover:from-violet-400 hover:to-indigo-500 transition-all active:scale-95"
+              >
+                <BrainCircuit className="size-4" />
+                Phân loại AI
+              </Link>
+              {itemCount > 0 && (
+                <ExportButton reportId={reportId} reportName={report.report_name} />
+              )}
             </div>
           </div>
-
-          {(items?.length ?? 0) > 0 && (
-            <ExportButton reportId={reportId} reportName={report.report_name} />
-          )}
         </div>
       </div>
 
-      {/* Items table */}
-      <div
-        className="rounded-2xl overflow-hidden"
-        style={{
-          border: '1px solid var(--border)',
-          background: 'var(--card)',
-          boxShadow: '0 1px 4px oklch(0 0 0 / 0.04)',
-        }}
-      >
-        <div
-          className="px-5 py-4 flex items-center gap-3"
-          style={{ borderBottom: '1px solid var(--border)', background: 'oklch(0.975 0.005 250)' }}
-        >
-          <Receipt className="size-4" style={{ color: 'oklch(0.52 0.24 265)' }} />
-          <h2 className="text-sm font-bold">
-            Các khoản mục
-            <span
-              className="ml-2 text-xs font-semibold px-2 py-0.5 rounded-full"
-              style={{
-                background: 'oklch(0.52 0.24 265 / 0.08)',
-                color: 'oklch(0.52 0.24 265)',
-              }}
-            >
-              {items?.length ?? 0}
-            </span>
-          </h2>
-        </div>
-        <div className="p-1">
-          <ReportItemsTable items={items ?? []} />
-        </div>
-      </div>
+      {/* ── Main Content ── */}
+      <div className="px-4 lg:px-8 py-6 bg-slate-50/50 min-h-screen">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="flex-1 min-w-0 space-y-5">
 
-      {/* Total summary */}
-      <div className="flex justify-end">
-        <div
-          className="text-right p-5 rounded-2xl min-w-48"
-          style={{
-            background: 'linear-gradient(135deg, oklch(0.52 0.24 265) 0%, oklch(0.58 0.22 280) 100%)',
-            boxShadow: '0 8px 24px oklch(0.52 0.24 265 / 0.3)',
-          }}
-        >
-          <p className="text-xs font-semibold text-white/70 mb-1">Tổng cộng</p>
-          <p className="text-2xl font-bold text-white" style={{ letterSpacing: '-0.03em' }}>
-            {formatCurrency(report.total_amount)}₫
-          </p>
+            {/* Stats summary row */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex items-center gap-3">
+                <div className="size-9 rounded-lg bg-violet-50 border border-violet-100 flex items-center justify-center shadow-sm">
+                  <Receipt className="size-4 text-violet-600" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Khoản mục</p>
+                  <p className="text-lg font-bold text-slate-900 leading-none">{itemCount}</p>
+                </div>
+              </div>
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex items-center gap-3">
+                <div className="size-9 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center shadow-sm">
+                  <TrendingUp className="size-4 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tổng cộng</p>
+                  <p className="text-lg font-bold text-slate-900 leading-none font-mono">{formatCurrency(report.total_amount)}₫</p>
+                </div>
+              </div>
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex items-center gap-3">
+                <div className="size-9 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center shadow-sm">
+                  <CalendarDays className="size-4 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ngày tạo</p>
+                  <p className="text-sm font-bold text-slate-900 leading-none">{formatDate(report.created_at)}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Items manager — 2 column split */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_4px_20px_rgb(0,0,0,0.04)] ring-1 ring-slate-900/5 overflow-hidden">
+              <div className="px-5 py-3.5 flex items-center justify-between border-b border-slate-100 bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="size-7 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center shadow-sm">
+                    <Receipt className="size-3.5 text-indigo-600" />
+                  </div>
+                  <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em]">
+                    Các khoản mục
+                    <span className="ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200">
+                      {itemCount}
+                    </span>
+                  </h2>
+                </div>
+              </div>
+              <ReportItemsManager
+                items={items ?? []}
+                reportId={reportId}
+                analyses={recentAnalyses ?? []}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

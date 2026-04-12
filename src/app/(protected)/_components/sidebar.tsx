@@ -1,109 +1,238 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
-import { 
-  LayoutDashboard, 
-  Sparkles, 
-  FileText, 
-  Building2, 
-  Database, 
-  LogOut 
+import {
+  LayoutDashboard,
+  Sparkles,
+  FileText,
+  Building2,
+  Database,
+  LogOut,
+  Zap,
+  ChevronRight,
 } from 'lucide-react';
 
-const navItems = [
-  { href: '/dashboard',          label: 'Tổng quan',        icon: LayoutDashboard },
-  { href: '/analyze',            label: 'Phân loại AI',     icon: Sparkles },
-  { href: '/reports',            label: 'Báo cáo',          icon: FileText },
-  { href: '/profile',            label: 'Hồ sơ Tổ chức',    icon: Building2 },
-  { href: '/admin/upload-master',label: 'Kho Dữ liệu Mức',  icon: Database },
+const mainNavItems = [
+  { href: '/analyze',   label: 'Phân loại AI',  icon: Sparkles,        desc: 'Định danh chi phí' },
+  { href: '/dashboard', label: 'Tổng quan',      icon: LayoutDashboard, desc: 'Thống kê hệ thống' },
+  { href: '/reports',   label: 'Báo cáo',        icon: FileText,        desc: 'Quản lý hồ sơ' },
+  { href: '/profile',   label: 'Hồ sơ Tổ chức', icon: Building2,       desc: 'Thông tin đơn vị' },
 ];
 
-export function Sidebar() {
+const adminNavItems = [
+  { href: '/admin/upload-master', label: 'Kho Dữ liệu', icon: Database, desc: 'Dữ liệu chuẩn' },
+];
+
+// Mobile bottom nav — 4 primary items
+const mobileNavItems = [
+  { href: '/analyze',   label: 'Phân loại', icon: Sparkles },
+  { href: '/dashboard', label: 'Tổng quan', icon: LayoutDashboard },
+  { href: '/reports',   label: 'Báo cáo',   icon: FileText },
+  { href: '/profile',   label: 'Hồ sơ',     icon: Building2 },
+];
+
+interface SidebarProps {
+  userEmail?: string;
+  isAdmin?: boolean;
+}
+
+export function Sidebar({ userEmail, isAdmin = false }: SidebarProps) {
+  const router   = useRouter();
   const pathname = usePathname();
-  const router = useRouter();
+
+  const isActive = (href: string) =>
+    href === '/analyze'
+      ? pathname === '/analyze' || pathname === '/workspace'
+      : pathname.startsWith(href);
 
   const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    toast.success('Đã đăng xuất khỏi hệ thống.');
+    toast.success('Đã đăng xuất.');
     router.push('/login');
     router.refresh();
   };
 
-  const isActive = (href: string) => {
-    if (href === '/dashboard') return pathname === '/dashboard';
-    return pathname.startsWith(href);
-  };
-
   return (
-    <aside className="h-full flex-shrink-0 flex items-center transition-all z-50">
-      
-      <div className="w-[80px] h-full bg-white/70 backdrop-blur-2xl border border-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] ring-1 ring-slate-900/5 flex flex-col items-center py-6 relative z-50 isolate">
-        
-        {/* Brand Indicator */}
-        <div className="mb-8 group relative cursor-pointer flex flex-col items-center">
-          <div className="size-12 rounded-[1.25rem] bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/30 flex items-center justify-center transition-transform duration-300 group-hover:scale-105 group-hover:-translate-y-1 group-active:scale-95">
-             <div className="size-3 rounded-full bg-white shadow-[0_0_15px_rgba(255,255,255,1)]" />
+    <>
+      {/* ════════════════════════════════════════
+          DESKTOP SIDEBAR — fixed 240px, full height
+          ════════════════════════════════════════ */}
+      <aside
+        className="hidden lg:flex fixed inset-y-0 left-0 z-50 w-60 flex-col"
+        style={{
+          background: '#0d1b2a',
+          borderRight: '1px solid rgba(255,255,255,0.06)',
+        }}
+      >
+        {/* ── Logo ── */}
+        <div className="flex items-center gap-3 px-5 py-5 border-b border-white/[0.06]">
+          <div
+            className="size-9 rounded-lg flex items-center justify-center shrink-0"
+            style={{
+              background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+              boxShadow: '0 2px 8px rgba(37,99,235,0.4)',
+            }}
+          >
+            <Zap className="size-4 text-white" strokeWidth={2.5} />
           </div>
-          {/* Tooltip */}
-          <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-900 text-white text-[11px] uppercase font-bold tracking-widest rounded-lg opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 pointer-events-none whitespace-nowrap shadow-xl z-50">
-            HỆ THỐNG PHÂN TÍCH
-            <div className="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 bg-slate-900 rotate-45" />
+          <div className="min-w-0">
+            <p className="text-white font-bold text-[14px] tracking-tight leading-none">KienTru</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] mt-1"
+              style={{ color: 'rgba(255,255,255,0.35)' }}>
+              Cổng Dữ Liệu Nội Bộ
+            </p>
           </div>
         </div>
 
-        {/* Navigation Nodes */}
-        <nav className="flex-1 w-full flex flex-col items-center justify-start gap-4">
-          {navItems.map(({ href, label, icon: Icon }, index) => {
-            const active = isActive(href);
-            return (
-              <div key={href} className="relative group w-full flex justify-center">
-                <Link
-                  href={href}
+        {/* ── Main Navigation ── */}
+        <nav className="flex-1 overflow-y-auto py-4 px-3">
+
+          <p className="text-[9px] font-bold uppercase tracking-[0.22em] px-2 mb-2"
+            style={{ color: 'rgba(255,255,255,0.22)' }}>
+            Ứng dụng
+          </p>
+
+          <div className="space-y-0.5">
+            {mainNavItems.map(({ href, label, icon: Icon }) => {
+              const active = isActive(href);
+              return (
+                <button
+                  key={href}
+                  onClick={() => router.push(href)}
                   className={cn(
-                    'size-12 rounded-2xl flex items-center justify-center transition-all duration-300 relative z-10',
-                    active 
-                      ? 'bg-slate-900 text-white shadow-md scale-105' 
-                      : 'text-slate-400 hover:text-slate-900 hover:bg-slate-100/80 hover:scale-105'
+                    'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-150 group relative',
+                    active
+                      ? 'bg-white/[0.10] text-white'
+                      : 'text-white/50 hover:text-white/80 hover:bg-white/[0.05]',
                   )}
-                  style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <Icon size={active ? 22 : 24} className={cn("transition-all duration-300", active && "scale-110")} />
-                </Link>
-                
-                {/* Modern Tooltip */}
-                <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-white border border-slate-200 text-slate-700 text-[12px] font-bold tracking-wide rounded-lg opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 pointer-events-none whitespace-nowrap shadow-lg z-50">
-                  {label}
-                  <div className="absolute top-1/2 -left-[5px] -translate-y-1/2 w-2.5 h-2.5 bg-white border-l border-b border-slate-200 rotate-45" />
-                </div>
+                  {/* Active left accent bar */}
+                  {active && (
+                    <span
+                      className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-blue-400"
+                      style={{ boxShadow: '0 0 8px rgba(96,165,250,0.7)' }}
+                    />
+                  )}
+                  <Icon
+                    size={16}
+                    strokeWidth={active ? 2.3 : 1.8}
+                    className={active ? 'text-blue-400' : 'text-white/40 group-hover:text-white/60 transition-colors'}
+                  />
+                  <span className="text-[13px] font-semibold tracking-tight">{label}</span>
+                  {active && (
+                    <ChevronRight size={12} className="ml-auto text-white/25" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Admin section — only for admins */}
+          {isAdmin && (
+            <>
+              <div className="mt-5 mb-3 mx-2 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
+
+              <p className="text-[9px] font-bold uppercase tracking-[0.22em] px-2 mb-2"
+                style={{ color: 'rgba(255,255,255,0.22)' }}>
+                Quản trị
+              </p>
+
+              <div className="space-y-0.5">
+                {adminNavItems.map(({ href, label, icon: Icon }) => {
+                  const active = isActive(href);
+                  return (
+                    <button
+                      key={href}
+                      onClick={() => router.push(href)}
+                      className={cn(
+                        'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-150 group relative',
+                        active
+                          ? 'bg-white/[0.10] text-white'
+                          : 'text-white/50 hover:text-white/80 hover:bg-white/[0.05]',
+                      )}
+                    >
+                      {active && (
+                        <span
+                          className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-blue-400"
+                          style={{ boxShadow: '0 0 8px rgba(96,165,250,0.7)' }}
+                        />
+                      )}
+                      <Icon
+                        size={16}
+                        strokeWidth={active ? 2.3 : 1.8}
+                        className={active ? 'text-blue-400' : 'text-white/40 group-hover:text-white/60 transition-colors'}
+                      />
+                      <span className="text-[13px] font-semibold tracking-tight">{label}</span>
+                    </button>
+                  );
+                })}
               </div>
-            );
-          })}
+            </>
+          )}
         </nav>
 
-        {/* Bottom Actions */}
-        <div className="w-full flex justify-center mt-auto pt-6 relative group">
-          
-          <div className="absolute top-0 w-8 h-px bg-slate-200" />
-          
+        {/* ── User + Logout ── */}
+        <div className="p-3 border-t border-white/[0.06] space-y-1">
+          {/* User info */}
+          {userEmail && (
+            <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.04)' }}>
+              <div
+                className="size-7 rounded-full flex items-center justify-center shrink-0 text-[11px] font-bold text-white"
+                style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)' }}
+              >
+                {userEmail[0].toUpperCase()}
+              </div>
+              <p className="text-[11px] font-medium truncate" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                {userEmail}
+              </p>
+            </div>
+          )}
+
+          {/* Logout */}
           <button
             onClick={handleSignOut}
-            className="size-12 rounded-2xl flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all duration-300 hover:scale-105"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-white/35 hover:text-red-400 hover:bg-red-500/10"
           >
-            <LogOut size={24} />
+            <LogOut size={15} strokeWidth={1.8} />
+            <span className="text-[13px] font-semibold">Đăng xuất</span>
           </button>
-          
-          <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-red-600 text-white text-[12px] font-bold tracking-wide rounded-lg opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 pointer-events-none whitespace-nowrap shadow-lg shadow-red-600/20 z-50">
-            Đăng xuất
-            <div className="absolute top-1/2 -left-[5px] -translate-y-1/2 w-2.5 h-2.5 bg-red-600 rotate-45" />
-          </div>
         </div>
+      </aside>
 
-      </div>
-    </aside>
+      {/* ════════════════════════════════════════
+          MOBILE BOTTOM NAV
+          ════════════════════════════════════════ */}
+      <nav
+        className="lg:hidden fixed bottom-0 inset-x-0 z-50 flex items-center h-16"
+        style={{
+          background: '#0d1b2a',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+        }}
+      >
+        {mobileNavItems.map(({ href, label, icon: Icon }) => {
+          const active = isActive(href);
+          return (
+            <button
+              key={href}
+              onClick={() => router.push(href)}
+              className={cn(
+                'flex-1 flex flex-col items-center justify-center gap-1 py-2 transition-colors duration-150',
+                active ? 'text-blue-400' : 'text-white/35',
+              )}
+            >
+              <Icon size={20} strokeWidth={active ? 2.3 : 1.8} />
+              <span className="text-[9px] font-bold uppercase tracking-[0.08em]">{label}</span>
+              {active && (
+                <span className="absolute bottom-0 h-[2px] w-8 rounded-full bg-blue-400 -mb-px" />
+              )}
+            </button>
+          );
+        })}
+      </nav>
+    </>
   );
 }

@@ -36,7 +36,7 @@ export async function GET(
 
     if (!items?.length) return new Response('Report has no items', { status: 422 });
 
-    // Fetch org profile if linked
+    // Fetch org profile if linked, else fallback to user's primary profile
     let orgProfile: PdfOrgProfile | null = null;
     if (report.organization_profile_id) {
       const { data: org } = await supabase
@@ -45,6 +45,17 @@ export async function GET(
         .eq('id', report.organization_profile_id)
         .single();
       orgProfile = org ?? null;
+    }
+    
+    if (!orgProfile) {
+      const { data: orgFallback } = await supabase
+        .from('organization_profiles')
+        .select('unit_name, address, tax_code')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      orgProfile = orgFallback ?? null;
     }
 
     const exportDate = new Date().toLocaleDateString('vi-VN');

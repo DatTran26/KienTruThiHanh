@@ -5,10 +5,11 @@ import { normalizeText } from '@/lib/utils/text-normalize';
 import { extractAmount, stripAmountTokens } from '@/lib/utils/amount-extractor';
 import { searchCandidates } from '@/lib/matching/pg-trgm-search';
 import { rerankWithOpenAI } from '@/lib/matching/openai-rerank';
-import type { AnalysisResponse, AnalysisResult } from '@/types/analysis';
+import { extractExpensesFromPrompt } from '@/lib/matching/openai-multi-extractor';
+import type { AnalysisResponse, AnalysisResult, ExpenseGroup } from '@/types/analysis';
 
 const InputSchema = z.object({
-  description: z.string().min(3).max(500),
+  description: z.string().min(3).max(5000),
   orgProfileId: z.string().uuid().optional(),
 });
 
@@ -27,59 +28,77 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Extract amount before normalization (regex runs on raw text)
-    const amount = extractAmount(description);
-    const cleanDesc = stripAmountTokens(description);
-    const normalizedQuery = normalizeText(cleanDesc);
+    // AI extracting multiple expenses (if present)
+    const extractedList = await extractExpensesFromPrompt(description);
 
-    // Candidate retrieval via pg_trgm
-    let candidates;
-    try {
-      candidates = await searchCandidates(supabase, normalizedQuery);
-    } catch (err: unknown) {
-      if (err instanceof Error && err.message === 'NO_ACTIVE_VERSION') {
-        return NextResponse.json(
-          { error: 'Chưa có dữ liệu danh mục. Vui lòng yêu cầu admin tải lên file danh mục.' },
-          { status: 422 },
-        );
+    const expenseGroups: ExpenseGroup[] = [];
+    let overallMinConfidence = 1.0;
+
+    for (const ex of extractedList) {
+      const cleanDesc = stripAmountTokens(ex.originalDesc);
+      const normalizedQuery = normalizeText(cleanDesc);
+
+      let candidates;
+      try {
+        candidates = await searchCandidates(supabase, normalizedQuery);
+      } catch (err: unknown) {
+        if (err instanceof Error && err.message === 'NO_ACTIVE_VERSION') {
+          return NextResponse.json(
+            { error: 'Chưa có dữ liệu danh mục. Vui lòng yêu cầu admin tải lên file danh mục.' },
+            { status: 422 },
+          );
+        }
+        throw err;
       }
-      throw err;
+
+      if (!candidates.length) continue;
+
+      const rerank = await rerankWithOpenAI(ex.originalDesc, candidates);
+
+      const bestCandidate = candidates[rerank.best_index - 1];
+      if (!bestCandidate) continue;
+
+      const altCandidates = rerank.alternatives
+        .map(i => candidates[i - 1])
+        .filter(Boolean)
+        .slice(0, 2);
+
+      const toResult = (c: typeof bestCandidate, confidence: number, reason: string): AnalysisResult => ({
+        groupCode: c.group_code,
+        groupTitle: c.group_title,
+        subCode: c.sub_code,
+        subTitle: c.sub_title,
+        description: c.description,
+        amount: ex.amount,
+        confidence,
+        reason,
+      });
+
+      overallMinConfidence = Math.min(overallMinConfidence, rerank.confidence);
+
+      const groupBest = toResult(bestCandidate, rerank.confidence, rerank.reason);
+      const groupAlts = altCandidates.map(c => toResult(c, c.similarity_score, ''));
+
+      expenseGroups.push({
+        originalDesc: ex.originalDesc,
+        amount: ex.amount,
+        bestItem: groupBest,
+        alternatives: groupAlts,
+      });
     }
 
-    if (!candidates.length) {
+    if (!expenseGroups.length) {
       return NextResponse.json(
         { error: 'Không tìm thấy mục phù hợp. Hãy thử mô tả chi tiết hơn.' },
         { status: 404 },
       );
     }
 
-    // OpenAI reranking
-    const rerank = await rerankWithOpenAI(description, candidates);
+    const confidenceLevel = overallMinConfidence >= 0.85 ? 'high' : overallMinConfidence >= 0.6 ? 'medium' : 'low';
 
-    // Build result list: best first, then alternatives
-    const bestCandidate = candidates[rerank.best_index - 1];
-    const altCandidates = rerank.alternatives
-      .map(i => candidates[i - 1])
-      .filter(Boolean)
-      .slice(0, 2);
-
-    const toResult = (c: typeof bestCandidate, confidence: number, reason: string): AnalysisResult => ({
-      groupCode: c.group_code,
-      groupTitle: c.group_title,
-      subCode: c.sub_code,
-      subTitle: c.sub_title,
-      description: c.description,
-      amount,
-      confidence,
-      reason,
-    });
-
-    const confidenceLevel = rerank.confidence >= 0.85 ? 'high' : rerank.confidence >= 0.6 ? 'medium' : 'low';
-
-    const results: AnalysisResult[] = [
-      toResult(bestCandidate, rerank.confidence, rerank.reason),
-      ...altCandidates.map(c => toResult(c, c.similarity_score, '')),
-    ];
+    // Backwards compatibility for DB storing (uses first item)
+    const firstGroup = expenseGroups[0];
+    const results: AnalysisResult[] = [firstGroup.bestItem, ...firstGroup.alternatives];
 
     // Persist analysis request
     const { data: saved } = await supabase
@@ -88,18 +107,19 @@ export async function POST(request: Request) {
         user_id: user.id,
         organization_profile_id: orgProfileId ?? null,
         raw_description: description,
-        extracted_amount: amount,
+        extracted_amount: firstGroup.amount,
         top_result_json: results as unknown as import('@/types/database').Json,
-        selected_item_id: bestCandidate.id,
-        confidence: rerank.confidence,
+        selected_item_id: firstGroup.bestItem.subCode, // DB doesn't strongly FK on id, keeping a string fallback
+        confidence: firstGroup.bestItem.confidence,
       })
       .select('id')
       .single();
 
     const response: AnalysisResponse = {
       requestId: saved?.id ?? '',
-      amount,
+      amount: firstGroup.amount,
       results,
+      expenseGroups,
       confidenceLevel,
     };
 

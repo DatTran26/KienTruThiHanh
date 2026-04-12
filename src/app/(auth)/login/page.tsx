@@ -7,11 +7,8 @@ import { z } from 'zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { createClient } from '@/lib/supabase/client';
-import { Loader2, Mail, Lock, ArrowRight } from 'lucide-react';
+import { Loader2, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const schema = z.object({
@@ -20,9 +17,36 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
+/* Clean SaaS input */
+const inputBase =
+  'w-full h-[52px] pl-11 rounded-xl font-medium text-slate-800 placeholder:text-slate-300 ' +
+  'bg-white border transition-all duration-150 outline-none text-[14px]';
+
+const inputCls = (hasError: boolean) =>
+  cn(
+    inputBase,
+    hasError
+      ? 'border-red-300 focus:border-red-400 focus:ring-3 focus:ring-red-500/10'
+      : 'border-slate-200 focus:border-blue-500 focus:ring-3 focus:ring-blue-500/12',
+  );
+
+/* Institutional navy primary button */
+const primaryButtonStyle = {
+  background: 'linear-gradient(to bottom, #2563eb, #1d4ed8)',
+  boxShadow: '0 1px 6px rgba(37,99,235,0.35), 0 1px 2px rgba(37,99,235,0.2)',
+};
+
+/* Clean ghost button (secondary) */
+const ghostButtonStyle = {
+  background: '#ffffff',
+  border: '1px solid #e2e8f0',
+  boxShadow: '0 1px 2px rgba(15,23,42,0.04)',
+};
+
 export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -37,13 +61,14 @@ export default function LoginPage() {
         password: data.password,
       });
       if (error) {
-        toast.error(error.message === 'Invalid login credentials'
-          ? 'Email hoặc mật khẩu không đúng'
-          : error.message
+        toast.error(
+          error.message === 'Invalid login credentials'
+            ? 'Email hoặc mật khẩu không đúng'
+            : error.message,
         );
         return;
       }
-      router.push('/dashboard');
+      router.push('/workspace');
       router.refresh();
     } finally {
       setLoading(false);
@@ -51,108 +76,103 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in-up w-full">
+
       {/* Header */}
-      <div className="mb-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-6 bg-green-50 text-green-700 border border-green-200 shadow-sm shadow-green-100">
-          <div className="size-2 rounded-full bg-green-500 animate-pulse" />
-          Hệ thống đang hoạt động
-        </div>
-        <h1 className="text-3xl font-extrabold mb-2 text-slate-900 tracking-tight">
-          Đăng nhập
-        </h1>
-        <p className="text-slate-500 text-sm font-medium">
-          Chào mừng trở lại! Vui lòng đăng nhập để truy cập dữ liệu.
+      <div className="mb-7">
+        <p className="text-[10px] font-bold uppercase tracking-[0.22em] mb-2 text-blue-600">
+          Đăng nhập hệ thống
+        </p>
+        <h2 className="text-[22px] font-bold text-slate-900 tracking-tight leading-tight mb-2">
+          Chào mừng trở lại
+        </h2>
+        <p className="text-[13px] text-slate-500 font-medium leading-relaxed">
+          Nhập thông tin xác thực để tiếp tục truy cập dữ liệu hệ thống.
         </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
         {/* Email */}
         <div className="space-y-1.5">
-          <Label htmlFor="login-email" className="text-sm font-bold text-slate-700">
-            Email Đăng nhập
-          </Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-            <Input
+          <label htmlFor="login-email" className="block text-[11px] font-bold text-slate-500 uppercase tracking-[0.12em]">
+            Email đăng nhập
+          </label>
+          <div className="relative group">
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
+            <input
               id="login-email"
               type="email"
               placeholder="canbo@hcm.gov.vn"
-              className={cn(
-                "pl-10 h-11 bg-slate-50 border-slate-300 focus:bg-white focus:ring-1 focus:ring-primary focus:border-primary shadow-sm",
-                errors.email && "border-red-500 focus:border-red-500 focus:ring-red-500"
-              )}
+              autoComplete="email"
+              className={inputCls(!!errors.email)}
               {...register('email')}
             />
           </div>
           {errors.email && (
-            <p className="text-xs font-bold text-red-600 mt-1">
-              {errors.email.message}
-            </p>
+            <p className="text-[12px] font-semibold text-red-500 ml-1">{errors.email.message}</p>
           )}
         </div>
 
         {/* Password */}
         <div className="space-y-1.5">
-          <Label htmlFor="login-password" className="text-sm font-bold text-slate-700">
+          <label htmlFor="login-password" className="block text-[11px] font-bold text-slate-500 uppercase tracking-[0.12em]">
             Mật khẩu
-          </Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-            <Input
+          </label>
+          <div className="relative group">
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
+            <input
               id="login-password"
-              type="password"
+              type={showPass ? 'text' : 'password'}
               placeholder="••••••••"
-              className={cn(
-                "pl-10 h-11 bg-slate-50 border-slate-300 focus:bg-white focus:ring-1 focus:ring-primary focus:border-primary shadow-sm",
-                errors.password && "border-red-500 focus:border-red-500 focus:ring-red-500"
-              )}
+              autoComplete="current-password"
+              className={cn(inputCls(!!errors.password), 'pr-12')}
               {...register('password')}
             />
+            <button
+              type="button"
+              onClick={() => setShowPass(v => !v)}
+              aria-label={showPass ? 'Ẩn mật khẩu' : 'Hiển thị mật khẩu'}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+            >
+              {showPass ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
           </div>
           {errors.password && (
-            <p className="text-xs font-bold text-red-600 mt-1">
-              {errors.password.message}
-            </p>
+            <p className="text-[12px] font-semibold text-red-500 ml-1">{errors.password.message}</p>
           )}
         </div>
 
         {/* Submit */}
-        <Button
+        <button
           type="submit"
-          className="w-full h-11 font-bold text-base gap-2 mt-4 bg-primary hover:bg-primary/90 text-white shadow-md transition-all active:scale-[0.98]"
           disabled={loading}
+          className="w-full h-[52px] mt-2 rounded-xl text-white font-semibold text-[14px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          style={primaryButtonStyle}
         >
-          {loading ? (
-            <>
-              <Loader2 className="size-5 animate-spin" />
-              Đang xác thực...
-            </>
-          ) : (
-            <>
-              Đăng nhập bằng Mật khẩu
-              <ArrowRight className="size-4" />
-            </>
-          )}
-        </Button>
+          {loading
+            ? <><Loader2 className="size-4 animate-spin" /> Đang xác thực...</>
+            : <>Đăng nhập hệ thống <ArrowRight className="size-4" /></>}
+        </button>
 
-        {/* Divider */}
-        <div className="relative flex items-center gap-4 py-4">
-          <div className="flex-1 h-px bg-slate-200" />
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-            chưa có tài khoản
-          </p>
-          <div className="flex-1 h-px bg-slate-200" />
-        </div>
-
-        {/* Register link */}
-        <Link
-          href="/register"
-          className="flex items-center justify-center w-full h-11 rounded-md font-bold text-sm transition-all duration-200 border border-slate-200 bg-white text-slate-700 hover:text-primary hover:border-primary hover:bg-slate-50 shadow-sm"
-        >
-          Đăng ký tài khoản mới
-        </Link>
       </form>
+
+      {/* Divider */}
+      <div className="flex items-center gap-3 my-7">
+        <div className="flex-1 h-px bg-gradient-to-r from-transparent to-slate-200" />
+        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] whitespace-nowrap">Chưa có tài khoản</span>
+        <div className="flex-1 h-px bg-gradient-to-l from-transparent to-slate-200" />
+      </div>
+
+      {/* Register link — ghost glass button */}
+      <Link
+        href="/register"
+        className="flex items-center justify-center w-full h-[52px] rounded-[14px] font-semibold text-[15px] text-slate-700 hover:text-slate-900 transition-all active:scale-[0.98]"
+        style={ghostButtonStyle}
+      >
+        Tạo yêu cầu cấp quyền truy cập
+      </Link>
+
     </div>
   );
 }

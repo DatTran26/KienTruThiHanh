@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Download, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -39,9 +38,13 @@ export function ExportButton({ reportId, reportName }: { reportId: string; repor
   }
 
   return (
-    <Button onClick={handleExport} disabled={loading} className="gap-2">
+    <button 
+      onClick={handleExport} 
+      disabled={loading} 
+      className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-bold text-sm shadow-lg shadow-red-500/20 hover:from-red-400 hover:to-red-500 transition-all disabled:opacity-50"
+    >
       {loading ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
       {loading ? 'Đang tạo PDF...' : 'Xuất PDF'}
-    </Button>
+    </button>
   );
 }

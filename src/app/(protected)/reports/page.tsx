@@ -1,75 +1,116 @@
 import { createClient } from '@/lib/supabase/server';
-import { ReportCard } from './_components/report-card';
 import { CreateReportDialog } from './_components/create-report-dialog';
-import { FileText, Database } from 'lucide-react';
+import { ReportListClient } from './_components/report-list-client';
+import {
+  FileText, TrendingUp, CheckCircle2,
+  ArrowUp, FolderOpen
+} from 'lucide-react';
+
+function formatCurrency(n: number) {
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)} tỷ`;
+  if (n >= 1_000_000)       return `${(n / 1_000_000).toFixed(1)} tr`;
+  if (n >= 1_000)           return `${(n / 1_000).toFixed(0)}k`;
+  return `${n}`;
+}
 
 export default async function ReportsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: reports } = await supabase
     .from('reports')
     .select('id, report_name, report_code, total_amount, status, created_at')
-    .eq('user_id', user!.id)
     .order('created_at', { ascending: false });
 
+  // Aggregate stats
   const totalAmount = reports?.reduce((s, r) => s + (r.total_amount ?? 0), 0) ?? 0;
+  const totalCount  = reports?.length ?? 0;
+  const draftCount  = reports?.filter(r => r.status === 'draft').length ?? 0;
+  const exportedCount = totalCount - draftCount;
+
+  const thisMonth = reports?.filter(r => {
+    const d = new Date(r.created_at);
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).length ?? 0;
+
+  const stats = [
+    {
+      label: 'Tổng báo cáo',
+      value: totalCount,
+      icon: FolderOpen,
+      color: 'text-violet-600',
+      bg: 'bg-violet-50 border-violet-100',
+    },
+    {
+      label: 'Tổng giá trị',
+      value: totalAmount > 0 ? `${formatCurrency(totalAmount)} đ` : '—',
+      icon: TrendingUp,
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-50 border-emerald-100',
+    },
+    {
+      label: 'Đã xuất',
+      value: exportedCount,
+      icon: CheckCircle2,
+      color: 'text-blue-600',
+      bg: 'bg-blue-50 border-blue-100',
+    },
+    {
+      label: 'Tháng này',
+      value: thisMonth,
+      icon: ArrowUp,
+      color: 'text-amber-600',
+      bg: 'bg-amber-50 border-amber-100',
+    },
+  ];
 
   return (
-    <div className="p-4 lg:p-8 space-y-6 max-w-[1200px] mx-auto flex flex-col h-full animate-fade-in-up">
+    <div className="flex flex-col min-h-full p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8">
 
-      {/* Header */}
-      <header className="mb-2 pb-4 border-b border-border shrink-0">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Lưu Trữ Sự Kiện</span>
-          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] rounded font-bold border border-blue-100">KHO DỮ LIỆU</span>
-        </div>
-        
-        <div className="flex items-start justify-between gap-4 flex-wrap mt-1">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-primary">
-              Báo cáo hạch toán
-            </h1>
-            <p className="text-sm text-slate-500 mt-1">
-              Quản lý danh sách các báo cáo chi phí, đóng gói chứng từ và kết xuất biểu mẫu đề nghị thanh toán.
-            </p>
+      {/* ── HEADER ── */}
+      <header className="flex flex-col sm:flex-row items-start sm:items-end justify-between mt-2 mb-7 animate-slide-up">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="size-6 rounded-md bg-violet-50 border border-violet-100 flex items-center justify-center">
+              <FileText size={13} strokeWidth={2.3} className="text-violet-600" />
+            </div>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Quản trị Dữ liệu</span>
           </div>
+          <h1 className="text-2xl sm:text-[1.8rem] font-bold tracking-tight text-slate-900 leading-tight">
+            Kho Báo Cáo
+          </h1>
+          <p className="text-slate-500 text-[13px] font-medium">
+            Quản lý các báo cáo hạch toán chi phí được phân loại tự động bởi AI.
+          </p>
+        </div>
+
+        <div className="mt-5 sm:mt-0">
           <CreateReportDialog />
         </div>
       </header>
 
-      {/* Main Workspace */}
-      <div className="structured-panel p-0 flex flex-col overflow-hidden relative flex-1 bg-white shadow-sm ring-1 ring-slate-200">
-        <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-           <span className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-             <Database size={18} className="text-slate-500"/>
-             Danh sách báo cáo
-           </span>
-           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-             {reports?.length ?? 0} BÁO CÁO · TỔNG: {new Intl.NumberFormat('vi-VN').format(totalAmount)} VNĐ
-           </span>
+      {/* ── STATS ROW ── */}
+      {totalCount > 0 && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-7 animate-slide-up" style={{ animationDelay: '50ms' }}>
+          {stats.map(({ label, value, icon: Icon, color, bg }) => (
+            <div key={label} className="bg-white rounded-2xl border border-slate-200 shadow-[0_4px_20px_rgb(0,0,0,0.04)] ring-1 ring-slate-900/5 px-4 py-4 flex items-center gap-3.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all">
+              <div className={`size-9 rounded-lg flex items-center justify-center shrink-0 border shadow-sm ${bg}`}>
+                <Icon size={16} strokeWidth={2.2} className={color} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 mb-0.5">{label}</p>
+                <p className="text-[20px] font-bold text-slate-900 leading-none tracking-tight">{value}</p>
+              </div>
+            </div>
+          ))}
         </div>
+      )}
 
-        <div className="p-6 md:p-8 overflow-y-auto flex-1 z-10 bg-slate-50/30">
-          {!reports?.length ? (
-            <div className="h-full flex flex-col items-center justify-center py-16 opacity-40">
-              <FileText className="size-16 mb-4 text-slate-400" />
-              <p className="font-bold text-sm uppercase tracking-wider text-slate-500 mb-2">Kho dữ liệu trống</p>
-              <p className="text-sm text-slate-400 mb-8 max-w-sm text-center">
-                Bạn chưa có báo cáo nào. Hãy khởi tạo báo cáo mới hoặc thêm chi phí từ hệ thống AI trực tiếp vào báo cáo.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {reports.map((r, i) => (
-                <div key={r.id} style={{ animationDelay: `${i * 50}ms` }} className="animate-fade-in-up">
-                  <ReportCard {...r} status={r.status as 'draft' | 'exported'} />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      {/* ── REPORTS GRID / EMPTY STATE ── */}
+      <div className="flex-1 mt-2">
+        <ReportListClient reports={reports || []} />
       </div>
+
     </div>
   );
 }

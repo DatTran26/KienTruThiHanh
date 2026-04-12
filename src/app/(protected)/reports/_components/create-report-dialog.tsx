@@ -2,10 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Loader2, Plus, X } from 'lucide-react';
+import { Loader2, Plus, X, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function CreateReportDialog() {
@@ -36,49 +33,57 @@ export function CreateReportDialog() {
 
   if (!open) {
     return (
-      <Button
+      <button
         onClick={() => setOpen(true)}
-        className="gap-2 font-bold px-5 h-9 bg-primary hover:bg-slate-800 text-white shadow-sm transition-colors"
+        className="inline-flex items-center gap-2 h-10 px-6 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 text-white text-sm font-bold hover:from-indigo-400 hover:to-indigo-500 transition-all shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 active:scale-95"
       >
-        <Plus className="size-4" />
+        <Plus className="size-4" strokeWidth={2.5} />
         Tạo báo cáo mới
-      </Button>
+      </button>
     );
   }
 
   return (
-    <div
-      className="flex items-end gap-3 p-4 rounded-lg bg-white border border-slate-200 shadow-lg animate-fade-in"
-    >
-      <div className="space-y-1.5 flex-1 min-w-[250px]">
-        <Label htmlFor="report-name" className="text-sm font-semibold text-slate-700">
+    <div className="flex items-stretch gap-3 p-3 rounded-2xl bg-white border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.06)] ring-1 ring-slate-900/5 animate-scale-in">
+      {/* Icon */}
+      <div className="hidden sm:flex size-12 rounded-xl bg-indigo-50 border border-indigo-100 items-center justify-center shrink-0 shadow-sm">
+        <FileText className="size-5 text-indigo-600" />
+      </div>
+
+      {/* Input */}
+      <div className="flex-1 min-w-[250px] flex flex-col justify-center">
+        <label htmlFor="report-name" className="block text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-1.5">
           Tên báo cáo hạch toán
-        </Label>
-        <Input
+        </label>
+        <input
           id="report-name"
           value={name}
           onChange={e => setName(e.target.value)}
           placeholder="VD: Chi phí công tác quý 2/2025..."
-          className="w-full h-10 text-sm bg-slate-50 border-slate-300 focus:border-primary focus:ring-1 focus:ring-primary"
+          className="w-full h-10 px-3.5 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 transition-all placeholder:text-slate-400 font-medium"
           onKeyDown={e => e.key === 'Enter' && handleCreate()}
           autoFocus
         />
       </div>
-      <Button
-        onClick={handleCreate}
-        disabled={loading || !name.trim()}
-        className="gap-1.5 font-bold h-10 px-5 bg-primary hover:bg-slate-800 text-white"
-      >
-        {loading ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
-        Khởi tạo
-      </Button>
-      <Button
-        variant="ghost"
-        className="h-10 w-10 p-0 text-slate-500 hover:text-slate-800 hover:bg-slate-100 shrink-0"
-        onClick={() => { setOpen(false); setName(''); }}
-      >
-        <X className="size-5" />
-      </Button>
+
+      {/* Actions */}
+      <div className="flex items-end gap-2">
+        <button
+          onClick={handleCreate}
+          disabled={loading || !name.trim()}
+          className="inline-flex items-center gap-1.5 h-10 px-5 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold text-sm hover:from-indigo-400 hover:to-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/15 active:scale-95"
+        >
+          {loading ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" strokeWidth={2.5} />}
+          Khởi tạo
+        </button>
+        <button
+          className="size-10 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors shrink-0 border border-slate-200"
+          onClick={() => { setOpen(false); setName(''); }}
+          aria-label="Đóng"
+        >
+          <X className="size-4.5" />
+        </button>
+      </div>
     </div>
   );
 }

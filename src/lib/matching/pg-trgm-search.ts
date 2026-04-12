@@ -13,13 +13,19 @@ export async function searchCandidates(
   limit = 10,
 ): Promise<SearchCandidate[]> {
   // Get active version
-  const { data: version } = await supabase
+  const { data: version, error: versionError } = await supabase
     .from('master_document_versions')
     .select('id')
     .eq('is_active', true)
     .single();
 
-  if (!version) throw new Error('NO_ACTIVE_VERSION');
+  if (versionError || !version) {
+    if (versionError?.code === 'PGRST116') {
+      throw new Error('NO_ACTIVE_VERSION');
+    }
+    console.error('[searchCandidates] version fetch error:', versionError);
+    throw new Error('VERSION_FETCH_FAILED');
+  }
 
   // Primary: pg_trgm similarity search
   const { data: trgmResults } = await supabase.rpc('search_master_items', {

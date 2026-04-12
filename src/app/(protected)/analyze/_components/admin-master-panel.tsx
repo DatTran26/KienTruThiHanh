@@ -9,11 +9,61 @@ import {
 } from 'lucide-react';
 
 const COLOR_SCHEME = [
-  { groupBadge: 'bg-indigo-50/80 text-indigo-700 border-indigo-200/50 backdrop-blur-sm', groupIcon: 'from-indigo-500 to-indigo-600 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(99,102,241,0.5)]', line: 'from-indigo-300/70', nodeBorderHover: 'hover:border-indigo-300', childBgMain: 'bg-[linear-gradient(110deg,theme(colors.indigo.50/95),theme(colors.white/95))] border-indigo-200/60 shadow-[inset_0_1px_4px_rgba(255,255,255,0.8),0_4px_16px_-4px_rgba(99,102,241,0.08)]', childBadgeMain: 'text-indigo-700 bg-indigo-100/50 border-indigo-200/60', hoverDot: 'group-hover/item:border-indigo-500 group-hover/item:shadow-[0_0_8px_theme(colors.indigo.400)]' },
-  { groupBadge: 'bg-emerald-50/80 text-emerald-700 border-emerald-200/50 backdrop-blur-sm', groupIcon: 'from-emerald-400 to-teal-500 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(16,181,129,0.5)]', line: 'from-emerald-300/70', nodeBorderHover: 'hover:border-emerald-300', childBgMain: 'bg-[linear-gradient(110deg,theme(colors.emerald.50/95),theme(colors.white/95))] border-emerald-200/60 shadow-[inset_0_1px_4px_rgba(255,255,255,0.8),0_4px_16px_-4px_rgba(16,181,129,0.08)]', childBadgeMain: 'text-emerald-700 bg-emerald-100/50 border-emerald-200/60', hoverDot: 'group-hover/item:border-emerald-500 group-hover/item:shadow-[0_0_8px_theme(colors.emerald.400)]' },
-  { groupBadge: 'bg-amber-50/80 text-amber-700 border-amber-200/50 backdrop-blur-sm', groupIcon: 'from-amber-400 to-orange-500 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(245,158,11,0.5)]', line: 'from-amber-300/70', nodeBorderHover: 'hover:border-amber-300', childBgMain: 'bg-[linear-gradient(110deg,theme(colors.amber.50/95),theme(colors.white/95))] border-amber-200/60 shadow-[inset_0_1px_4px_rgba(255,255,255,0.8),0_4px_16px_-4px_rgba(245,158,11,0.08)]', childBadgeMain: 'text-amber-700 bg-amber-100/50 border-amber-200/60', hoverDot: 'group-hover/item:border-amber-500 group-hover/item:shadow-[0_0_8px_theme(colors.amber.400)]' },
-  { groupBadge: 'bg-rose-50/80 text-rose-700 border-rose-200/50 backdrop-blur-sm', groupIcon: 'from-rose-400 to-pink-600 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(244,63,94,0.5)]', line: 'from-rose-300/70', nodeBorderHover: 'hover:border-rose-300', childBgMain: 'bg-[linear-gradient(110deg,theme(colors.rose.50/95),theme(colors.white/95))] border-rose-200/60 shadow-[inset_0_1px_4px_rgba(255,255,255,0.8),0_4px_16px_-4px_rgba(244,63,94,0.08)]', childBadgeMain: 'text-rose-700 bg-rose-100/50 border-rose-200/60', hoverDot: 'group-hover/item:border-rose-500 group-hover/item:shadow-[0_0_8px_theme(colors.rose.400)]' },
-  { groupBadge: 'bg-cyan-50/80 text-cyan-700 border-cyan-200/50 backdrop-blur-sm', groupIcon: 'from-cyan-400 to-blue-500 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(6,182,212,0.5)]', line: 'from-cyan-300/70', nodeBorderHover: 'hover:border-cyan-300', childBgMain: 'bg-[linear-gradient(110deg,theme(colors.cyan.50/95),theme(colors.white/95))] border-cyan-200/60 shadow-[inset_0_1px_4px_rgba(255,255,255,0.8),0_4px_16px_-4px_rgba(6,182,212,0.08)]', childBadgeMain: 'text-cyan-700 bg-cyan-100/50 border-cyan-200/60', hoverDot: 'group-hover/item:border-cyan-500 group-hover/item:shadow-[0_0_8px_theme(colors.cyan.400)]' },
+  { 
+    groupBadge: 'bg-indigo-50/80 text-indigo-700 border-indigo-200/50 backdrop-blur-sm', 
+    groupIcon: 'from-blue-600 via-indigo-600 to-violet-600 shadow-[0_0_20px_rgba(99,102,241,0.4),inset_0_1px_1px_rgba(255,255,255,0.4)]', 
+    line: 'from-indigo-400 via-indigo-300/50 to-transparent',
+    ray: 'bg-indigo-400/30',
+    nodeBorderHover: 'hover:border-indigo-400/50 hover:shadow-[0_12px_30px_-10px_rgba(99,102,241,0.25)]', 
+    childBgMain: 'bg-[linear-gradient(135deg,theme(colors.indigo.50/90),theme(colors.white))] border-indigo-200 shadow-[inset_0_1px_1px_rgba(255,255,255,1),0_8px_20px_-4px_rgba(99,102,241,0.12)]', 
+    childBadgeMain: 'text-indigo-700 bg-indigo-100/50 border-indigo-200', 
+    hoverDot: 'group-hover/item:border-indigo-500 group-hover/item:shadow-[0_0_12px_theme(colors.indigo.400)] group-hover/item:scale-150',
+    neonLine: 'bg-indigo-400/40 shadow-[0_0_8px_rgba(99,102,241,0.3)]'
+  },
+  { 
+    groupBadge: 'bg-emerald-50/80 text-emerald-700 border-emerald-200/50 backdrop-blur-sm', 
+    groupIcon: 'from-emerald-500 via-teal-500 to-cyan-500 shadow-[0_0_20px_rgba(16,185,129,0.4),inset_0_1px_1px_rgba(255,255,255,0.4)]', 
+    line: 'from-emerald-400 via-emerald-300/50 to-transparent',
+    ray: 'bg-emerald-400/30',
+    nodeBorderHover: 'hover:border-emerald-400/50 hover:shadow-[0_12px_30px_-10px_rgba(16,185,129,0.25)]', 
+    childBgMain: 'bg-[linear-gradient(135deg,theme(colors.emerald.50/90),theme(colors.white))] border-emerald-200 shadow-[inset_0_1px_1px_rgba(255,255,255,1),0_8px_20px_-4px_rgba(16,185,129,0.12)]', 
+    childBadgeMain: 'text-emerald-700 bg-emerald-100/50 border-emerald-200', 
+    hoverDot: 'group-hover/item:border-emerald-500 group-hover/item:shadow-[0_0_12px_theme(colors.emerald.400)] group-hover/item:scale-150',
+    neonLine: 'bg-emerald-400/40 shadow-[0_0_8px_rgba(16,185,129,0.3)]'
+  },
+  { 
+    groupBadge: 'bg-amber-50/80 text-amber-700 border-amber-200/50 backdrop-blur-sm', 
+    groupIcon: 'from-orange-400 via-amber-500 to-yellow-500 shadow-[0_0_20px_rgba(245,158,11,0.4),inset_0_1px_1px_rgba(255,255,255,0.4)]', 
+    line: 'from-amber-400 via-amber-300/50 to-transparent',
+    ray: 'bg-amber-400/30',
+    nodeBorderHover: 'hover:border-amber-400/50 hover:shadow-[0_12px_30px_-10px_rgba(245,158,11,0.25)]', 
+    childBgMain: 'bg-[linear-gradient(135deg,theme(colors.amber.50/90),theme(colors.white))] border-amber-200 shadow-[inset_0_1px_1px_rgba(255,255,255,1),0_8px_20px_-4px_rgba(245,158,11,0.12)]', 
+    childBadgeMain: 'text-amber-700 bg-amber-100/50 border-amber-200', 
+    hoverDot: 'group-hover/item:border-amber-500 group-hover/item:shadow-[0_0_12px_theme(colors.amber.400)] group-hover/item:scale-150',
+    neonLine: 'bg-amber-400/40 shadow-[0_0_8px_rgba(245,158,11,0.3)]'
+  },
+  { 
+    groupBadge: 'bg-rose-50/80 text-rose-700 border-rose-200/50 backdrop-blur-sm', 
+    groupIcon: 'from-rose-500 via-pink-500 to-fuchsia-600 shadow-[0_0_20px_rgba(244,63,94,0.4),inset_0_1px_1px_rgba(255,255,255,0.4)]', 
+    line: 'from-rose-400 via-rose-300/50 to-transparent',
+    ray: 'bg-rose-400/30',
+    nodeBorderHover: 'hover:border-rose-400/50 hover:shadow-[0_12px_30px_-10px_rgba(244,63,94,0.25)]', 
+    childBgMain: 'bg-[linear-gradient(135deg,theme(colors.rose.50/90),theme(colors.white))] border-rose-200 shadow-[inset_0_1px_1px_rgba(255,255,255,1),0_8px_20px_-4px_rgba(244,63,94,0.12)]', 
+    childBadgeMain: 'text-rose-700 bg-rose-100/50 border-rose-200', 
+    hoverDot: 'group-hover/item:border-rose-500 group-hover/item:shadow-[0_0_12px_theme(colors.rose.400)] group-hover/item:scale-150',
+    neonLine: 'bg-rose-400/40 shadow-[0_0_8px_rgba(244,63,94,0.3)]'
+  },
+  { 
+    groupBadge: 'bg-cyan-50/80 text-cyan-700 border-cyan-200/50 backdrop-blur-sm', 
+    groupIcon: 'from-cyan-500 via-sky-500 to-blue-500 shadow-[0_0_20px_rgba(6,182,212,0.4),inset_0_1px_1px_rgba(255,255,255,0.4)]', 
+    line: 'from-cyan-400 via-cyan-300/50 to-transparent',
+    ray: 'bg-cyan-400/30',
+    nodeBorderHover: 'hover:border-cyan-400/50 hover:shadow-[0_12px_30px_-10px_rgba(6,182,212,0.25)]', 
+    childBgMain: 'bg-[linear-gradient(135deg,theme(colors.cyan.50/90),theme(colors.white))] border-cyan-200 shadow-[inset_0_1px_1px_rgba(255,255,255,1),0_8px_20px_-4px_rgba(6,182,212,0.12)]', 
+    childBadgeMain: 'text-cyan-700 bg-cyan-100/50 border-cyan-200', 
+    hoverDot: 'group-hover/item:border-cyan-500 group-hover/item:shadow-[0_0_12px_theme(colors.cyan.400)] group-hover/item:scale-150',
+    neonLine: 'bg-cyan-400/40 shadow-[0_0_8px_rgba(6,182,212,0.3)]'
+  },
 ];
 
 interface MasterVersion {
@@ -370,18 +420,18 @@ export function AdminMasterPanel({ activeMaster, onClose }: Props) {
             </div>
             
             {/* Search Bar */}
-            <div className="px-6 py-4 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.08)] bg-white/60 backdrop-blur-xl border-b border-white/80 sticky top-0 z-30">
-              <div className="relative group">
-                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors z-10" />
+            <div className="px-6 py-4 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.12)] bg-white/70 backdrop-blur-2xl border-b border-white/50 sticky top-0 z-30">
+              <div className="relative group p-[1px] rounded-[15px] bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 focus-within:from-indigo-500/50 focus-within:via-purple-500/50 focus-within:to-pink-500/50 transition-all duration-500">
+                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors z-10" />
                 <input 
                   type="text"
                   placeholder="Tìm kiếm tiểu mục, mã số, hoặc tên nhóm..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-slate-50/50 backdrop-blur-sm shadow-[inset_0_2px_4px_rgba(0,0,0,0.02),0_1px_2px_rgba(255,255,255,0.8)] border border-white rounded-[14px] py-3 pl-11 pr-4 text-[13px] font-medium text-slate-700 outline-none focus:bg-white focus:border-indigo-300 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400 placeholder:font-normal"
+                  className="w-full bg-white/80 backdrop-blur-md shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] border border-transparent rounded-[14px] py-3 pl-11 pr-4 text-[13px] font-bold text-slate-700 outline-none focus:bg-white transition-all placeholder:text-slate-400 placeholder:font-normal"
                 />
                 {searchQuery && (
-                  <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 size-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors">
+                  <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 size-6 rounded-full bg-slate-100/50 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors">
                     <X size={12} />
                   </button>
                 )}
@@ -401,61 +451,73 @@ export function AdminMasterPanel({ activeMaster, onClose }: Props) {
                   <div key={group.code} className="relative mt-2">
                     {/* Connection line between groups */}
                     {gIdx !== groupedPreview.length - 1 && (
-                      <div className={`absolute left-[25px] top-[40px] bottom-[-48px] w-[2px] bg-gradient-to-b ${scheme.line} via-slate-200/50 to-transparent -z-10 rounded-full`} />
+                      <div className={`absolute left-[24px] top-[40px] bottom-[-48px] w-[3px] bg-gradient-to-b ${scheme.line} via-slate-200/30 to-transparent -z-10 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)]`} />
                     )}
                     
                     {/* GROUP HEADER */}
-                    <div className="flex items-start gap-4 group">
+                    <div className="flex items-start gap-5 group">
                       <div className="relative flex flex-col items-center mt-0.5 shrink-0 z-10">
-                        {/* Glow effect behind the icon */}
-                        <div className={`absolute inset-0 bg-gradient-to-br ${scheme.groupIcon} blur-md opacity-30 rounded-2xl group-hover:opacity-50 transition-opacity`} />
-                        <div className={`relative size-[50px] rounded-[16px] bg-gradient-to-br ${scheme.groupIcon} flex items-center justify-center border border-white/40 group-hover:scale-[1.03] transition-transform`}>
-                          <Layers size={22} className="text-white drop-shadow-md" />
+                        {/* Orbit Glowing Ring */}
+                        <div className={`absolute -inset-1.5 border border-white/40 rounded-[20px] animate-[spin_8s_linear_infinite] opacity-40`} />
+                        <div className={`absolute -inset-1 bg-gradient-to-br ${scheme.groupIcon} blur-lg opacity-40 group-hover:opacity-70 transition-opacity`} />
+                        <div className={`relative size-[52px] rounded-[18px] bg-gradient-to-br ${scheme.groupIcon} flex items-center justify-center border border-white/50 group-hover:scale-[1.05] transition-transform duration-500`}>
+                          <Layers size={24} className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]" />
                         </div>
                       </div>
                       
-                      <div className="flex-1 min-w-0 pt-1.5 pb-2">
-                        <h4 className={`text-[10px] font-black uppercase tracking-[0.15em] inline-flex items-center px-2.5 py-[3px] rounded-md border shadow-[0_2px_4px_rgba(0,0,0,0.02)] mb-2 transition-colors ${scheme.groupBadge}`}>
-                          Nhóm {group.code}
-                        </h4>
-                        <p className="text-[15px] font-extrabold text-slate-800 leading-snug drop-shadow-sm pr-4">
+                      <div className="flex-1 min-w-0 pt-2 pb-2">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className={`text-[9px] font-black uppercase tracking-[0.2em] inline-flex items-center px-3 py-1 rounded-full border shadow-[0_2px_4px_rgba(0,0,0,0.03)] transition-colors ${scheme.groupBadge}`}>
+                            Mã Nhóm {group.code}
+                          </h4>
+                          <div className={`h-px flex-1 bg-gradient-to-r ${scheme.line} opacity-30`} />
+                        </div>
+                        <p className="text-[17px] font-black text-slate-900 leading-tight drop-shadow-sm pr-4 tracking-tight">
                           {group.title}
                         </p>
                       </div>
                     </div>
 
                     {/* CHILDREN ITEMS */}
-                    <div className="relative pl-[25px] ml-[25px] mt-3 border-l-[2px] border-slate-200/40 space-y-3">
+                    <div className="relative pl-[25px] ml-[25px] mt-4 border-l-[3px] border-slate-200/30 space-y-4">
                       {group.children.map((item, i) => {
                         const isMain = item.subCode === group.code;
                         return (
-                          <div key={`${item.subCode}-${i}`} className="relative flex items-center gap-4 group/item hover:z-20">
-                            {/* horizontal connector */}
-                            <div className="absolute left-[-2px] top-1/2 w-[18px] h-[2px] bg-slate-200/50 -translate-y-1/2 -z-10 rounded-r-full" />
-                            {/* tiny glowing dot */}
-                            <div className={`absolute left-[-5px] top-1/2 size-2.5 rounded-full border-[2px] border-slate-300 bg-white -translate-y-1/2 ${scheme.hoverDot} group-hover/item:scale-[1.3] transition-all duration-300`} />
+                          <div key={`${item.subCode}-${i}`} className="relative flex items-center gap-5 group/item hover:z-20">
+                            {/* horizontal connector - neon ray */}
+                            <div className={`absolute left-[-3px] top-1/2 w-[22px] h-[3px] ${scheme.neonLine} -translate-y-1/2 -z-10 rounded-full`} />
+                            
+                            {/* glowing node dot */}
+                            <div className={`absolute left-[-6.5px] top-1/2 size-3 rounded-full border-[2.5px] border-white shadow-md bg-slate-200 -translate-y-1/2 ${scheme.hoverDot} transition-all duration-500`} />
 
-                            <div className={`flex-1 min-w-0 rounded-2xl p-4 transition-all duration-300 border ${
+                            <div className={`flex-1 min-w-0 rounded-[20px] p-4 md:p-5 transition-all duration-500 border ${
                               isMain 
-                                ? scheme.childBgMain
-                                : `bg-white/70 backdrop-blur-md border-white hover:bg-white hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.12)] hover:-translate-y-[1.5px] ${scheme.nodeBorderHover}`
+                                ? `${scheme.childBgMain} scale-[1.01] z-10`
+                                : `bg-white/60 backdrop-blur-xl border-white/80 hover:bg-white hover:shadow-[0_16px_40px_-12px_rgba(0,0,0,0.15)] hover:-translate-y-1 ${scheme.nodeBorderHover}`
                             }`}>
-                              <div className="flex items-center gap-2 mb-1.5">
-                                <span className={`font-mono text-[10.5px] font-black px-2 py-0.5 rounded uppercase tracking-[0.1em] border shadow-[0_1px_2px_rgba(0,0,0,0.04)] ${
+                              <div className="flex items-center justify-between gap-2 mb-2">
+                                <span className={`font-mono text-[10px] font-black px-2.5 py-0.5 rounded-lg uppercase tracking-[0.15em] border shadow-sm ${
                                   isMain 
                                     ? scheme.childBadgeMain
-                                    : 'text-slate-600 bg-slate-100/50 border-slate-200/60'
+                                    : 'text-slate-500 bg-slate-100/80 border-slate-200/50'
                                 }`}>
-                                  {!isMain && <ChevronRight size={10} className="inline-block mr-0.5 text-slate-400 mt-[-1px]" />}
+                                  {!isMain && <ChevronRight size={10} className="inline-block mr-1 text-slate-400" />}
                                   {item.subCode.replace(/-/g, ' ‑ ')}
                                 </span>
+                                
+                                {isMain && (
+                                  <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-200/30">
+                                    <span className="size-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                                    <span className="text-[9px] font-black text-indigo-600 uppercase">Core Node</span>
+                                  </div>
+                                )}
                               </div>
-                              <p className={`text-[13px] leading-snug ${isMain ? 'font-extrabold text-slate-900 drop-shadow-sm' : 'font-bold text-slate-700'}`}>
+                              <p className={`text-[14px] leading-snug tracking-tight ${isMain ? 'font-black text-indigo-950' : 'font-extrabold text-slate-800'}`}>
                                 {item.subTitle}
                               </p>
                               {item.notes && (
-                                <div className="mt-3 px-3.5 py-2.5 bg-slate-50/70 rounded-xl border border-white shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)]">
-                                  <p className="text-[11.5px] font-medium text-slate-500 italic leading-relaxed">
+                                <div className="mt-4 px-4 py-3 bg-[linear-gradient(to_right,theme(colors.slate.50/90),transparent)] rounded-xl border-l-2 border-slate-200/50">
+                                  <p className="text-[12px] font-medium text-slate-500 italic leading-relaxed">
                                     {item.notes}
                                   </p>
                                 </div>

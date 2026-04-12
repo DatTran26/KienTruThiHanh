@@ -60,59 +60,59 @@ export function OrgForm({ initialValues, isVerified }: OrgFormProps) {
           
           {/* Unit name */}
           <div className="space-y-1.5 md:col-span-2">
-            <label htmlFor="unit_name" className="flex justify-between text-sm font-semibold text-slate-700">
-              <span>Tên đơn vị sự nghiệp <span className="text-red-500">*</span></span>
-              {errors.unit_name && <span className="text-destructive font-bold">{errors.unit_name.message}</span>}
+            <label htmlFor="unit_name" className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em]">
+              <span>Tên đơn vị sự nghiệp <span className="text-red-400">*</span></span>
+              {errors.unit_name && <span className="text-red-400 font-bold normal-case tracking-normal">{errors.unit_name.message}</span>}
             </label>
             <input
               id="unit_name"
               {...register('unit_name')}
               placeholder="Ví dụ: BỆNH VIỆN ĐA KHOA..."
-              className="w-full h-11 bg-white border border-slate-300 rounded-md px-4 text-sm uppercase tracking-wide text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none"
+              className="w-full h-11 bg-black/[0.03] border border-white/50 rounded-xl px-4 text-sm uppercase tracking-wide text-slate-900 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-none placeholder:text-muted-foreground/60"
             />
           </div>
 
           {/* Address */}
           <div className="space-y-1.5 md:col-span-2">
-             <label htmlFor="address" className="flex justify-between text-sm font-semibold text-slate-700">
-              <span>Địa chỉ trụ sở chính <span className="text-red-500">*</span></span>
-              {errors.address && <span className="text-destructive font-bold">{errors.address.message}</span>}
+             <label htmlFor="address" className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em]">
+              <span>Địa chỉ trụ sở chính <span className="text-red-400">*</span></span>
+              {errors.address && <span className="text-red-400 font-bold normal-case tracking-normal">{errors.address.message}</span>}
             </label>
             <input
               id="address"
               {...register('address')}
               placeholder="Số nhà, Đường, Quận/Huyện, Tỉnh/Thành phố..."
-              className="w-full h-11 bg-white border border-slate-300 rounded-md px-4 text-sm text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none"
+              className="w-full h-11 bg-black/[0.03] border border-white/50 rounded-xl px-4 text-sm text-slate-900 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-none placeholder:text-muted-foreground/60"
             />
           </div>
 
           {/* Tax code */}
           <div className="space-y-1.5 md:col-span-1">
-             <label htmlFor="tax_code" className="flex justify-between text-sm font-semibold text-slate-700">
-              <span>Mã số thuế <span className="text-red-500">*</span></span>
-              {errors.tax_code && <span className="text-destructive font-bold">{errors.tax_code.message}</span>}
+             <label htmlFor="tax_code" className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em]">
+              <span>Mã số thuế <span className="text-red-400">*</span></span>
+              {errors.tax_code && <span className="text-red-400 font-bold normal-case tracking-normal">{errors.tax_code.message}</span>}
             </label>
             <input
               id="tax_code"
               {...register('tax_code')}
               placeholder="Ví dụ: 0312xxxxxx"
-              className="w-full h-11 bg-white border border-slate-300 rounded-md px-4 text-sm font-mono tracking-wider text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none"
+              className="w-full h-11 bg-black/[0.03] border border-white/50 rounded-xl px-4 text-sm font-mono tracking-wider text-slate-900 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-none placeholder:text-muted-foreground/60"
             />
           </div>
         </div>
 
         {errorMsg && (
-          <div className="border-l-4 border-destructive bg-red-50 rounded-r px-4 py-3 flex gap-3 text-sm text-destructive">
-            <Info className="size-5 shrink-0" />
+          <div className="border-l-2 border-red-400 bg-red-500/[0.06] rounded-r-lg px-4 py-3 flex gap-3 text-sm text-red-300">
+            <Info className="size-5 shrink-0 text-red-400" />
             <span className="font-bold">{errorMsg}</span>
           </div>
         )}
 
-        <div className="pt-6 border-t border-slate-200 flex justify-end">
+        <div className="pt-6 border-t border-white/50 flex justify-end">
           <button
             type="submit"
             disabled={isLoading}
-            className="rounded-md px-8 py-2.5 bg-primary text-primary-foreground font-bold text-sm uppercase tracking-wide shadow-sm hover:bg-slate-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 w-full md:w-auto"
+            className="rounded-xl px-8 py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold text-sm uppercase tracking-wider shadow-lg shadow-indigo-500/20 hover:from-indigo-400 hover:to-indigo-500 transition-all disabled:opacity-50 flex items-center justify-center gap-2 w-full md:w-auto"
           >
             {isLoading
               ? <><Loader2 className="size-4 animate-spin" /> Hệ thống đang truy xuất...</>
@@ -123,10 +123,10 @@ export function OrgForm({ initialValues, isVerified }: OrgFormProps) {
       </form>
 
       {result && (
-        <div className="border-t border-slate-200 mt-6 pt-6">
+        <div className="border-t border-white/50 mt-6 pt-6">
            <div className="flex items-center gap-2 mb-4">
-             <Database className="size-4 text-primary" />
-             <span className="text-sm font-bold text-slate-700 uppercase tracking-wider">Kết quả thẩm định từ Tổng cục Thuế</span>
+             <Database className="size-4 text-indigo-400" />
+             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em]">Kết quả thẩm định từ Tổng cục Thuế</span>
            </div>
           <ValidationResult result={result} />
         </div>

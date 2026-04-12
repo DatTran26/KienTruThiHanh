@@ -40,20 +40,30 @@ export async function proxy(request: NextRequest) {
   // Redirect authenticated users away from auth pages
   if (user && isAuthRoute) {
     const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
+    url.pathname = '/workspace';
     return NextResponse.redirect(url);
   }
 
-  // Redirect root → dashboard if authed, login if not
+  // Redirect root → workspace if authed, login if not
   if (pathname === '/') {
     const url = request.nextUrl.clone();
-    url.pathname = user ? '/dashboard' : '/login';
+    url.pathname = user ? '/workspace' : '/login';
     return NextResponse.redirect(url);
   }
 
   return supabaseResponse;
 }
 
-export const proxyConfig = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization)
+     * - api (API routes)
+     * - favicon.ico
+     * - Any file with an extension (.css, .js, .png, etc.)
+     */
+    '/((?!_next/static|_next/image|api|favicon.ico|.*\\..*).*)',
+  ],
 };

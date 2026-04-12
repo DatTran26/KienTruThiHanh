@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { Sidebar } from './_components/sidebar';
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
@@ -8,29 +8,31 @@ export default async function ProtectedLayout({ children }: { children: React.Re
 
   if (!user) redirect('/login');
 
+  // Read role via service client (bypasses RLS — always accurate)
+  const serviceSupabase = createServiceClient();
+  const { data: userRow } = await serviceSupabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+  const isAdmin = userRow?.role === 'admin';
+
   return (
-    <div className="flex h-[100dvh] w-full overflow-hidden relative selection:bg-accent selection:text-accent-foreground">
-      
-      {/* Clean Light Institutional Background Overlay */}
-      <div className="absolute inset-0 bg-background z-0 pointer-events-none" />
+    <div className="flex min-h-[100dvh] bg-[#f8fafc]">
 
-      {/* Structure Grid (Subtle) */}
-      <div className="absolute inset-0 z-0 opacity-[0.4] pointer-events-none" style={{
-        backgroundImage: 'linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px)',
-        backgroundSize: '80px 80px'
-      }} />
+      {/* ── Desktop Sidebar (hidden on mobile) ── */}
+      <Sidebar userEmail={user.email} isAdmin={isAdmin} />
 
-      {/* Main Layout Container */}
-      <div className="relative z-10 flex w-full h-full p-4 lg:p-6 gap-6">
-        
-        <Sidebar />
-        
-        {/* Main Content Area */}
-        <main className="flex-1 h-full overflow-y-auto rounded-xl bg-card border border-border shadow-sm pb-24 lg:pb-0 scroll-smooth">
+      {/* ── Main content area ── */}
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-60">
+
+        {/* Page content — scrollable */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden">
           {children}
         </main>
-        
+
       </div>
+
     </div>
   );
 }

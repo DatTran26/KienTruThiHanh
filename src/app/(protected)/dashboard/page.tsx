@@ -5,10 +5,15 @@ import {
   Search, 
   Activity, 
   Target, 
-  TerminalSquare, 
+  Sparkles, 
   Clock, 
-  ArrowRight
+  ArrowRight,
+  TrendingUp,
+  BarChart3,
+  Zap,
+  FolderOpen
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -31,8 +36,7 @@ export default async function DashboardPage() {
   ]);
 
   const getUserName = (email?: string) => {
-    const name = email?.split('@')[0] ?? 'Cán bộ';
-    return name;
+    return email?.split('@')[0] ?? 'Cán bộ';
   };
 
   const avgConfidence = (() => {
@@ -43,135 +47,151 @@ export default async function DashboardPage() {
 
   const stats = [
     {
-      label: 'Tổng Yêu Cầu Đã Xử Lý',
+      label: 'Tổng Yêu Cầu',
       value: totalAnalyses ?? 0,
       icon: Search,
-      color: 'text-blue-700',
-      bg: 'bg-blue-50',
-      border: 'border-blue-100',
+      gradient: 'from-blue-500/10 to-blue-400/5',
+      iconColor: 'text-blue-500',
+      valueColor: 'text-blue-600',
     },
     {
-      label: 'Báo Cáo Đã Tạo',
+      label: 'Báo Cáo',
       value: recentReports?.length ?? 0,
       icon: FileText,
-      color: 'text-teal-700',
-      bg: 'bg-teal-50',
-      border: 'border-teal-100',
+      gradient: 'from-indigo-500/10 to-indigo-400/5',
+      iconColor: 'text-indigo-500',
+      valueColor: 'text-indigo-600',
     },
     {
-      label: 'Độ Tin Cậy Trung Bình AI',
+      label: 'Độ Tin Cậy TB',
       value: avgConfidence ?? '—',
       icon: Target,
-      color: 'text-amber-700',
-      bg: 'bg-amber-50',
-      border: 'border-amber-100',
+      gradient: 'from-emerald-500/10 to-emerald-400/5',
+      iconColor: 'text-emerald-500',
+      valueColor: 'text-emerald-600',
     },
     {
-      label: 'Phiên Đang Hoạt Động',
+      label: 'Phiên Hoạt Động',
       value: recentAnalyses?.length ?? 0,
       icon: Activity,
-      color: 'text-slate-700',
-      bg: 'bg-slate-50',
-      border: 'border-slate-200',
+      gradient: 'from-amber-500/10 to-amber-400/5',
+      iconColor: 'text-amber-500',
+      valueColor: 'text-amber-600',
     },
   ];
 
   return (
-    <div className="w-full h-full max-h-[100dvh] flex flex-col p-4 lg:p-6 lg:px-8 overflow-hidden bg-background max-w-[1400px] mx-auto">
-      
-      {/* ── Header: Official Style ── */}
-      <header className="flex flex-col sm:flex-row items-start sm:items-end justify-between mt-2 mb-8 animate-fade-in-up">
-        <div>
+    <div className="@container w-full flex flex-col p-4 @md:p-6 @lg:p-8 max-w-[1400px] mx-auto pb-24 lg:pb-8">
+
+      {/* ── Header ── */}
+      <header className="flex flex-col @md:flex-row items-start @md:items-end justify-between mt-2 mb-8 animate-slide-up">
+        <div className="space-y-1">
           <div className="flex items-center gap-2 mb-1">
-            <span className="size-2 bg-green-500 rounded-full" />
-            <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">HỆ THỐNG ĐANG HOẠT ĐỘNG</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Tổng quan</span>
+            <span className="text-slate-300 text-xs">·</span>
+            <span className="flex items-center gap-1.5 text-[10px] font-semibold text-emerald-600">
+              <span className="relative flex size-1.5">
+                <span className="absolute inset-0 rounded-full bg-emerald-500 opacity-70 animate-ping" />
+                <span className="relative size-1.5 rounded-full bg-emerald-500" />
+              </span>
+              Hệ thống Online
+            </span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-primary">
-            Xin chào, {getUserName(user?.email)}
+          <h1 className="text-2xl @sm:text-3xl font-bold tracking-tight text-slate-900 leading-tight">
+            Xin chào, <span className="text-blue-700">{getUserName(user?.email)}</span>
           </h1>
-          <p className="text-slate-500 mt-1">Tổng quan tình hình xử lý chi phí và báo cáo hạch toán.</p>
+          <p className="text-slate-500 text-sm font-medium">Tổng quan hệ thống hạch toán & phân loại bằng trí tuệ nhân tạo.</p>
         </div>
-        <div className="mt-4 sm:mt-0 flex flex-col items-end text-sm text-slate-500 font-medium">
-          <p>Ngày hệ thống: {new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-          <p>Cập nhật lần cuối: {new Date().toLocaleTimeString('vi-VN')}</p>
+
+        <div className="hidden @md:flex flex-col items-end text-xs text-slate-500 bg-white rounded-xl p-3 border border-slate-200 shadow-sm">
+          <p className="font-semibold text-slate-700">{new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          <p className="font-mono mt-1 text-slate-400">Cập nhật lúc: {new Date().toLocaleTimeString('vi-VN')}</p>
         </div>
       </header>
 
       {/* ── Dashboard Grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 overflow-y-auto pr-2 pb-10">
+      <div className="grid grid-cols-1 @4xl:grid-cols-12 gap-6 pb-10">
         
-        {/* STATS ROW (Top Section) */}
-        <div className="lg:col-span-12 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {/* STATS ROW */}
+        <div className="@4xl:col-span-12 grid grid-cols-2 @3xl:grid-cols-4 gap-4">
           {stats.map((s, i) => (
-            <div 
-              key={i} 
-              className={`structured-panel p-5 animate-fade-in-up ${s.bg} ${s.border} hover:shadow-md transition-shadow`}
-              style={{ animationDelay: `${i * 100}ms` }}
+            <div
+              key={i}
+              className="saas-card p-5 animate-slide-up group relative overflow-hidden"
+              style={{ animationDelay: `${i * 60}ms` }}
             >
               <div className="flex justify-between items-start mb-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-600">{s.label}</span>
-                <div className={`${s.color} p-2 bg-white rounded-md shadow-sm border border-slate-100`}>
-                  <s.icon size={18} strokeWidth={2.5} />
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">{s.label}</span>
+                <div className={`size-9 flex items-center justify-center rounded-lg bg-slate-50 border border-slate-100 ${s.iconColor}`}>
+                  <s.icon size={16} strokeWidth={2.3} />
                 </div>
               </div>
               <div className="flex items-baseline gap-2">
-                <span className={`text-3xl font-bold tracking-tight ${s.color}`}>{s.value}</span>
+                <span className={`text-3xl @md:text-4xl font-bold tracking-tight ${s.valueColor}`}>{s.value}</span>
               </div>
             </div>
           ))}
         </div>
 
-        {/* LEFT COLUMN: Actions & Reports */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
-          
-          {/* Quick Command Module */}
-          <div className="structured-panel border-primary overflow-hidden animate-fade-in-up delay-300 ring-1 ring-primary/10">
-            <Link href="/analyze" className="group block relative p-6 bg-white hover:bg-slate-50 transition-colors">
-              <div className="absolute right-6 top-6 text-primary group-hover:translate-x-1 transition-transform">
-                <ArrowRight size={24} />
+        {/* LEFT COLUMN */}
+        <div className="@4xl:col-span-5 flex flex-col gap-5">
+
+          {/* Quick Action Banner */}
+          <div className="saas-card overflow-hidden animate-slide-up group" style={{ animationDelay: '60ms' }}>
+            <Link href="/analyze" className="block relative p-6 transition-colors">
+              <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-200 group-hover:text-blue-300 group-hover:translate-x-1 transition-all duration-200">
+                <ArrowRight size={22} strokeWidth={2}/>
               </div>
-              <div className="flex items-center gap-2 mb-3 text-primary">
-                <TerminalSquare size={20} strokeWidth={2} />
-                <span className="font-bold text-sm tracking-wider uppercase">Nghiệp vụ mới</span>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="size-7 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center">
+                  <Sparkles className="size-3.5 text-blue-600" strokeWidth={2} />
+                </div>
+                <span className="font-bold text-[10px] tracking-[0.18em] uppercase text-blue-600">Tác vụ mới</span>
               </div>
-              <h3 className="text-xl font-bold text-primary tracking-tight mb-2">Phân loại chi phí AI</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">Sử dụng AI để tự động truy xuất và đề xuất mã tiểu mục hạch toán phù hợp từ cơ sở dữ liệu Bộ Tài Chính.</p>
+              <h3 className="text-base font-bold text-slate-800 tracking-tight mb-1">Phân loại chi phí AI</h3>
+              <p className="text-[12.5px] text-slate-500 leading-relaxed">Nhập mô tả chi phí, AI sẽ đề xuất mã tiểu mục ngân sách tức thì.</p>
             </Link>
           </div>
 
-          {/* Docs / Reports Module */}
-          <div className="structured-panel flex-1 flex flex-col overflow-hidden animate-fade-in-up delay-400">
-            <div className="px-5 py-4 border-b border-border bg-slate-50 flex justify-between items-center">
-              <div className="flex items-center gap-2 text-slate-700">
-                <FileText size={16} strokeWidth={2.5} />
-                <span className="font-bold text-sm uppercase tracking-wider">Báo cáo gần đây</span>
+          {/* Reports Module */}
+          <div className="saas-card flex-1 flex flex-col overflow-hidden animate-slide-up" style={{ animationDelay: '120ms' }}>
+            <div className="px-5 py-3.5 border-b border-slate-100 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <div className="size-6 rounded-md bg-violet-50 border border-violet-100 flex items-center justify-center">
+                  <FolderOpen size={13} strokeWidth={2.3} className="text-violet-600" />
+                </div>
+                <span className="font-bold text-[13px] text-slate-700">Hồ Sơ Báo Cáo</span>
               </div>
-              <span className="px-2.5 py-1 rounded bg-slate-200 text-slate-700 text-[10px] font-bold uppercase tracking-wider">Lưu trữ</span>
+              <Link href="/reports" className="text-[11px] font-semibold text-blue-600 hover:text-blue-700">Xem tất cả →</Link>
             </div>
-            
-            <div className="flex-1 overflow-y-auto">
+
+            <div className="flex-1 p-2">
               {!recentReports?.length ? (
-                <div className="h-full flex flex-col items-center justify-center p-8 text-slate-400">
-                  <FileText size={32} className="opacity-20 mb-3" />
-                  <span className="text-sm font-semibold">Chưa có báo cáo nào</span>
+                <div className="min-h-[180px] flex flex-col items-center justify-center p-6 text-center">
+                  <div className="size-12 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center mb-3">
+                    <FileText size={20} className="text-slate-300" />
+                  </div>
+                  <span className="text-[13px] font-semibold text-slate-700">Chưa có báo cáo nào</span>
+                  <span className="text-[11px] text-slate-400 mt-1">Dữ liệu đã lưu sẽ hiển thị tại đây</span>
                 </div>
               ) : (
-                <div className="divide-y divide-border">
+                <div className="space-y-0.5 p-1">
                   {recentReports.map((r) => (
-                    <Link 
+                    <Link
                       key={r.id} href={`/reports/${r.id}`}
-                      className="block p-4 hover:bg-slate-50 transition-colors group"
+                      className="flex justify-between items-center p-3 rounded-lg hover:bg-slate-50 transition-colors group/item"
                     >
-                      <div className="flex justify-between items-start mb-1.5">
-                        <span className="text-sm font-bold text-slate-800 tracking-tight truncate pr-4 group-hover:text-primary transition-colors">{r.report_name}</span>
-                        <span className="text-sm font-bold text-primary shrink-0">{new Intl.NumberFormat('vi-VN').format(r.total_amount)} VNĐ</span>
+                      <div className="flex flex-col gap-0.5 min-w-0 pr-3">
+                        <span className="text-[13px] font-semibold text-slate-800 truncate group-hover/item:text-blue-700 transition-colors">{r.report_name}</span>
+                        <div className="flex items-center gap-1.5 text-[10.5px] text-slate-400 font-medium">
+                          <span className="font-mono">#{r.id.split('-')[0]}</span>
+                          <span>·</span>
+                          <span>{new Date(r.created_at).toLocaleDateString('vi-VN')}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium uppercase tracking-wider">
-                        <Clock size={12} />
-                        <span>Mã: {r.id.split('-')[0]}</span>
-                        <span>•</span>
-                        <span>{new Date(r.created_at).toLocaleDateString('vi-VN')}</span>
-                      </div>
+                      <span className="text-[12px] font-bold text-slate-700 shrink-0 font-mono bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200">
+                        {formatCurrency(r.total_amount)} đ
+                      </span>
                     </Link>
                   ))}
                 </div>
@@ -180,54 +200,64 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Telemetry Log (Recent Analyses) */}
-        <div className="lg:col-span-8 structured-panel flex flex-col overflow-hidden animate-fade-in-up delay-400">
-          <div className="px-5 py-4 border-b border-border bg-slate-50 flex justify-between items-center">
-            <div className="flex items-center gap-2 text-slate-700">
-              <Activity size={18} strokeWidth={2.5} />
-              <span className="font-bold text-sm uppercase tracking-wider">Lịch sử phân tích hệ thống</span>
+        {/* RIGHT COLUMN: Analysis Log */}
+        <div className="@4xl:col-span-7 saas-card flex flex-col overflow-hidden animate-slide-up" style={{ animationDelay: '180ms' }}>
+          <div className="px-5 py-3.5 border-b border-slate-100 flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <div className="size-6 rounded-md bg-blue-50 border border-blue-100 flex items-center justify-center">
+                <BarChart3 size={13} strokeWidth={2.3} className="text-blue-600" />
+              </div>
+              <span className="font-bold text-[13px] text-slate-700">Lịch sử tra cứu AI</span>
             </div>
+            <span className="px-2.5 py-1 rounded-md bg-slate-50 text-[10.5px] font-bold text-slate-400 border border-slate-200">
+              {recentAnalyses?.length ?? 0} gần nhất
+            </span>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-0">
-             {!recentAnalyses?.length ? (
-                <div className="h-full flex flex-col items-center justify-center text-slate-400 p-8">
-                  <Activity size={32} className="opacity-20 mb-3" />
-                  <span className="text-sm font-semibold">Hệ thống đang chờ dữ liệu...</span>
+          <div className="flex-1 overflow-y-auto p-2">
+            {!recentAnalyses?.length ? (
+              <div className="min-h-[280px] flex flex-col items-center justify-center p-8 text-center">
+                <div className="size-16 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-center mb-4">
+                  <Activity size={24} className="text-slate-300" />
                 </div>
-             ) : (
-               <div className="divide-y divide-border">
-                 {recentAnalyses.map((item, i) => (
-                   <div key={item.id} className="p-5 hover:bg-slate-50 transition-colors">
-                      <div className="flex items-start justify-between gap-6">
-                         <div className="flex-1 min-w-0">
-                           <div className="flex items-center gap-2 mb-2">
-                             <Clock size={12} className="text-slate-400" />
-                             <span className="text-[11px] font-bold text-slate-500 tracking-wider font-mono">
-                               {new Date(item.created_at).toLocaleString('vi-VN')}
-                             </span>
-                           </div>
-                           <p className="text-sm font-medium text-slate-800 leading-relaxed truncate">{item.raw_description}</p>
-                         </div>
-                         
-                         {/* Confidence Indicator */}
-                         {item.confidence != null && (
-                           <div className="shrink-0 flex items-center gap-3 bg-white p-2 rounded border border-slate-200">
-                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Độ tin cậy</span>
-                              <div className="relative size-10 flex items-center justify-center rounded-full bg-slate-50">
-                                <svg className="absolute inset-0 size-full -rotate-90">
-                                  <circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" strokeWidth="3" className="text-slate-200" />
-                                  <circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="100" strokeDashoffset={100 - (100 * item.confidence)} className={item.confidence > 0.8 ? "text-green-500" : "text-amber-500"} style={{ transition: 'stroke-dashoffset 1s ease' }} />
-                                </svg>
-                                <span className="text-[11px] font-bold text-slate-700">{Math.round(item.confidence * 100)}%</span>
-                              </div>
-                           </div>
-                         )}
+                <span className="text-[13px] font-semibold text-slate-700">Hệ thống đang chờ lệnh</span>
+                <span className="text-[11.5px] text-slate-400 mt-1 max-w-[200px]">Thực hiện "Phân loại chi phí" để bắt đầu phân tích.</span>
+              </div>
+            ) : (
+              <div className="space-y-0.5 p-1">
+                {recentAnalyses.map((item) => (
+                  <div key={item.id} className="relative p-3.5 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all flex items-start gap-3.5 group">
+                    <div className="size-2 rounded-full bg-slate-300 group-hover:bg-blue-400 transition-colors mt-2 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Clock size={11} className="text-slate-400" />
+                        <span className="text-[10.5px] font-semibold text-slate-400">
+                          {new Date(item.created_at).toLocaleString('vi-VN', { dateStyle: 'medium', timeStyle: 'short' })}
+                        </span>
                       </div>
-                   </div>
-                 ))}
-               </div>
-             )}
+                      <p className="text-[13px] font-medium text-slate-700 leading-relaxed line-clamp-2">
+                        "{item.raw_description}"
+                      </p>
+                    </div>
+                    {item.confidence != null && (
+                      <div className="shrink-0 flex items-center justify-center bg-white border border-slate-100 rounded-lg p-1.5 w-14">
+                        <div className="relative size-10 flex flex-col items-center justify-center">
+                          <svg viewBox="0 0 40 40" className="absolute inset-0 size-full -rotate-90">
+                            <circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" strokeWidth="3" className="text-slate-100" />
+                            <circle cx="20" cy="20" r="16" fill="none" strokeWidth="3" strokeLinecap="round"
+                              strokeDasharray="100" strokeDashoffset={100 - (100 * item.confidence)}
+                              className={item.confidence > 0.8 ? 'stroke-emerald-500' : 'stroke-amber-500'}
+                              style={{ transition: 'stroke-dashoffset 1s ease' }}
+                            />
+                          </svg>
+                          <span className="text-[10px] font-bold text-slate-700">{Math.round(item.confidence * 100)}%</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
