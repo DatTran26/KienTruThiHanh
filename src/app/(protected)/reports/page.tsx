@@ -1,17 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { CreateReportDialog } from './_components/create-report-dialog';
 import { ReportListClient } from './_components/report-list-client';
+import { formatCurrency } from '@/lib/utils';
 import {
   FileText, TrendingUp, CheckCircle2,
   ArrowUp, FolderOpen
 } from 'lucide-react';
-
-function formatCurrency(n: number) {
-  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)} tỷ`;
-  if (n >= 1_000_000)       return `${(n / 1_000_000).toFixed(1)} tr`;
-  if (n >= 1_000)           return `${(n / 1_000).toFixed(0)}k`;
-  return `${n}`;
-}
 
 export default async function ReportsPage() {
   const supabase = await createClient();
@@ -49,7 +43,7 @@ export default async function ReportsPage() {
     },
     {
       label: 'Tổng giá trị',
-      value: totalAmount > 0 ? `${formatCurrency(totalAmount)} đ` : '—',
+      value: totalAmount > 0 ? `${formatCurrency(totalAmount)} VNĐ` : '—',
       icon: TrendingUp,
       color: 'text-emerald-600',
       bg: 'bg-emerald-50 border-emerald-100',
