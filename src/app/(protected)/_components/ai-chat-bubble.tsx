@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bot, X, Send, Sparkles, Loader2, MinimalSubtitles } from 'lucide-react';
+import { Bot, X, Send, Sparkles, Loader2, MessageCircle } from 'lucide-react';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -172,7 +172,7 @@ export function AiChatBubble() {
           <X className="size-6 transition-transform" />
         ) : (
           <>
-            <MinimalSubtitles className="size-6 absolute transition-transform" />
+            <MessageCircle className="size-6 absolute transition-transform" />
             <div className="absolute -top-1 -right-1 flex h-4 w-4">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-4 w-4 bg-amber-500 border-2 border-white"></span>
