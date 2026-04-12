@@ -235,11 +235,19 @@ export function AiChatBubble() {
               </button>
             </div>
             
-            <div className="flex justify-center items-center gap-1.5 mt-4">
-              <Sparkles className="size-4 text-indigo-400" />
-              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-[0.18em]">
-                AI ENGINE - VKS
-              </p>
+            <div className="flex justify-between items-center mt-3.5 px-1">
+              <div className="flex items-center gap-1.5 opacity-80">
+                <Sparkles className="size-3.5 text-indigo-400" />
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.15em]">
+                  AI ENGINE - VKS
+                </p>
+              </div>
+              <div className="flex items-center gap-1 text-[11px] text-amber-600 font-medium">
+                <kbd className="px-1.5 py-0.5 rounded-md bg-amber-50 border border-amber-200/60 font-sans text-[10px] font-bold shadow-sm">Shift</kbd>
+                <span className="text-amber-500/80">+</span>
+                <kbd className="px-1.5 py-0.5 rounded-md bg-amber-50 border border-amber-200/60 font-sans text-[10px] font-bold shadow-sm">Enter</kbd>
+                <span className="text-amber-500/80 ml-0.5">để xuống dòng</span>
+              </div>
             </div>
           </div>
         </div>
