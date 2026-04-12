@@ -20,7 +20,7 @@ type FormData = z.infer<typeof schema>;
 /* Clean SaaS input */
 const inputBase =
   'w-full h-[52px] pl-11 rounded-xl font-medium text-slate-800 placeholder:text-slate-300 ' +
-  'bg-white border transition-all duration-150 outline-none text-[14px]';
+  'bg-white border transition-all duration-150 outline-none text-[15px]';
 
 const inputCls = (hasError: boolean) =>
   cn(
@@ -76,17 +76,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="animate-fade-in-up w-full">
+    <div className="w-full">
 
       {/* Header */}
       <div className="mb-7">
-        <p className="text-[10px] font-bold uppercase tracking-[0.22em] mb-2 text-blue-600">
+        <p className="text-[12px] font-bold uppercase tracking-[0.22em] mb-2 text-blue-600">
           Đăng nhập hệ thống
         </p>
-        <h2 className="text-[22px] font-bold text-slate-900 tracking-tight leading-tight mb-2">
+        <h2 className="text-[26px] font-bold text-slate-900 tracking-tight leading-tight mb-2">
           Chào mừng trở lại
         </h2>
-        <p className="text-[13px] text-slate-500 font-medium leading-relaxed">
+        <p className="text-[14.5px] text-slate-500 font-medium leading-relaxed">
           Nhập thông tin xác thực để tiếp tục truy cập dữ liệu hệ thống.
         </p>
       </div>
@@ -95,11 +95,11 @@ export default function LoginPage() {
 
         {/* Email */}
         <div className="space-y-1.5">
-          <label htmlFor="login-email" className="block text-[11px] font-bold text-slate-500 uppercase tracking-[0.12em]">
+          <label htmlFor="login-email" className="block text-[12px] font-bold text-slate-500 uppercase tracking-[0.12em]">
             Email đăng nhập
           </label>
           <div className="relative group">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-4 z-10 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
             <input
               id="login-email"
               type="email"
@@ -116,11 +116,11 @@ export default function LoginPage() {
 
         {/* Password */}
         <div className="space-y-1.5">
-          <label htmlFor="login-password" className="block text-[11px] font-bold text-slate-500 uppercase tracking-[0.12em]">
+          <label htmlFor="login-password" className="block text-[12px] font-bold text-slate-500 uppercase tracking-[0.12em]">
             Mật khẩu
           </label>
           <div className="relative group">
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 z-10 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
             <input
               id="login-password"
               type={showPass ? 'text' : 'password'}
@@ -147,7 +147,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full h-[52px] mt-2 rounded-xl text-white font-semibold text-[14px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          className="w-full h-[52px] mt-2 rounded-xl text-white font-semibold text-[15px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           style={primaryButtonStyle}
         >
           {loading
@@ -160,14 +160,14 @@ export default function LoginPage() {
       {/* Divider */}
       <div className="flex items-center gap-3 my-7">
         <div className="flex-1 h-px bg-gradient-to-r from-transparent to-slate-200" />
-        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] whitespace-nowrap">Chưa có tài khoản</span>
+        <span className="text-[12px] font-bold text-slate-400 uppercase tracking-[0.15em] whitespace-nowrap">Chưa có tài khoản</span>
         <div className="flex-1 h-px bg-gradient-to-l from-transparent to-slate-200" />
       </div>
 
       {/* Register link — ghost glass button */}
       <Link
         href="/register"
-        className="flex items-center justify-center w-full h-[52px] rounded-[14px] font-semibold text-[15px] text-slate-700 hover:text-slate-900 transition-all active:scale-[0.98]"
+        className="flex items-center justify-center w-full h-[52px] rounded-[14px] font-semibold text-[16px] text-slate-700 hover:text-slate-900 transition-all active:scale-[0.98]"
         style={ghostButtonStyle}
       >
         Tạo yêu cầu cấp quyền truy cập

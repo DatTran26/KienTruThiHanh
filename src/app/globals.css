@@ -230,6 +230,12 @@ input::placeholder, textarea::placeholder {
 }
 .animate-scale-in { animation: scale-in 0.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
 
+@keyframes fade-in-gentle {
+  from { opacity: 0; transform: translateY(8px); filter: blur(3px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0px); }
+}
+.animate-fade-in-gentle { animation: fade-in-gentle 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
 @keyframes shimmer {
   from { transform: translateX(-100%); }
   to   { transform: translateX(200%); }
@@ -237,7 +243,7 @@ input::placeholder, textarea::placeholder {
 .animate-shimmer { animation: shimmer 1.4s ease-in-out infinite; }
 
 /* ─── Reduced Motion ─── */
-@media (prefers-reduced-motion: reduce) {
+/* @media (prefers-reduced-motion: reduce) {
   .animate-fade-in-up,
   .animate-scale-in,
   .animate-slide-up,
@@ -246,4 +252,4 @@ input::placeholder, textarea::placeholder {
     animation: none !important;
     transition: none !important;
   }
-}
+} */

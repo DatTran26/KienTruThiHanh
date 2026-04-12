@@ -1,101 +1,76 @@
 import { Zap, Cpu, ShieldCheck, FileOutput, CheckCircle } from 'lucide-react';
 
+
 const FEATURES = [
-  { icon: Cpu,         label: 'AI phân loại chi phí tự động',        sub: 'GPT-4o · Phân mảnh ngữ nghĩa' },
-  { icon: ShieldCheck, label: 'Khớp chuẩn cấu trúc TABMIS',          sub: 'Đối chiếu mục – tiểu mục chính xác' },
-  { icon: FileOutput,  label: 'Xuất biểu mẫu chuẩn nhà nước',        sub: 'Tích hợp mẫu biểu kế toán công' },
+  { icon: Cpu,         label: 'AI phân loại chi phí tự động',        sub: 'Trí tuệ nhân tạo nhận diện chuyên biệt', colorText: 'text-purple-600', colorBg: 'bg-purple-50', colorBorder: 'border-purple-200' },
+  { icon: ShieldCheck, label: 'Khớp chuẩn cấu trúc TABMIS',          sub: 'Đối chiếu mục – tiểu mục chính xác', colorText: 'text-emerald-600', colorBg: 'bg-emerald-50', colorBorder: 'border-emerald-200' },
+  { icon: FileOutput,  label: 'Xuất biểu mẫu chuẩn nhà nước',        sub: 'Tích hợp mẫu biểu kế toán công', colorText: 'text-rose-500', colorBg: 'bg-rose-50', colorBorder: 'border-rose-200' },
+];
+
+const TRUST_INDICATORS = [
+  { label: 'Mã hóa TLS 1.3', colorIcon: 'text-amber-700' }, // Nâu (Brown)
+  { label: 'TABMIS Đồng bộ', colorIcon: 'text-purple-500' }, // Tím
+  { label: 'Dữ liệu nội bộ', colorIcon: 'text-emerald-500' }, // Xanh lá
 ];
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="min-h-[100dvh] w-full flex items-center justify-center p-4 sm:p-8"
-      style={{ background: '#eef2f7' }}
+      className="min-h-[100dvh] w-full flex items-center justify-center p-4 sm:p-8 relative"
+      style={{ background: '#f1f5f9' }}
     >
       {/* ── Centered two-column card ── */}
       <div
-        className="w-full max-w-4xl flex flex-col lg:flex-row rounded-2xl overflow-hidden animate-fade-in-up"
+        className="w-full max-w-[1140px] flex flex-col lg:flex-row rounded-[24px] overflow-hidden animate-fade-in-up md:min-h-[640px]"
         style={{
           background: '#ffffff',
-          boxShadow: '0 8px 40px rgba(15,23,42,0.10), 0 2px 8px rgba(15,23,42,0.06)',
+          boxShadow: '0 20px 40px -15px rgba(15,23,42,0.05), 0 10px 20px -5px rgba(15,23,42,0.02)',
           border: '1px solid #e2e8f0',
-          minHeight: '560px',
         }}
       >
-        {/* ════ LEFT: Institutional branding panel ════ */}
-        <div
-          className="w-full lg:w-[44%] flex flex-col justify-between p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-slate-100"
-          style={{
-            background: 'linear-gradient(160deg, #0d1b2a 0%, #1a2f4a 100%)',
-          }}
-        >
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div
-              className="size-10 rounded-xl flex items-center justify-center shrink-0"
-              style={{
-                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                boxShadow: '0 2px 12px rgba(245,158,11,0.4)',
-              }}
-            >
-              <Zap className="size-5 text-white" strokeWidth={2.5} />
+        {/* ════ LEFT: Institutional branding panel (Light & Crisp) ════ */}
+        <div className="w-full lg:w-[46%] relative overflow-hidden flex flex-col justify-between p-10 lg:p-14 xl:p-16 bg-slate-50 border-b lg:border-b-0 lg:border-r border-slate-100">
+          
+          {/* Subtle Ambient Background Mesh */}
+          <div className="absolute top-[-20%] right-[-10%] w-[70%] h-[70%] bg-amber-100/50 rounded-full blur-[80px] pointer-events-none" />
+          <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-orange-100/40 rounded-full blur-[60px] pointer-events-none" />
+
+          {/* Logo Section */}
+          <div className="relative z-10 flex items-center gap-3.5">
+            <div className="size-11 rounded-xl flex items-center justify-center bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-md shadow-orange-500/20">
+              <Zap className="size-5.5" strokeWidth={2.5} />
             </div>
-            <div>
-              <p className="text-white font-bold text-[15px] tracking-tight leading-none">VKS ThiHanh</p>
-              <p className="text-[9px] font-bold uppercase tracking-[0.28em] mt-1"
-                style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <div className="pt-0.5">
+              <p className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600 font-extrabold text-[19px] tracking-tight leading-none mb-1">VKS</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500 mt-0.5">
                 Cổng Dữ Liệu Nội Bộ
               </p>
             </div>
           </div>
 
-          {/* Main copy */}
-          <div className="my-10 lg:my-0">
-            <div
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6 text-[10px] font-bold uppercase tracking-[0.18em]"
-              style={{
-                background: 'rgba(245,158,11,0.18)',
-                border: '1px solid rgba(245,158,11,0.3)',
-                color: 'rgba(251,191,36,0.9)',
-              }}
-            >
-              <span className="relative flex size-1.5">
-                <span className="absolute inset-0 rounded-full bg-amber-400 opacity-70 animate-ping" />
-                <span className="relative size-1.5 rounded-full bg-amber-400" />
-              </span>
-              Hệ thống đang hoạt động
-            </div>
-
-            <h1
-              className="font-bold tracking-tight leading-[1.1] mb-4"
-              style={{ fontSize: 'clamp(1.7rem, 2.8vw, 2.4rem)', color: '#ffffff' }}
-            >
+          {/* Main Copy Area */}
+          <div className="relative z-10 my-10 lg:my-0">
+            <h1 className="font-extrabold tracking-tight leading-[1.15] mb-5 text-[clamp(2.5rem,4vw,3.5rem)] text-slate-900">
               Hệ thống Tra cứu<br />
-              <span style={{ color: '#fbbf24' }}>Định danh Chi phí</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600 pb-1 inline-block">Định danh Chi phí</span>
             </h1>
 
-            <p
-              className="text-[13px] leading-relaxed font-medium mb-8"
-              style={{ color: 'rgba(255,255,255,0.42)', maxWidth: '260px' }}
-            >
-              Nền tảng phân tích chi phí và đối chiếu tiểu mục ngân sách nhà nước sử dụng trí tuệ nhân tạo.
+            <p className="text-[15px] leading-relaxed font-medium mb-12 text-slate-500 max-w-[340px]">
+              Nền tảng phân tích chi phí và đối chiếu tiểu mục ngân sách nhà nước sử dụng công nghệ mở rộng tĩnh tự động.
             </p>
 
             {/* Feature list */}
-            <div className="flex flex-col gap-3.5">
-              {FEATURES.map(({ icon: Icon, label, sub }) => (
-                <div key={label} className="flex items-start gap-3">
-                  <div
-                    className="size-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                    style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.10)' }}
-                  >
-                    <Icon className="size-3.5" strokeWidth={1.8} style={{ color: 'rgba(147,197,253,0.85)' }} />
+            <div className="flex flex-col gap-5">
+              {FEATURES.map(({ icon: Icon, label, sub, colorText, colorBg, colorBorder }) => (
+                <div key={label} className="flex items-start gap-4">
+                  <div className={`size-11 flex mt-0.5 rounded-xl items-center justify-center shrink-0 border shadow-sm mix-blend-multiply ${colorBg} ${colorBorder} ${colorText}`}>
+                    <Icon className="size-5" strokeWidth={2} />
                   </div>
-                  <div>
-                    <p className="text-[12.5px] font-semibold" style={{ color: 'rgba(255,255,255,0.80)' }}>
+                  <div className="pt-0.5">
+                    <p className="text-[14px] font-bold text-slate-800 mb-0.5 tracking-tight">
                       {label}
                     </p>
-                    <p className="text-[11px] font-medium mt-0.5" style={{ color: 'rgba(255,255,255,0.30)' }}>
+                    <p className="text-[13px] font-medium text-slate-500 leading-snug">
                       {sub}
                     </p>
                   </div>
@@ -105,27 +80,22 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </div>
 
           {/* Trust indicators */}
-          <div className="flex flex-wrap gap-x-4 gap-y-2 pt-5 border-t border-white/[0.08]">
-            {['Mã hóa TLS 1.3', 'TABMIS Đồng bộ', 'Dữ liệu nội bộ'].map((item) => (
-              <span key={item} className="flex items-center gap-1.5 text-[10px] font-semibold"
-                style={{ color: 'rgba(255,255,255,0.30)' }}>
-                <CheckCircle className="size-3 text-emerald-500/60" strokeWidth={2} />
-                {item}
+          <div className="relative z-10 flex flex-wrap gap-x-5 gap-y-2 pt-6 xl:pt-8 border-t border-slate-200/80">
+            {TRUST_INDICATORS.map(({ label, colorIcon }) => (
+              <span key={label} className="flex items-center gap-1.5 text-[11px] font-bold tracking-wide uppercase text-slate-500">
+                <CheckCircle className={`size-3.5 ${colorIcon}`} strokeWidth={2.5} />
+                {label}
               </span>
             ))}
           </div>
         </div>
 
         {/* ════ RIGHT: Form panel ════ */}
-        <div
-          className="flex-1 flex flex-col justify-center p-8 lg:p-12"
-          style={{ background: '#ffffff' }}
-        >
-          <div className="w-full max-w-[360px] mx-auto">
+        <div className="flex-1 flex flex-col justify-center p-8 lg:p-14 xl:p-16 relative bg-[#ffffff]">
+          <div className="w-full max-w-[420px] mx-auto">
             {children}
           </div>
         </div>
-
       </div>
     </div>
   );

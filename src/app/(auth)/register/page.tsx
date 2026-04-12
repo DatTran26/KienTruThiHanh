@@ -30,7 +30,7 @@ const BENEFITS = [
 /* Apple-style glass input */
 const inputBase =
   'w-full h-[50px] pl-11 rounded-[14px] font-medium text-slate-800 placeholder:text-slate-400 ' +
-  'bg-white/70 backdrop-blur-md border transition-all duration-200 outline-none focus:bg-white focus:ring-4';
+  'bg-white/70 backdrop-blur-md border transition-all duration-200 outline-none focus:bg-white focus:ring-4 text-[15px]';
 
 const inputCls = (hasError: boolean) =>
   cn(
@@ -68,14 +68,14 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="animate-fade-in-up w-full">
+    <div className="w-full">
 
       {/* Header */}
       <div className="mb-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.22em] mb-2" style={{ color: 'rgba(0,122,255,0.8)' }}>
+        <p className="text-[12px] font-bold uppercase tracking-[0.22em] mb-2" style={{ color: 'rgba(0,122,255,0.8)' }}>
           Tạo tài khoản mới
         </p>
-        <h2 className="text-[26px] font-bold text-slate-800 tracking-tight leading-tight mb-2">
+        <h2 className="text-[28px] font-bold text-slate-800 tracking-tight leading-tight mb-2">
           Bắt đầu sử dụng
         </h2>
       </div>
@@ -95,7 +95,7 @@ export default function RegisterPage() {
               style={{ background: 'rgba(0,122,255,0.08)' }}>
               <Icon className="size-3.5 text-blue-600" strokeWidth={2} />
             </div>
-            <span className="text-[13px] text-slate-600 font-medium leading-snug">{text}</span>
+            <span className="text-[14px] text-slate-600 font-medium leading-snug">{text}</span>
           </div>
         ))}
       </div>
@@ -104,11 +104,11 @@ export default function RegisterPage() {
 
         {/* Email */}
         <div className="space-y-1.5">
-          <label htmlFor="reg-email" className="block text-[11px] font-bold text-slate-500 uppercase tracking-[0.12em]">
+          <label htmlFor="reg-email" className="block text-[12px] font-bold text-slate-500 uppercase tracking-[0.12em]">
             Email
           </label>
           <div className="relative group">
-            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
+            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 z-10 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
             <input
               id="reg-email"
               type="email"
@@ -125,11 +125,11 @@ export default function RegisterPage() {
 
         {/* Password */}
         <div className="space-y-1.5">
-          <label htmlFor="reg-password" className="block text-[11px] font-bold text-slate-500 uppercase tracking-[0.12em]">
+          <label htmlFor="reg-password" className="block text-[12px] font-bold text-slate-500 uppercase tracking-[0.12em]">
             Mật khẩu
           </label>
           <div className="relative group">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 z-10 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
             <input
               id="reg-password"
               type={showPass ? 'text' : 'password'}
@@ -154,11 +154,11 @@ export default function RegisterPage() {
 
         {/* Confirm password */}
         <div className="space-y-1.5">
-          <label htmlFor="reg-confirm" className="block text-[11px] font-bold text-slate-500 uppercase tracking-[0.12em]">
+          <label htmlFor="reg-confirm" className="block text-[12px] font-bold text-slate-500 uppercase tracking-[0.12em]">
             Xác nhận mật khẩu
           </label>
           <div className="relative group">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 z-10 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
             <input
               id="reg-confirm"
               type={showConfirm ? 'text' : 'password'}
@@ -185,7 +185,7 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full h-[52px] mt-1 rounded-[14px] text-white font-semibold text-[15px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          className="w-full h-[52px] mt-1 rounded-[14px] text-white font-semibold text-[16px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           style={{
             background: 'linear-gradient(to bottom, #2b97ff, #007aff)',
             boxShadow: '0 2px 16px rgba(0,122,255,0.38), inset 0 1px 0 rgba(255,255,255,0.28)',
@@ -198,7 +198,7 @@ export default function RegisterPage() {
 
       </form>
 
-      <p className="text-center text-[14px] text-slate-500 mt-6">
+      <p className="text-center text-[15px] text-slate-500 mt-6">
         Đã có tài khoản?{' '}
         <Link href="/login" className="font-semibold transition-colors hover:opacity-75" style={{ color: '#007aff' }}>
           Đăng nhập ngay

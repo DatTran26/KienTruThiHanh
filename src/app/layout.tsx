@@ -28,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="vi"
       className={`${sansFont.variable} ${monoFont.variable} h-full antialiased`}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <body className="min-h-[100dvh] bg-background text-foreground" suppressHydrationWarning>
