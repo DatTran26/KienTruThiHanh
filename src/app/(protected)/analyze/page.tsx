@@ -62,7 +62,6 @@ export default async function AnalyzePage() {
       .eq('id', user.id)
       .single();
     isAdmin = (userRow as any)?.role === 'admin';
-    console.log('[AnalyzePage] userId:', user.id, '→ role:', (userRow as any)?.role, '→ isAdmin:', isAdmin);
   }
 
   // Recent analyses (initial SSR data)

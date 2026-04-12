@@ -200,20 +200,20 @@ export function AdminMasterPanel({ activeMaster, onClose }: Props) {
     <>
       {/* ── Overlay ── */}
       <div 
-        className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-40 transition-opacity" 
+        className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-[100] transition-opacity" 
         onClick={onClose} 
       />
 
       {/* ── Modal Container ── */}
       <div 
-        className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 rounded-2xl bg-white border border-slate-200 animate-scale-in max-h-[90vh] flex overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
-          result ? 'w-[95vw] max-w-[1250px]' : 'w-[520px]'
+        className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] rounded-2xl bg-white border border-slate-200 animate-scale-in max-h-[90dvh] w-[95vw] flex flex-col lg:flex-row overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
+          result ? 'max-w-[1250px] h-[90dvh] lg:h-[85vh]' : 'max-w-[520px]'
         }`}
         style={{ boxShadow: '0 24px 64px rgba(15,23,42,0.2), 0 8px 24px rgba(15,23,42,0.08)' }}
       >
         
         {/* ── LEFT COLUMN (Upload & Meta) ── */}
-        <div className="w-[520px] shrink-0 flex flex-col bg-white">
+        <div className={`shrink-0 flex flex-col bg-white min-h-0 ${result ? 'w-full lg:w-[520px] flex-none max-h-[40dvh] lg:max-h-full' : 'w-full max-h-full'}`}>
           <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="size-9 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center">
@@ -401,7 +401,7 @@ export function AdminMasterPanel({ activeMaster, onClose }: Props) {
 
         {/* ── RIGHT COLUMN (Extracted Data Tree) ── */}
         {result && (
-          <div className="flex-1 bg-[radial-gradient(ellipse_at_top_right,theme(colors.indigo.50/50),transparent_50%),radial-gradient(ellipse_at_bottom_left,theme(colors.blue.50/40),transparent_50%)] bg-slate-50 border-l border-white shadow-[inset_1px_0_10px_rgba(0,0,0,0.02)] flex flex-col min-w-0">
+          <div className="flex-1 bg-[radial-gradient(ellipse_at_top_right,theme(colors.indigo.50/50),transparent_50%),radial-gradient(ellipse_at_bottom_left,theme(colors.blue.50/40),transparent_50%)] bg-slate-50 border-t lg:border-t-0 lg:border-l border-white shadow-[inset_1px_0_10px_rgba(0,0,0,0.02)] flex flex-col min-w-0 min-h-0">
             <div className="p-6 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl shrink-0 flex items-center justify-between z-40">
               <div className="flex items-center gap-3">
                 <div className="size-9 rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50 border border-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(99,102,241,0.2)]">

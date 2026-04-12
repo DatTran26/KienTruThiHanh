@@ -94,8 +94,6 @@ export default async function DashboardPage() {
     return { ...r, total_amount: realTotal };
   }) ?? [];
 
-  const totalReportAmount = mappedRecentReports.reduce((s, r) => s + r.total_amount, 0);
-
   const stats = [
     {
       label: 'Tổng Phân Tích',
@@ -110,14 +108,14 @@ export default async function DashboardPage() {
     },
     {
       label: 'Báo Cáo Lưu',
-      value: recentReports?.length ?? 0,
+      value: allReports?.length ?? 0,
       icon: FileText,
       bg: 'bg-violet-500',
       lightBg: 'bg-violet-50',
       borderColor: 'border-violet-200/50',
       textColor: 'text-violet-600',
       textGradient: 'from-violet-600 to-purple-600',
-      change: formatCurrency(totalReportAmount) + ' VNĐ',
+      change: formatCurrency(totalExpectedAmount) + ' VNĐ',
     },
     {
       label: 'Độ Chính Xác',
@@ -299,7 +297,7 @@ export default async function DashboardPage() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Số phiếu báo cáo</p>
-                  <p className="text-[15px] font-black text-amber-700 tracking-tight">{recentReports?.length ?? 0}</p>
+                  <p className="text-[15px] font-black text-amber-700 tracking-tight">{allReports?.length ?? 0}</p>
                 </div>
               </div>
             </div>

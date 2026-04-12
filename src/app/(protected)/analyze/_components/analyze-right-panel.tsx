@@ -60,7 +60,6 @@ export function AnalyzeRightPanel({
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchHistory = useCallback(async () => {
-    console.log('[AnalyzeRightPanel] fetchHistory called');
     setIsRefreshing(true);
     try {
       // Add cache-busting timestamp to avoid browser/Next.js caching
@@ -70,15 +69,12 @@ export function AnalyzeRightPanel({
       });
       if (res.ok) {
         const data = await res.json();
-        console.log('[AnalyzeRightPanel] Got', data.recentAnalyses?.length, 'analyses');
         setRecentAnalyses(data.recentAnalyses ?? []);
         setTotalAnalyses(data.totalAnalyses ?? 0);
         setTotalReports(data.totalReports ?? 0);
-      } else {
-        console.error('[AnalyzeRightPanel] API returned', res.status);
       }
     } catch (err) {
-      console.error('[AnalyzeRightPanel] Failed to fetch history:', err);
+      // Failed to fetch history
     } finally {
       setIsRefreshing(false);
     }
@@ -87,7 +83,6 @@ export function AnalyzeRightPanel({
   // Sync state when server-provided props change (e.g. from router.refresh())
   useEffect(() => {
     if (initialRecentAnalyses.length > 0) {
-      console.log('[AnalyzeRightPanel] Server data updated, syncing', initialRecentAnalyses.length, 'items');
       setRecentAnalyses(initialRecentAnalyses);
     }
   }, [initialRecentAnalyses]);
@@ -103,7 +98,6 @@ export function AnalyzeRightPanel({
   // Also do a client-side fetch when trigger changes (belt + suspenders)
   useEffect(() => {
     if (refreshTrigger > 0) {
-      console.log('[AnalyzeRightPanel] refreshTrigger =', refreshTrigger, '— client-side fetch in 800ms');
       const timer = setTimeout(() => {
         fetchHistory();
       }, 800);

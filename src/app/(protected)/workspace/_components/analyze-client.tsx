@@ -197,9 +197,7 @@ export default function AnalyzeClient({
       // Trigger right panel refresh AFTER router.refresh() settles
       // router.refresh() re-renders the server component tree which may reset client state,
       // so we delay the trigger to ensure it fires after the reconciliation
-      console.log('[AnalyzeClient] Analysis complete, scheduling refreshTrigger');
       setTimeout(() => {
-        console.log('[AnalyzeClient] Firing refreshTrigger now');
         setRefreshTrigger(prev => prev + 1);
       }, 1500);
     } catch {
@@ -317,9 +315,9 @@ export default function AnalyzeClient({
   }
 
   return (
-    <div className="flex min-h-full w-full animate-fade-in-up">
+    <div className="flex min-h-[100dvh] w-full relative">
       {/* Main content area */}
-      <div className="flex-1 min-w-0 overflow-y-auto pb-20 lg:pb-8">
+      <div className="flex-1 min-w-0 overflow-y-auto pb-20 lg:pb-8 animate-fade-in-up">
 
       {/* ── Page Header — Liquid Glass Light ── */}
       <div className="relative px-6 py-8 flex flex-col justify-end bg-white border-b border-slate-200/80 overflow-hidden shadow-sm">
@@ -840,7 +838,6 @@ export default function AnalyzeClient({
         </div>
       </div>
       )}
-
       </div>{/* End main content area */}
 
       {/* ── Admin Master Panel Modal ── */}
@@ -873,7 +870,7 @@ export default function AnalyzeClient({
       )}
 
       {/* ── Desktop Right Panel ── */}
-      <aside className="hidden xl:flex flex-col w-[440px] 2xl:w-[480px] shrink-0 border-l border-slate-200/80 bg-white overflow-y-auto z-10 shadow-[-10px_0_30px_rgba(0,0,0,0.01)] relative">
+      <aside className="hidden xl:flex flex-col w-[440px] 2xl:w-[480px] shrink-0 border-l border-slate-200/80 bg-white overflow-y-auto z-10 shadow-[-10px_0_30px_rgba(0,0,0,0.01)] relative animate-fade-in-up">
         <AnalyzeRightPanel
           {...(rightPanelData ?? {})}
           refreshTrigger={refreshTrigger}
