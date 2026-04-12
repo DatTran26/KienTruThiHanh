@@ -241,10 +241,15 @@ export function ReportPdfDocument({ reportName, reportCode, totalAmount, items, 
               {/* Rows */}
               {items.map((item, idx) => {
                 const isLast = idx === items.length - 1;
+                const content = item.expense_content || '';
+                const displayContent = (item.sub_code && !content.startsWith(item.sub_code)) 
+                  ? `${item.sub_code} - ${content}` 
+                  : content;
+
                 return (
                   <View key={idx} style={isLast ? styles.trLast : styles.tr}>
                     <View style={styles.colStt}><Text style={[styles.td, { textAlign: 'center' }]}>{idx + 1}</Text></View>
-                    <View style={styles.colContent}><Text style={styles.td}>{item.sub_code ? `${item.sub_code} - ` : ''}{item.expense_content || ''}</Text></View>
+                    <View style={styles.colContent}><Text style={styles.td}>{displayContent}</Text></View>
                     <View style={styles.colGroup}><Text style={[styles.td, { textAlign: 'center' }]}>{item.group_code || ''}</Text></View>
                     <View style={styles.colSub}><Text style={[styles.td, { textAlign: 'center' }]}>{item.sub_code || ''}</Text></View>
                     <View style={styles.colNote}><Text style={styles.td}>{item.note || ''}</Text></View>

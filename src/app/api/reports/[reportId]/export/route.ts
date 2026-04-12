@@ -77,11 +77,35 @@ export async function GET(
 
     const calculatedTotalAmount = items?.reduce((acc, item) => acc + (Number(item.amount) || 0), 0) ?? report.total_amount;
 
+    // Aggregate items with the same group_code and sub_code
+    const aggregatedItems: typeof items = [];
+    const itemMap = new Map<string, typeof items[0]>();
+
+    for (const item of items || []) {
+      if (!item.group_code || !item.sub_code) {
+        aggregatedItems.push(item);
+        continue;
+      }
+      
+      const key = `${item.group_code}-${item.sub_code}`;
+      if (itemMap.has(key)) {
+        const existing = itemMap.get(key)!;
+        existing.amount += (Number(item.amount) || 0);
+        if (item.note) {
+          existing.note = existing.note ? `${existing.note}, ${item.note}` : item.note;
+        }
+      } else {
+        const newItem = { ...item, amount: Number(item.amount) || 0 };
+        itemMap.set(key, newItem);
+        aggregatedItems.push(newItem);
+      }
+    }
+
     const pdfBuffer = await generateReportPdf({
       reportName: report.report_name,
       reportCode: report.report_code,
       totalAmount: calculatedTotalAmount,
-      items,
+      items: aggregatedItems,
       orgProfile,
       exportDate,
     });
