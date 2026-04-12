@@ -35,6 +35,7 @@ export function AiChatBubble() {
     if (!input.trim()) return;
 
     // Add user message
+    const userMsg = input.trim();
     const currentMessages = [...messages, { role: 'user', content: userMsg }];
     setMessages(currentMessages as ChatMessage[]);
     setInput('');
