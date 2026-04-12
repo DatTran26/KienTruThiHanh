@@ -31,9 +31,9 @@ export default async function ProfilePage() {
     if (refData) {
       profile = {
         ...profile,
-        unit_name: refData.unit_name,
-        address: refData.address,
-        tax_code: refData.tax_code,
+        unit_name: refData.unit_name || '',
+        address: refData.address || '',
+        tax_code: refData.tax_code || '',
         validation_status: 'matched' // Admin's config is by definition matched
       };
     }
