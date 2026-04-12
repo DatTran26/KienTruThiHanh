@@ -322,7 +322,7 @@ export function ReportItemsManager({
                         </div>
                       </td>
                       <td className="px-4 py-4 text-right">
-                        <span className="font-mono text-[16px] font-black text-indigo-600 bg-indigo-50/50 px-3 py-1.5 rounded-lg border border-indigo-100/50 tabular-nums">
+                        <span className="font-mono text-[16px] font-black text-indigo-600 bg-indigo-50/50 px-3 py-1.5 rounded-lg border border-indigo-100/50 tabular-nums whitespace-nowrap">
                           {formatCurrency(group.amount)} <span className="text-[10px] text-indigo-400">VND</span>
                         </span>
                       </td>

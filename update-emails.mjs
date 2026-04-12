@@ -1,8 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import * as dotenv from 'dotenv';
-
-dotenv.config({ path: '.env.local' });
-dotenv.config();
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
@@ -13,11 +9,11 @@ async function main() {
   for (const user of users) {
      if (user.email === 'admin@hcm.gov.vn') {
        const res = await supabase.auth.admin.updateUserById(user.id, { email: 'admin@gov.vn', email_confirm: true });
-       console.log('Updated admin:', res.error ? res.error.message : 'Success');
+       console.log('Updated admin@hcm.gov.vn -> admin@gov.vn:', res.error ? res.error.message : 'Success');
      }
      if (user.email === 'canbo@hcm.gov.vn') {
        const res = await supabase.auth.admin.updateUserById(user.id, { email: 'canbo@gov.vn', email_confirm: true });
-       console.log('Updated canbo:', res.error ? res.error.message : 'Success');
+       console.log('Updated canbo@hcm.gov.vn -> canbo@gov.vn:', res.error ? res.error.message : 'Success');
      }
   }
 }
