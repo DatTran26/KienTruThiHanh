@@ -103,7 +103,7 @@ export default function LoginPage() {
             <input
               id="login-email"
               type="email"
-              placeholder="canbo@hcm.gov.vn"
+              placeholder="canbo@gov.vn"
               autoComplete="email"
               className={inputCls(!!errors.email)}
               {...register('email')}
