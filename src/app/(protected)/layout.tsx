@@ -15,7 +15,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
     .select('role')
     .eq('id', user.id)
     .single();
-  const isAdmin = userRow?.role === 'admin';
+  const isAdmin = (userRow as any)?.role === 'admin';
 
   return (
     <div className="flex min-h-[100dvh] bg-[#f8fafc]">
