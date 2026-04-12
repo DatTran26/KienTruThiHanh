@@ -34,32 +34,59 @@ export default async function UserProfilePage() {
 
       {/* Warning/Required Update Banner */}
       {!isVerified && (
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 to-orange-600 p-6 shadow-xl shadow-orange-500/20 border border-orange-400">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[40px] translate-x-1/3 -translate-y-1/3" />
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-black/10 rounded-full blur-[20px] -translate-x-1/2 translate-y-1/2" />
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-slate-900 border border-slate-800 shadow-[0_20px_60px_-15px_rgba(2ea,88,12,0.3)] mb-8">
+          {/* Glowing orbs */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-600/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-amber-500/10 rounded-full blur-[60px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
           
-          <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
-            <div className="p-4 rounded-full bg-white/20 backdrop-blur-md border border-white/20 shrink-0 shadow-inner">
-              <ShieldAlert className="size-10 text-white" strokeWidth={1.5} />
-            </div>
+          <div className="relative z-10 p-8 md:p-10 flex flex-col md:flex-row items-center md:items-stretch gap-8">
             
-            <div className="flex-1 text-white">
-              <h3 className="text-xl font-black mb-1.5 tracking-wide">Yêu cầu hoàn tất định danh Tổ chức</h3>
-              <p className="text-[14px] leading-relaxed text-white/90 font-medium max-w-xl">
-                Tài khoản của bạn lần đầu đăng nhập hệ thống. Để kích hoạt công cụ phân tích AI và truy xuất Master Data, bạn buộc phải cập nhật chính xác <strong className="font-bold underline decoration-orange-300 underline-offset-2">Mã số thuế</strong> và thông tin đơn vị trực thuộc.
+            {/* Context Section */}
+            <div className="flex-1 flex flex-col justify-center">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 font-bold text-[11px] uppercase tracking-widest mb-4 w-fit shadow-inner">
+                <ShieldAlert className="size-3.5" />
+                Dữ liệu rỗng
+              </div>
+              <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight mb-3">Hoàn tất định danh Tổ chức</h3>
+              <p className="text-[14px] leading-relaxed text-slate-300 font-medium max-w-xl">
+                Tài khoản của bạn lần đầu đăng nhập. Để kích hoạt công cụ phân tích AI và kho dữ liệu Master Data, vui lòng cập nhật chính xác <span className="text-orange-400 font-bold border-b border-orange-400/50 pb-0.5">Mã số thuế</span> và các thông tin cơ quan trực thuộc.
               </p>
               
-              <div className="mt-5 p-4 rounded-2xl bg-black/15 border border-white/10 font-mono text-[13px] text-orange-50 shadow-inner backdrop-blur-sm relative overflow-hidden">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-white/30" />
-                <p className="flex justify-between border-b border-white/10 pb-2 mb-2"><span className="opacity-70 font-semibold tracking-wider">Tên đơn vị:</span> <strong className="text-white max-w-[250px] md:max-w-none text-right">Viện kiểm sát nhân dân khu vực 5 – Đắk Lắk</strong></p>
-                <p className="flex justify-between border-b border-white/10 pb-2 mb-2"><span className="opacity-70 font-semibold tracking-wider">Mã số thuế:</span> <strong className="text-white text-lg tracking-widest text-[#FFDF00]">6000930278</strong></p>
-                <p className="flex justify-between"><span className="opacity-70 font-semibold tracking-wider">Địa chỉ:</span> <strong className="text-white text-right max-w-[250px] md:max-w-none">Khu trung tâm hành chính, xã Dray Bhăng, tỉnh Đắk Lắk</strong></p>
+              <div className="mt-8 flex items-center">
+                <Link href="/workspace" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-black text-[14px] rounded-2xl shadow-[0_8px_25px_-8px_rgba(249,115,22,0.6)] hover:shadow-[0_12px_35px_-8px_rgba(249,115,22,0.8)] hover:scale-[1.02] transition-all">
+                  Cập nhật ngay bây giờ <ExternalLink className="size-4" />
+                </Link>
               </div>
             </div>
-            
-            <Link href="/workspace" className="shrink-0 w-full md:w-auto px-8 py-3.5 bg-white text-orange-600 font-black text-[14px] rounded-xl shadow-lg hover:shadow-orange-500/50 hover:scale-105 transition-all text-center flex items-center justify-center gap-2">
-              Chuyển đến Cập nhật <ExternalLink className="size-4" />
-            </Link>
+
+            {/* Snippet / Reference Data Section */}
+            <div className="w-full md:w-[450px] shrink-0">
+              <div className="h-full rounded-[1.5rem] bg-white/5 border border-white/10 backdrop-blur-xl p-6 relative overflow-hidden flex flex-col justify-center shadow-2xl">
+                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-orange-500/80 to-transparent opacity-70" />
+                 
+                 <div className="space-y-5">
+                   <div>
+                     <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-2 flex items-center gap-2"><Zap className="size-3 text-amber-400"/> Mã số thuế chuẩn</p>
+                     <div className="flex items-center justify-between bg-black/40 rounded-xl p-3 border border-white/5 shadow-inner">
+                        <span className="font-mono text-2xl font-bold text-amber-400 tracking-[0.2em]">6000930278</span>
+                     </div>
+                   </div>
+
+                   <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+                   <div>
+                     <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black mb-1.5">Tên Đơn vị</p>
+                     <p className="text-[14px] font-bold text-slate-100">Viện kiểm sát nhân dân khu vực 5 – Đắk Lắk</p>
+                   </div>
+                   
+                   <div>
+                     <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black mb-1.5">Trụ sở hành chính</p>
+                     <p className="text-[13px] font-medium text-slate-400">Khu trung tâm hành chính, xã Dray Bhăng, tỉnh Đắk Lắk</p>
+                   </div>
+                 </div>
+              </div>
+            </div>
+
           </div>
         </div>
       )}
