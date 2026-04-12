@@ -8,7 +8,7 @@ const InputSchema = z.object({
   group_title:    z.string().optional(),
   sub_code:       z.string().optional(),
   sub_title:      z.string().optional(),
-  expense_content: z.string().min(1).max(1000),
+  expense_content: z.string().min(1).max(5000),
   amount:         z.number().min(0),
   note:           z.string().max(500).optional(),
 });
@@ -22,7 +22,8 @@ export async function POST(
     const body = await request.json();
     const parsed = InputSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
+      console.error('[POST /api/reports/items] Validation failed:', JSON.stringify(parsed.error.issues));
+      return NextResponse.json({ error: 'Invalid input', details: parsed.error.issues }, { status: 400 });
     }
 
     const supabase = await createClient();

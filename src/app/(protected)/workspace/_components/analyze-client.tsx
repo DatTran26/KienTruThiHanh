@@ -284,7 +284,7 @@ export default function AnalyzeClient({
             group_title:     item.groupTitle,
             sub_code:        item.subCode,
             sub_title:       item.subTitle,
-            expense_content: item.description || item.subTitle || '',
+            expense_content: (item.description || item.subTitle || item.groupTitle || item.subCode || 'Chi phí').slice(0, 5000),
             amount:          item.amount ?? 0,
           }),
         })
