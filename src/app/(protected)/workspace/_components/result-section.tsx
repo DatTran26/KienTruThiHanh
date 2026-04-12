@@ -330,8 +330,10 @@ export function ResultSection({ response, onAddToReport, savedTargetInfo }: Resu
                            </div>
                            
                            {grp.bestItem.reason && showReasons && (
-                             <div className="relative group/tree mt-3 text-[11.5px] text-slate-700 bg-white/60 backdrop-blur-md border border-indigo-100/60 p-3 rounded-lg shadow-[inset_0_1px_0_#fff,0_1px_3px_rgba(0,0,0,0.02)] leading-relaxed animate-fade-in-up w-max max-w-full cursor-help">
-                               <strong className="text-indigo-600 block mb-0.5 uppercase tracking-[0.15em] text-[9.5px]">Cơ sở phân tích:</strong>
+                             <div className="relative group/tree mt-3 text-[11.5px] text-slate-800 bg-indigo-50/80 backdrop-blur-md border border-indigo-200/60 p-3.5 rounded-xl shadow-sm leading-relaxed animate-fade-in-up w-max max-w-full cursor-help transition-all hover:bg-indigo-100/50 hover:shadow-[0_4px_15px_-4px_rgba(99,102,241,0.15)]">
+                               <strong className="text-indigo-700 flex items-center gap-1.5 mb-1.5 uppercase tracking-[0.15em] text-[10px] leading-none">
+                                 <Zap className="size-3" /> Cơ sở phân tích:
+                               </strong>
                                {grp.bestItem.reason}
                                {renderWorktreeTooltip(grp.bestItem, 'bottom')}
                              </div>
@@ -494,7 +496,7 @@ export function ResultSection({ response, onAddToReport, savedTargetInfo }: Resu
                           <summary className="list-none cursor-pointer inline-flex items-center gap-1.5 w-fit px-2.5 py-1 rounded bg-orange-50/80 hover:bg-orange-100 border border-orange-200/60 transition-colors text-[9.5px] font-black uppercase tracking-wider text-orange-600 select-none shadow-sm">
                             <Info className="size-3" /> Cơ sở AI
                           </summary>
-                          <div className="mt-2 text-[11.5px] text-slate-700 bg-white/60 backdrop-blur-md p-3 rounded-xl border border-orange-100/80 shadow-[inset_0_1px_0_#fff,0_1px_3px_rgba(0,0,0,0.02)] leading-relaxed">
+                          <div className="mt-2 text-[11.5px] text-slate-800 bg-orange-50/50 backdrop-blur-md p-3.5 rounded-xl border border-orange-200/80 shadow-sm leading-relaxed relative">
                             {r.reason}
                           </div>
                         </details>
