@@ -147,9 +147,9 @@ export function AiChatBubble() {
                   }
                 </div>
                 
-                <div className={`px-5 py-4 text-[14.5px] leading-relaxed shadow-sm whitespace-pre-wrap ${
+                <div className={`px-5 py-4 text-[14.5px] leading-relaxed shadow-sm ${
                   msg.role === 'user' 
-                    ? 'bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-700 text-white rounded-[20px] rounded-tr-[4px] shadow-indigo-500/20 shadow-lg border border-indigo-400/30 font-medium'
+                    ? 'whitespace-pre-wrap bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-700 text-white rounded-[20px] rounded-tr-[4px] shadow-indigo-500/20 shadow-lg border border-indigo-400/30 font-medium'
                     : 'bg-white/95 backdrop-blur-md border border-slate-100 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.05)] text-slate-700 rounded-[20px] rounded-tl-[4px] font-medium'
                 }`}>
                   {msg.role === 'user' ? (
@@ -163,9 +163,9 @@ export function AiChatBubble() {
                         h1: ({node, ...props}) => <h1 className="text-lg font-extrabold text-indigo-950 mt-4 mb-2" {...props}/>,
                         h2: ({node, ...props}) => <h2 className="text-base font-extrabold text-indigo-950 mt-4 mb-2" {...props}/>,
                         h3: ({node, ...props}) => <h3 className="text-[15px] font-bold text-indigo-950 mt-3 mb-1.5" {...props}/>,
-                        ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-3 space-y-1" {...props}/>,
-                        ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...props}/>,
-                        li: ({node, ...props}) => <li className="pl-0.5" {...props}/>,
+                        ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-2 space-y-1 marker:text-indigo-400" {...props}/>,
+                        ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-2 space-y-1 marker:text-indigo-400" {...props}/>,
+                        li: ({node, ...props}) => <li className="pl-0.5 leading-relaxed" {...props}/>,
                         code: ({node, ref, ...props}: any) => {
                           const isInline = !props.className?.includes('language-');
                           return isInline 
