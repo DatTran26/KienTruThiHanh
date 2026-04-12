@@ -628,7 +628,7 @@ export function ReportItemsManager({
                       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 to-emerald-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       
                       <div className="relative flex items-start justify-between mb-2">
-                        <span className="font-mono text-[10px] font-bold text-white bg-gradient-to-r from-amber-700 to-amber-900 px-2 py-0.5 rounded shadow-sm shadow-amber-900/20">
+                        <span className="font-mono text-[10px] font-bold text-white bg-gradient-to-r from-indigo-500 to-indigo-600 px-2 py-0.5 rounded shadow-sm shadow-indigo-500/20">
                           {item.groupCode}
                         </span>
                         {item.subCode && (
