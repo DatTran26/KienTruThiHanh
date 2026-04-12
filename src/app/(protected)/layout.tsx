@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { Sidebar } from './_components/sidebar';
+import { AiChatBubble } from './_components/ai-chat-bubble';
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -32,7 +33,9 @@ export default async function ProtectedLayout({ children }: { children: React.Re
         </main>
 
       </div>
-
+      
+      {/* ── Floating AI Chat ── */}
+      <AiChatBubble />
     </div>
   );
 }
