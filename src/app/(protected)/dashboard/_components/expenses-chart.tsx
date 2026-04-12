@@ -214,7 +214,7 @@ export function ExpensesChart({ data: realData, totalExpectedAmount }: ExpensesC
             {chartType === 'area' && (
               <ResponsiveContainer width="100%" height="100%" minHeight={200} minWidth={0}>
                 <AreaChart data={data} margin={{ top: 8, right: 30, left: -4, bottom: 0 }}
-                  onMouseMove={(e) => e.activePayload?.length && setHoverData(e.activePayload[0].payload)}
+                  onMouseMove={(e: any) => e?.activePayload?.length && setHoverData(e.activePayload[0].payload)}
                   onMouseLeave={() => setHoverData(null)}
                 >
                   <defs>
@@ -246,7 +246,7 @@ export function ExpensesChart({ data: realData, totalExpectedAmount }: ExpensesC
             {chartType === 'bar' && (
               <ResponsiveContainer width="100%" height="100%" minHeight={200} minWidth={0}>
                 <BarChart data={data} margin={{ top: 8, right: 30, left: -4, bottom: 0 }}
-                  onMouseMove={(e) => e.activePayload?.length && setHoverData(e.activePayload[0].payload)}
+                  onMouseMove={(e: any) => e?.activePayload?.length && setHoverData(e.activePayload[0].payload)}
                   onMouseLeave={() => setHoverData(null)}
                 >
                   <defs>
@@ -274,7 +274,7 @@ export function ExpensesChart({ data: realData, totalExpectedAmount }: ExpensesC
             {chartType === 'hbar' && (
               <ResponsiveContainer width="100%" height="100%" minHeight={350} minWidth={0}>
                 <BarChart data={data} layout="vertical" margin={{ top: 8, right: 30, left: 0, bottom: 0 }}
-                  onMouseMove={(e) => e.activePayload?.length && setHoverData(e.activePayload[0].payload)}
+                  onMouseMove={(e: any) => e?.activePayload?.length && setHoverData(e.activePayload[0].payload)}
                   onMouseLeave={() => setHoverData(null)}
                 >
                   <defs>
@@ -302,7 +302,7 @@ export function ExpensesChart({ data: realData, totalExpectedAmount }: ExpensesC
             {chartType === 'line' && (
               <ResponsiveContainer width="100%" height="100%" minHeight={200} minWidth={0}>
                 <LineChart data={data} margin={{ top: 8, right: 30, left: -4, bottom: 0 }}
-                  onMouseMove={(e) => e.activePayload?.length && setHoverData(e.activePayload[0].payload)}
+                  onMouseMove={(e: any) => e?.activePayload?.length && setHoverData(e.activePayload[0].payload)}
                   onMouseLeave={() => setHoverData(null)}
                 >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -322,7 +322,7 @@ export function ExpensesChart({ data: realData, totalExpectedAmount }: ExpensesC
             {chartType === 'composed' && (
               <ResponsiveContainer width="100%" height="100%" minHeight={200} minWidth={0}>
                 <ComposedChart data={data} margin={{ top: 8, right: 30, left: -4, bottom: 0 }}
-                  onMouseMove={(e) => e.activePayload?.length && setHoverData(e.activePayload[0].payload)}
+                  onMouseMove={(e: any) => e?.activePayload?.length && setHoverData(e.activePayload[0].payload)}
                   onMouseLeave={() => setHoverData(null)}
                 >
                   <defs>
@@ -379,7 +379,7 @@ export function ExpensesChart({ data: realData, totalExpectedAmount }: ExpensesC
             {chartType === 'radar' && (
               <ResponsiveContainer width="100%" height="100%" minHeight={200} minWidth={0}>
                 <RadarChart data={data} cx="50%" cy="50%" outerRadius="75%" 
-                  onMouseMove={(e) => e.activePayload?.length && setHoverData(e.activePayload[0].payload)}
+                  onMouseMove={(e: any) => e?.activePayload?.length && setHoverData(e.activePayload[0].payload)}
                   onMouseLeave={() => setHoverData(null)}
                 >
                   <defs>
