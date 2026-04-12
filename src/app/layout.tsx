@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-[100dvh] bg-background text-foreground" suppressHydrationWarning>
         {children}
-        <Toaster richColors position="bottom-right" theme="light" />
+        <Toaster richColors position="top-right" theme="light" expand={true} duration={4000} offset={24} />
       </body>
     </html>
   );
