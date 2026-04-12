@@ -35,19 +35,36 @@ export function AiChatBubble() {
     if (!input.trim()) return;
 
     // Add user message
-    const userMsg = input.trim();
-    setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+    const currentMessages = [...messages, { role: 'user', content: userMsg }];
+    setMessages(currentMessages as ChatMessage[]);
     setInput('');
     setLoading(true);
 
-    // Simulated delay for demo
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: currentMessages }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Lỗi kết nối AI Server');
+      }
+
+      const data = await response.json();
+      if (data && data.content) {
+        setMessages(prev => [...prev, { role: 'assistant', content: data.content }]);
+      } else {
+        throw new Error('Invalid Response');
+      }
+    } catch (error) {
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: 'AI Engine đang trong kỉ nguyên Beta. Tôi đang được nạp hàng vạn trang thông tư nghị định để có thể hỗ trợ bạn tốt nhất trong tương lai!' 
+        content: 'Xin lỗi, kết nối đến Trí tuệ Nhân tạo VKS đang đi qua máy chủ trạm và gặp sự cố. Bạn vui lòng thử lại sau giây lát nhe.' 
       }]);
+    } finally {
       setLoading(false);
-    }, 1800);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -127,7 +144,7 @@ export function AiChatBubble() {
                   }
                 </div>
                 
-                <div className={`px-5 py-4 text-[14.5px] leading-relaxed shadow-sm ${
+                <div className={`px-5 py-4 text-[14.5px] leading-relaxed shadow-sm whitespace-pre-wrap ${
                   msg.role === 'user' 
                     ? 'bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-700 text-white rounded-[20px] rounded-tr-[4px] shadow-indigo-500/20 shadow-lg border border-indigo-400/30 font-medium'
                     : 'bg-white/95 backdrop-blur-md border border-slate-100 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.05)] text-slate-700 rounded-[20px] rounded-tl-[4px] font-medium'
