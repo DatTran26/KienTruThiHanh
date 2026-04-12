@@ -25,6 +25,7 @@ export function OrgForm({ initialValues, isVerified }: OrgFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<OrgValidationResult | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [submittedValues, setSubmittedValues] = useState<FormValues | null>(null);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -35,6 +36,7 @@ export function OrgForm({ initialValues, isVerified }: OrgFormProps) {
     setIsLoading(true);
     setResult(null);
     setErrorMsg('');
+    setSubmittedValues(values);
 
     try {
       const res = await fetch('/api/validate-org', {
@@ -122,13 +124,13 @@ export function OrgForm({ initialValues, isVerified }: OrgFormProps) {
         </div>
       </form>
 
-      {result && (
+      {result && submittedValues && (
         <div className="border-t border-white/50 mt-6 pt-6">
            <div className="flex items-center gap-2 mb-4">
              <Database className="size-4 text-indigo-400" />
              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em]">Kết quả thẩm định từ Tổng cục Thuế</span>
            </div>
-          <ValidationResult result={result} />
+          <ValidationResult result={result} submittedValues={submittedValues} />
         </div>
       )}
     </div>

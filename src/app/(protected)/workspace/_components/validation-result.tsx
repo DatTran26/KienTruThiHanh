@@ -8,9 +8,10 @@ import type { OrgFieldResult, OrgValidationResult } from '@/lib/matching/org-val
 interface FieldRowProps {
   label: string;
   result: OrgFieldResult;
+  inputValue?: string;
 }
 
-function FieldRow({ label, result }: FieldRowProps) {
+function FieldRow({ label, result, inputValue }: FieldRowProps) {
   const { matched, isNearMatch, score, suggestion } = result;
 
   const state = matched ? 'match' : isNearMatch ? 'near' : 'miss';
@@ -40,10 +41,23 @@ function FieldRow({ label, result }: FieldRowProps) {
           <div className="mt-1.5 h-1 w-full rounded-full bg-black/[0.03] overflow-hidden">
             <div className={cn('h-full rounded-full transition-all duration-1000', barColor)} style={{ width: `${pct}%`, filter: 'drop-shadow(0 0 3px currentColor)' }} />
           </div>
-          {suggestion && (
-            <p className="mt-1 text-xs text-muted-foreground">
-              Gợi ý: <span className="font-medium text-slate-600">{suggestion}</span>
-            </p>
+          
+          {/* Detailed mismatch feedback */}
+          {!matched && suggestion && (
+            <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg space-y-2 relative overflow-hidden backdrop-blur-sm">
+               <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-400" />
+               <p className="text-[10px] font-black text-red-500 uppercase tracking-widest pl-2">Phát hiện sai lệch</p>
+               <div className="pl-2 space-y-1">
+                 <p className="text-xs text-slate-500 flex items-start gap-2">
+                   <span className="shrink-0 w-24">Bạn đã nhập:</span>
+                   <span className="text-slate-800 line-through decoration-red-400/60 font-medium break-words leading-relaxed">{inputValue || '(Bỏ trống)'}</span>
+                 </p>
+                 <p className="text-xs text-slate-500 flex items-start gap-2">
+                   <span className="shrink-0 w-24 mt-1">Chuẩn yêu cầu:</span>
+                   <span className="text-emerald-700 font-bold bg-emerald-100/50 border border-emerald-200/50 px-2 py-1 rounded inline-block leading-relaxed">{suggestion}</span>
+                 </p>
+               </div>
+            </div>
           )}
         </div>
       </div>
@@ -51,7 +65,7 @@ function FieldRow({ label, result }: FieldRowProps) {
   );
 }
 
-export function ValidationResult({ result }: { result: OrgValidationResult }) {
+export function ValidationResult({ result, submittedValues }: { result: OrgValidationResult, submittedValues: any }) {
   const overallPct = Math.round(result.overallScore * 100);
 
   return (
@@ -72,7 +86,7 @@ export function ValidationResult({ result }: { result: OrgValidationResult }) {
           </p>
           <p className={cn('text-xs mt-0.5', result.isMatch ? 'text-emerald-400/60' : 'text-amber-400/60')}>
             Độ khớp tổng thể: {overallPct}%
-            {!result.isMatch && ' — Kiểm tra lại các trường bên dưới'}
+            {!result.isMatch && ' — Trình tự rà soát cho thấy có sai lệch dữ liệu'}
           </p>
         </div>
         <span className={cn(
@@ -84,18 +98,18 @@ export function ValidationResult({ result }: { result: OrgValidationResult }) {
       </div>
 
       {/* Field breakdown */}
-      <div className="space-y-3">
+      <div className="space-y-3 mt-4">
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em]">
-          Chi tiết từng trường
+          Chi tiết đối soát
         </p>
-        <FieldRow label="Tên đơn vị" result={result.fields.unitName} />
-        <FieldRow label="Địa chỉ"    result={result.fields.address} />
-        <FieldRow label="Mã số thuế" result={result.fields.taxCode} />
+        <FieldRow label="Tên đơn vị" result={result.fields.unitName} inputValue={submittedValues.unit_name} />
+        <FieldRow label="Địa chỉ"    result={result.fields.address}  inputValue={submittedValues.address} />
+        <FieldRow label="Mã số thuế" result={result.fields.taxCode}  inputValue={submittedValues.tax_code} />
       </div>
 
       {/* CTA on success */}
       {result.isMatch && (
-        <Link href="/workspace" className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-indigo-500/20 hover:from-indigo-400 hover:to-indigo-500 transition-all mt-2">
+        <Link href="/workspace" className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-indigo-500/20 hover:from-indigo-400 hover:to-indigo-500 transition-all mt-4">
           <Search className="size-4" />
           Tra cứu chi phí ngay
           <ArrowRight className="size-4" />
