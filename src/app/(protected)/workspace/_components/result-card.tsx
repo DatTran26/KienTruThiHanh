@@ -54,7 +54,7 @@ export function ResultCard({ result, isBest = false, onAddToReport, originalDesc
       )}
 
       {/* Codes Header */}
-      <div className="relative flex border-b border-slate-200/50 bg-white/40">
+      <div className="relative flex border-b border-slate-200/50 bg-white/40 group/tree cursor-help z-10 hover:z-50">
         <div className="flex-1 flex flex-wrap gap-2.5 items-center px-5 py-3.5">
           <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold bg-white/80 text-slate-600 px-3 py-1.5 rounded-lg border border-slate-200/80 shadow-sm shrink-0">
             <span className="text-slate-400">MỤC</span>
@@ -63,6 +63,39 @@ export function ResultCard({ result, isBest = false, onAddToReport, originalDesc
           <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold bg-indigo-50/80 text-indigo-700 px-3 py-1.5 rounded-lg border border-indigo-100/80 shadow-sm shrink-0">
             <span className="text-indigo-400">TIỂU MỤC</span>
             <span className="text-indigo-800 font-extrabold">{result.subCode}</span>
+          </div>
+        </div>
+
+        {/* Tree popup */}
+        <div className="absolute left-[130px] top-full mt-2 w-[320px] sm:w-[400px] p-4 bg-[#14182B] rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.4)] border border-[#1E2442] opacity-0 invisible group-hover/tree:opacity-100 group-hover/tree:visible transition-all duration-300 z-50 pointer-events-none scale-95 group-hover/tree:scale-100 origin-top">
+          <div className="absolute left-1/2 -translate-x-1/2 top-[-6px] w-3 h-3 bg-[#14182B] border-[#1E2442] border-l border-t rotate-45" />
+          <div className="flex items-center gap-2 mb-3 px-1">
+             <Info className="size-3.5 text-indigo-400" />
+             <span className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-400">Worktree Phân loại</span>
+          </div>
+          <div className="flex flex-col text-[12px] font-sans px-1 text-left">
+            <div className="flex items-start gap-2">
+              <div className="mt-1.5 size-1.5 rounded-full bg-indigo-500 shrink-0 shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
+              <div>
+                <span className="font-mono text-indigo-400 font-bold bg-indigo-500/10 px-1 rounded mr-1.5 leading-none">{result.groupCode}</span>
+                <span className="text-slate-300 font-medium leading-tight">{result.groupTitle}</span>
+              </div>
+            </div>
+            <div className="flex items-start gap-2 ml-[3px] border-l border-slate-700 pl-[15px] pb-1 pt-2">
+              <div className="mt-1.5 size-1.5 rounded-full bg-blue-500 shrink-0 shadow-[0_0_8px_rgba(59,130,246,0.5)] -ml-[19.5px]" />
+              <div className="flex flex-col gap-1 w-full">
+                 <div>
+                   <span className="font-mono text-blue-400 font-bold bg-blue-500/10 px-1 rounded mr-1.5 leading-none">{result.subCode}</span>
+                   <span className="text-white font-bold leading-tight">{result.subTitle}</span>
+                 </div>
+                 {result.description && (
+                   <div className="mt-1.5 text-[11px] text-slate-400 font-normal leading-relaxed border-t border-slate-700/60 pt-2 whitespace-pre-line line-clamp-[8]">
+                     <strong className="text-slate-300 font-medium block mb-1">Nội dung bao gồm:</strong>
+                     {result.description}
+                   </div>
+                 )}
+              </div>
+            </div>
           </div>
         </div>
 

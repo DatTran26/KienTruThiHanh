@@ -23,12 +23,12 @@ const mainNavItems = [
   { href: '/master-data', label: 'Kho Dữ liệu',   icon: Database,        desc: 'Dữ liệu chuẩn' },
 ];
 
-// Mobile bottom nav — 4 primary items
 const mobileNavItems = [
-  { href: '/analyze',   label: 'Phân loại', icon: Sparkles },
-  { href: '/dashboard', label: 'Tổng quan', icon: LayoutDashboard },
-  { href: '/reports',   label: 'Báo cáo',   icon: FileText },
-  { href: '/profile',   label: 'Hồ sơ',     icon: Building2 },
+  { href: '/analyze',     label: 'Phân loại', icon: Sparkles },
+  { href: '/dashboard',   label: 'Tổng quan', icon: LayoutDashboard },
+  { href: '/master-data', label: 'Kho dữ liệu', icon: Database },
+  { href: '/reports',     label: 'Báo cáo',   icon: FileText },
+  { href: '/profile',     label: 'Hồ sơ',     icon: Building2 },
 ];
 
 interface SidebarProps {
@@ -67,7 +67,7 @@ export function Sidebar({ userEmail, isAdmin = false }: SidebarProps) {
             <Zap className="size-5 text-white fill-transparent" strokeWidth={2.5} />
           </div>
           <div className="min-w-0">
-            <h1 className="text-[#F59E0B] font-black text-[22px] tracking-tight leading-none mb-1.5" style={{ color: '#F59E0B' }}>Baymax</h1>
+            <h1 className="text-[#F59E0B] font-black text-[22px] tracking-tight leading-none mb-1.5" style={{ color: '#F59E0B' }}>VKS</h1>
             <p className="text-[9.5px] font-bold uppercase tracking-[0.15em] text-slate-400 truncate">
               Cổng Dữ Liệu Nội Bộ
             </p>

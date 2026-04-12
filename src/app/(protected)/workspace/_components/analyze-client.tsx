@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, startTransition } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -8,9 +8,10 @@ import { createClient } from '@/lib/supabase/client';
 import { DescriptionForm } from './description-form';
 import { ResultSection } from './result-section';
 import type { AnalysisResponse, AnalysisResult } from '@/types/analysis';
-import { Sparkles, FileText, X, Save, AlertCircle, Cpu, ShieldCheck, PencilLine, Plus, BrainCircuit, Zap, CheckCircle2, ChevronRight, Database, CheckCircle, Target } from 'lucide-react';
+import { Sparkles, FileText, X, Save, AlertCircle, Cpu, ShieldCheck, PencilLine, Plus, BrainCircuit, Zap, CheckCircle2, ChevronRight, Database, CheckCircle, Target, Activity, LayoutDashboard } from 'lucide-react';
 
 import { AdminMasterPanel } from '@/app/(protected)/analyze/_components/admin-master-panel';
+import { AnalyzeRightPanel } from '@/app/(protected)/analyze/_components/analyze-right-panel';
 
 const QUICK_TIPS = [
   'Càng mô tả chi tiết (tên hoạt động, địa điểm, đối tượng), AI phân loại càng chính xác.',
@@ -25,15 +26,24 @@ interface Props {
   activeMaster: any; // Type it slightly looser to avoid big refactors
   popularItems?: { sub_code: string, sub_title: string }[];
   aiModel?: string;
+  rightPanelData?: {
+    initialRecentAnalyses: any[];
+    initialTotalAnalyses: number;
+    initialTotalReports: number;
+    popularItems: { sub_code: string, sub_title: string }[];
+    aiModel: string;
+  };
 }
 
 export default function AnalyzeClient({ 
   isAdmin = false, 
   activeMaster = null, 
   popularItems = [], 
-  aiModel = 'gpt-4o-mini' 
+  aiModel = 'gpt-4o-mini',
+  rightPanelData,
 }: Props) {
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showMobilePanel, setShowMobilePanel] = useState(false);
   const [state, setState]                   = useState<PageState>('idle');
   const [response, setResponse]             = useState<AnalysisResponse | null>(null);
   const [errorMsg, setErrorMsg]             = useState('');
@@ -43,6 +53,7 @@ export default function AnalyzeClient({
   const [formKey, setFormKey]               = useState(0);
   const [supplementKey, setSupplementKey]   = useState(0);
   const [showTips, setShowTips]             = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -51,6 +62,30 @@ export default function AnalyzeClient({
   const currentReqRef = useRef<string | null>(null);
 
   const [targetReportName, setTargetReportName] = useState<string | null>(null);
+  
+  const [saveMode, setSaveMode] = useState<'new' | 'existing'>('new');
+  const [recentReports, setRecentReports] = useState<{id: string, report_name: string}[]>([]);
+  const [selectedExistingReport, setSelectedExistingReport] = useState<string>('');
+  
+  const [savedTargetInfo, setSavedTargetInfo] = useState<{ id: string, name: string } | null>(null);
+
+  useEffect(() => {
+    if (pendingItems.length > 0 && !reportIdParam) {
+      const fetchRecentReports = async () => {
+        const supabase = createClient();
+        const { data } = await supabase
+          .from('reports')
+          .select('id, report_name')
+          .order('created_at', { ascending: false })
+          .limit(10);
+        if (data && data.length > 0) {
+          setRecentReports(data);
+          setSelectedExistingReport(data[0].id);
+        }
+      };
+      fetchRecentReports();
+    }
+  }, [pendingItems.length, reportIdParam]);
 
   useEffect(() => {
     if (reportIdParam) {
@@ -68,6 +103,7 @@ export default function AnalyzeClient({
       sessionStorage.setItem('last_analyze_req', reqId);
       if (currentReqRef.current !== reqId) {
         loadHistoryItem(reqId);
+        setShowMobilePanel(false);
       }
     } else {
       const savedReq = sessionStorage.getItem('last_analyze_req');
@@ -142,8 +178,18 @@ export default function AnalyzeClient({
       setState('results');
       currentReqRef.current = data.requestId;
       sessionStorage.setItem('last_analyze_req', data.requestId);
-      router.replace(`/analyze?reqId=${data.requestId}`, { scroll: false });
-      router.refresh();
+      startTransition(() => {
+        router.replace(`/analyze?reqId=${data.requestId}`, { scroll: false });
+        router.refresh();
+      });
+      // Trigger right panel refresh AFTER router.refresh() settles
+      // router.refresh() re-renders the server component tree which may reset client state,
+      // so we delay the trigger to ensure it fires after the reconciliation
+      console.log('[AnalyzeClient] Analysis complete, scheduling refreshTrigger');
+      setTimeout(() => {
+        console.log('[AnalyzeClient] Firing refreshTrigger now');
+        setRefreshTrigger(prev => prev + 1);
+      }, 1500);
     } catch {
       setErrorMsg('Mất kết nối máy chủ');
       setState('error');
@@ -170,7 +216,9 @@ export default function AnalyzeClient({
       });
       setSupplementKey(k => k + 1);
       setState('results');
-      router.refresh();
+      startTransition(() => {
+        router.refresh();
+      });
     } catch {
       setState('supplement');
     }
@@ -191,9 +239,18 @@ export default function AnalyzeClient({
     if (pendingItems.length === 0) return;
     setAddingToReport(true);
     try {
-      let currentReportId = reportIdParam;
+      let currentReportId = '';
 
-      if (!currentReportId) {
+      if (reportIdParam) {
+        currentReportId = reportIdParam;
+      } else if (saveMode === 'existing') {
+        currentReportId = selectedExistingReport;
+        if (!currentReportId) {
+          toast.error("Vui lòng chọn báo cáo đích");
+          setAddingToReport(false);
+          return;
+        }
+      } else {
         if (!reportName.trim()) { setAddingToReport(false); return; }
         const reportRes  = await fetch('/api/reports', {
           method:  'POST',
@@ -226,6 +283,12 @@ export default function AnalyzeClient({
       if (failed) { toast.error('Lỗi lưu trữ một số dòng dữ liệu'); return; }
 
       setPendingItems([]);
+      setSavedTargetInfo({
+        id: currentReportId,
+        name: saveMode === 'new' ? reportName.trim() : (recentReports.find(r => r.id === currentReportId)?.report_name || targetReportName || 'Phiếu hiện tại')
+      });
+      router.replace('/analyze', { scroll: false });
+
       toast.success(
         <span className="text-sm font-medium">
           Đã lưu vào báo cáo.{' '}
@@ -242,7 +305,9 @@ export default function AnalyzeClient({
   }
 
   return (
-    <div className="min-h-full w-full animate-fade-in-up pb-20 lg:pb-8">
+    <div className="flex min-h-full w-full animate-fade-in-up">
+      {/* Main content area */}
+      <div className="flex-1 min-w-0 overflow-y-auto pb-20 lg:pb-8">
 
       {/* ── Page Header — Liquid Glass Light ── */}
       <div className="relative px-6 py-8 flex flex-col justify-end bg-white border-b border-slate-200/80 overflow-hidden shadow-sm">
@@ -261,13 +326,21 @@ export default function AnalyzeClient({
                 Phân loại AI
               </span>
               <span className="text-slate-200">/</span>
-              <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.15em] text-amber-600 px-2.5 py-1 rounded-[8px] border border-amber-200 bg-amber-50 shadow-sm">
+              <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.15em] text-amber-600 px-2.5 py-1 rounded-[8px] border border-amber-200 bg-amber-50 shadow-sm shrink-0">
                 <span className="relative flex size-1.5">
                   <span className="absolute inset-0 rounded-full bg-emerald-400 opacity-70 animate-ping" />
                   <span className="relative size-1.5 rounded-full bg-emerald-500" />
                 </span>
-                {aiModel} · Online
+                {aiModel}
               </span>
+              {/* MOBILE DASHBOARD TOGGLE */}
+              <button 
+                onClick={() => setShowMobilePanel(true)}
+                className="xl:hidden ml-auto flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-slate-900 border border-slate-800 text-[9px] font-black uppercase tracking-[0.1em] text-white shadow-md active:scale-95 transition-all"
+              >
+                <LayoutDashboard className="size-3 text-indigo-400" />
+                Bảng điều khiển
+              </button>
             </div>
             
             <h1 className="text-[1.7rem] font-black text-slate-900 tracking-tight leading-none mb-2">
@@ -358,6 +431,16 @@ export default function AnalyzeClient({
                     <CheckCircle size={12} strokeWidth={2.5} className={showTips ? 'text-amber-600' : 'text-slate-400'} />
                     <span className="text-[10px] font-bold uppercase tracking-wider hidden sm:inline">Mẹo sử dụng</span>
                     <span className="text-[10px] font-bold uppercase tracking-wider sm:hidden">Mẹo</span>
+                  </button>
+
+                  {/* Mobile Right panel trigger */}
+                  <button
+                    onClick={() => setShowMobilePanel(true)}
+                    className="xl:hidden flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors border border-indigo-100 shadow-sm"
+                    title="Bảng điều khiển"
+                  >
+                    <Activity size={12} strokeWidth={2.5} />
+                    <span className="text-[10px] font-bold uppercase tracking-wider hidden sm:inline">Bảng điều khiển</span>
                   </button>
 
                   {/* Admin trigger */}
@@ -475,16 +558,20 @@ export default function AnalyzeClient({
                 <button
                   onClick={() => { 
                     setFormKey(prev => prev + 1); 
-                    setState('idle'); 
-                    setResponse(null); 
+                    setState('idle');
+                    setErrorMsg('');
+                    setResponse(null);
+                    setSavedTargetInfo(null);
                     currentReqRef.current = null;
                     sessionStorage.removeItem('last_analyze_req');
+                    
+                    // Clear URL to signify a completely new request
                     if (reqId) router.replace('/analyze', { scroll: false });
                   }}
-                  className="flex-1 sm:flex-none px-4 py-2.5 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-bold text-[11px] uppercase tracking-wider rounded-xl transition-all border border-slate-200 shadow-sm flex items-center justify-center gap-2 active:scale-95"
+                  className="flex-1 sm:flex-none px-4 py-2.5 bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700 font-bold text-[11px] uppercase tracking-wider rounded-xl transition-all border border-amber-200 shadow-sm flex items-center justify-center gap-2 active:scale-95"
                 >
                   <Plus className="size-3.5" />
-                  Nhập mới
+                  Tạo mới
                 </button>
                 <button
                   onClick={() => { setSupplementKey(k => k + 1); setState('supplement'); }}
@@ -518,7 +605,7 @@ export default function AnalyzeClient({
               </div>
             )}
 
-            <ResultSection response={response} onAddToReport={handleAddToReport} />
+            <ResultSection response={response} onAddToReport={handleAddToReport} savedTargetInfo={savedTargetInfo} />
           </div>
         )}
 
@@ -532,7 +619,7 @@ export default function AnalyzeClient({
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
                   { step: '01', title: 'Nhập mô tả', desc: 'Gõ hoặc dán nội dung hoá đơn, nghiệp vụ kế toán cần tra cứu', icon: <PencilLine className="size-5 text-indigo-600" />, iconBg: 'bg-indigo-50 border-indigo-100', customBorder: 'border-slate-200/80 hover:border-amber-200/50' },
-                  { step: '02', title: 'Baymax phân tích', desc: <><span className="font-bold text-amber-500">{aiModel}</span> đối chiếu với cơ sở dữ liệu chuẩn TABMIS và đề xuất tiểu mục</>, icon: <Zap className="size-5 text-amber-500 fill-amber-500/20" strokeWidth={2.5} />, iconBg: 'bg-gradient-to-br from-amber-50 to-orange-50/50 border-amber-200/60 shadow-[0_0_15px_rgba(245,158,11,0.15)] ring-1 ring-amber-500/10', customBorder: 'border-amber-200/60 shadow-[0_4px_20px_rgba(245,158,11,0.08)] ring-1 ring-amber-500/10' },
+                  { step: '02', title: 'VKS phân tích', desc: <><span className="font-bold text-amber-500">{aiModel}</span> đối chiếu với cơ sở dữ liệu chuẩn TABMIS và đề xuất tiểu mục</>, icon: <Zap className="size-5 text-amber-500 fill-amber-500/20" strokeWidth={2.5} />, iconBg: 'bg-gradient-to-br from-amber-50 to-orange-50/50 border-amber-200/60 shadow-[0_0_15px_rgba(245,158,11,0.15)] ring-1 ring-amber-500/10', customBorder: 'border-amber-200/60 shadow-[0_4px_20px_rgba(245,158,11,0.08)] ring-1 ring-amber-500/10' },
                   { step: '03', title: 'Lưu báo cáo', desc: 'Xác nhận kết quả và ghi nhận vào phiếu hạch toán kế toán', icon: <CheckCircle2 className="size-5 text-emerald-600" />, iconBg: 'bg-emerald-50 border-emerald-100', customBorder: 'border-slate-200/80 hover:border-amber-200/50' },
                 ].map(({ step, title, desc, icon, iconBg, customBorder }) => (
                   <div key={step} className={`relative bg-white rounded-3xl p-5 border ${customBorder} hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06)] transition-all duration-300 group hover:-translate-y-1 overflow-hidden cursor-default`}>
@@ -592,39 +679,58 @@ export default function AnalyzeClient({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-md" onClick={() => setPendingItems([])} />
           
-          <div className="relative rounded-3xl w-full max-w-md bg-white overflow-hidden animate-scale-in shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] ring-1 ring-slate-900/5">
+          <div className="relative rounded-[28px] w-full max-w-[520px] bg-white overflow-hidden animate-scale-in shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] ring-1 ring-slate-900/10">
             {/* Modal header */}
-            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="size-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shadow-sm">
-                  <FileText className="size-5 text-indigo-600" />
+            <div className="px-7 py-5 bg-gradient-to-br from-slate-900 to-indigo-950 border-b border-white/10 flex items-center justify-between relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute top-0 left-0 w-40 h-40 bg-violet-500/10 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2" />
+              <div className="flex items-center gap-3.5 relative z-10">
+                <div className="size-11 rounded-[14px] bg-white/10 border border-white/10 flex items-center justify-center shadow-inner backdrop-blur-md">
+                  <FileText className="size-5 !text-white" />
                 </div>
                 <div>
-                  <h3 className="text-[15px] font-bold text-slate-900 leading-tight">
+                  <h3 className="text-[17px] font-black !text-white tracking-tight drop-shadow-sm">
                     {reportIdParam ? 'Thêm vào Báo cáo' : 'Lưu vào Báo cáo mới'}
                   </h3>
-                  <p className="text-[11px] text-slate-500 font-medium mt-0.5">{pendingItems.length} khoản chi phí</p>
+                  <p className="text-[12px] !text-indigo-100 font-medium mt-0.5">{pendingItems.length} khoản chi phí hợp lệ</p>
                 </div>
               </div>
               <button 
                 onClick={() => setPendingItems([])}
-                className="size-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                className="size-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors relative z-10"
               >
                 <X className="size-4.5" />
               </button>
             </div>
 
-            <div className="px-6 py-5">
+            <div className="px-7 py-6">
               {/* Items preview */}
-              <div className="mb-5 p-4 rounded-xl bg-slate-50/80 border border-slate-100 shadow-inner">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3">Mã ngân sách</p>
-                <div className="flex flex-col gap-2.5">
-                   {pendingItems.map((item, idx) => (
-                     <div key={idx} className="flex items-start gap-2.5">
-                       <span className="font-mono font-black text-indigo-700 bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded text-[11px] shrink-0">{item.subCode}</span>
-                       <span className="text-[12.5px] text-slate-700 font-medium line-clamp-2 leading-relaxed">{item.subTitle}</span>
-                     </div>
-                   ))}
+              <div className="mb-6 p-1 rounded-[20px] bg-slate-50/80 border border-slate-200/60 shadow-inner">
+                <div className="p-4 max-h-[220px] overflow-y-auto min-[300px]:scrollbar-thin rounded-[16px] bg-white border border-slate-100 shadow-sm">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3.5">Thông tin {pendingItems.length} khoản chi phí</p>
+                  <div className="flex flex-col gap-3.5">
+                     {pendingItems.map((item, idx) => (
+                       <div key={idx} className="flex justify-between items-start gap-4 pb-3.5 border-b border-slate-100 last:border-0 last:pb-0">
+                         <div className="flex items-start gap-3 min-w-0">
+                           <span className="font-mono font-black text-indigo-700 bg-indigo-50 border border-indigo-100/80 px-2 py-0.5 rounded-[6px] text-[11px] shrink-0 mt-0.5">{item.subCode}</span>
+                           <span className="text-[13px] text-slate-700 font-semibold line-clamp-2 leading-relaxed">{item.subTitle}</span>
+                         </div>
+                         {item.amount != null && item.amount > 0 && (
+                           <span className="text-[13px] font-black text-slate-800 shrink-0 whitespace-nowrap mt-0.5">
+                             {new Intl.NumberFormat('vi-VN').format(item.amount)} đ
+                           </span>
+                         )}
+                       </div>
+                     ))}
+                  </div>
+                </div>
+                
+                {/* Total amount bar */}
+                <div className="flex justify-between items-center px-5 py-3 mt-1">
+                  <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-widest">Thành tiền:</span>
+                  <span className="text-[18px] font-black text-amber-500 tracking-tight drop-shadow-sm">
+                    {new Intl.NumberFormat('vi-VN').format(pendingItems.reduce((acc, curr) => acc + (curr.amount || 0), 0))} <span className="text-[14px] text-amber-600/80">đ</span>
+                  </span>
                 </div>
               </div>
 
@@ -642,18 +748,60 @@ export default function AnalyzeClient({
                   <p className="text-[11px] text-indigo-500 font-medium mt-1">Các khoản chi phí sẽ được nối thẳng vào phiếu này.</p>
                 </div>
               ) : (
-                <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">
-                    Tên phiếu / Mã báo cáo <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    value={reportName}
-                    onChange={e => setReportName(e.target.value)}
-                    placeholder="VD: Báo cáo công tác Hà Nội Q1/2026..."
-                    onKeyDown={e => e.key === 'Enter' && handleConfirmAdd()}
-                    autoFocus
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-800 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]"
-                  />
+                <div className="space-y-4">
+                  {/* Option switch */}
+                  <div className="flex p-1.5 bg-slate-100/80 rounded-2xl border border-slate-200/60 shadow-inner">
+                    <button
+                      onClick={() => setSaveMode('new')}
+                      className={`flex-1 py-2 text-[12px] font-extrabold rounded-xl transition-all duration-300 ${saveMode === 'new' ? 'bg-white text-indigo-700 shadow-[0_2px_8px_rgb(0,0,0,0.06)] border border-slate-200/80' : 'text-slate-400 hover:text-slate-600'}`}
+                    >
+                      Báo cáo mới
+                    </button>
+                    <button
+                      onClick={() => setSaveMode('existing')}
+                      className={`flex-1 py-2 text-[12px] font-extrabold rounded-xl transition-all duration-300 ${saveMode === 'existing' ? 'bg-white text-indigo-700 shadow-[0_2px_8px_rgb(0,0,0,0.06)] border border-slate-200/80' : 'text-slate-400 hover:text-slate-600'}`}
+                    >
+                      Báo cáo đã có
+                    </button>
+                  </div>
+
+                  {saveMode === 'new' ? (
+                    <div>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">
+                        Tên phiếu / Mã báo cáo <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        value={reportName}
+                        onChange={e => setReportName(e.target.value)}
+                        placeholder="VD: Báo cáo công tác Hà Nội Q1/2026..."
+                        onKeyDown={e => e.key === 'Enter' && handleConfirmAdd()}
+                        autoFocus
+                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-800 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]"
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">
+                        Chọn báo cáo đích <span className="text-rose-500">*</span>
+                      </label>
+                      <select
+                        value={selectedExistingReport}
+                        onChange={e => setSelectedExistingReport(e.target.value)}
+                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-800 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] appearance-none cursor-pointer"
+                        style={{ backgroundImage: 'url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%2364748b\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")', backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
+                      >
+                        {recentReports.length > 0 ? (
+                          recentReports.map(rp => (
+                            <option key={rp.id} value={rp.id}>
+                              {rp.report_name}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="" disabled>Không có báo cáo nào gần đây</option>
+                        )}
+                      </select>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -666,12 +814,12 @@ export default function AnalyzeClient({
                 </button>
                 <button
                   onClick={handleConfirmAdd}
-                  disabled={addingToReport || (!reportIdParam && !reportName.trim())}
+                  disabled={addingToReport || (!reportIdParam && saveMode === 'new' && !reportName.trim()) || (!reportIdParam && saveMode === 'existing' && !selectedExistingReport)}
                   className="flex-1 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-black py-2.5 px-4 rounded-xl text-[12px] uppercase tracking-widest transition-all disabled:opacity-50 flex justify-center items-center gap-2 active:scale-[0.98] shadow-[0_4px_15px_-3px_rgba(99,102,241,0.4)]"
                 >
                   {addingToReport
                     ? <><span className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Đang lưu...</>
-                    : <><FileText className="size-4" strokeWidth={2.5} /> {reportIdParam ? "Lưu vào phiếu" : "Tạo phiếu mới"}</>
+                    : <><FileText className="size-4" strokeWidth={2.5} /> {(reportIdParam || saveMode === 'existing') ? "Lưu vào phiếu" : "Tạo phiếu mới"}</>
                   }
                 </button>
               </div>
@@ -681,6 +829,7 @@ export default function AnalyzeClient({
       </div>
       )}
 
+      </div>{/* End main content area */}
 
       {/* ── Admin Master Panel Modal ── */}
       {showAdminPanel && isAdmin && (
@@ -689,6 +838,35 @@ export default function AnalyzeClient({
           onClose={() => setShowAdminPanel(false)}
         />
       )}
+
+      {/* ── Mobile Right Panel Dialog ── */}
+      {showMobilePanel && (
+        <div className="fixed inset-0 z-50 flex justify-end xl:hidden">
+          <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-md" onClick={() => setShowMobilePanel(false)} />
+          <div className="relative w-full max-w-[360px] sm:max-w-md bg-white overflow-y-auto animate-fade-in-left shadow-2xl z-10 flex flex-col h-full">
+            <button
+              onClick={() => setShowMobilePanel(false)}
+              className="absolute top-6 right-6 size-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors z-20"
+            >
+              <X className="size-4" />
+            </button>
+            <div className="flex-1 overflow-y-auto pb-16">
+              <AnalyzeRightPanel
+                {...(rightPanelData ?? {})}
+                refreshTrigger={refreshTrigger}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Desktop Right Panel ── */}
+      <aside className="hidden xl:flex flex-col w-[440px] 2xl:w-[480px] shrink-0 border-l border-slate-200/80 bg-white overflow-y-auto z-10 shadow-[-10px_0_30px_rgba(0,0,0,0.01)] relative">
+        <AnalyzeRightPanel
+          {...(rightPanelData ?? {})}
+          refreshTrigger={refreshTrigger}
+        />
+      </aside>
     </div>
   );
 }

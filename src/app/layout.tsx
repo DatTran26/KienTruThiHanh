@@ -18,7 +18,7 @@ const monoFont = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Baymax · Hệ Thống Phân Tích Chi Phí AI',
+  title: 'VKS · Hệ Thống Phân Tích Chi Phí AI',
   description: 'Nền tảng tra cứu và phân loại chi phí ngân sách thông minh sử dụng AI. Tối ưu quy trình hạch toán kế toán.',
   keywords: 'tra cứu chi phí, AI analysis, expense protocol, ngân sách nhà nước',
 };

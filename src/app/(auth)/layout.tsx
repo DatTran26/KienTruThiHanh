@@ -41,7 +41,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               <Zap className="size-5 text-white" strokeWidth={2.5} />
             </div>
             <div>
-              <p className="text-white font-bold text-[15px] tracking-tight leading-none">Baymax ThiHanh</p>
+              <p className="text-white font-bold text-[15px] tracking-tight leading-none">VKS ThiHanh</p>
               <p className="text-[9px] font-bold uppercase tracking-[0.28em] mt-1"
                 style={{ color: 'rgba(255,255,255,0.35)' }}>
                 Cổng Dữ Liệu Nội Bộ

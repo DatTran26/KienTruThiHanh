@@ -1,0 +1,325 @@
+'use client';
+
+import { useState, useMemo } from 'react';
+import {
+  AreaChart, Area,
+  BarChart, Bar,
+  LineChart, Line,
+  ComposedChart,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  Cell, Legend,
+  PieChart, Pie
+} from 'recharts';
+import { TrendingUp, BarChart3, Activity, Zap, PieChart as PieChartIcon, ToggleLeft, ToggleRight } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
+
+interface ChartData {
+  name: string;
+  amount: number;
+}
+
+interface ExpensesChartProps {
+  data: ChartData[];
+  totalExpectedAmount: number;
+}
+
+/* ────── Demo data generator ────── */
+function generateDemoData(): ChartData[] {
+  const months = ['Thg 1','Thg 2','Thg 3','Thg 4','Thg 5','Thg 6','Thg 7','Thg 8','Thg 9','Thg 10','Thg 11','Thg 12'];
+  return months.map(name => ({
+    name,
+    amount: Math.round((800000 + Math.random() * 9200000) / 1000) * 1000,
+  }));
+}
+
+/* ────── Custom Tooltip ────── */
+function CustomTooltip({ active, payload }: any) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 px-4 py-3 rounded-2xl shadow-2xl shadow-slate-900/20">
+      <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-1.5">{payload[0].payload.name}</p>
+      <p className="text-[16px] font-black text-white tabular-nums tracking-tight">
+        {formatCurrency(payload[0].value as number)}
+        <span className="text-[10px] text-slate-400 font-bold ml-1.5">VNĐ</span>
+      </p>
+    </div>
+  );
+}
+
+/* ────── Pie Chart Tooltip ────── */
+function PieTooltip({ active, payload }: any) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 px-4 py-3 rounded-2xl shadow-2xl">
+      <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-1">{payload[0].name}</p>
+      <p className="text-[15px] font-black text-white tabular-nums">
+        {formatCurrency(payload[0].value)}
+        <span className="text-[10px] text-slate-400 font-bold ml-1.5">VNĐ</span>
+      </p>
+    </div>
+  );
+}
+
+/* ────── Chart Type Options ────── */
+type ChartType = 'area' | 'bar' | 'line' | 'composed' | 'pie';
+
+const CHART_TYPES: { key: ChartType; label: string; icon: any }[] = [
+  { key: 'area',     label: 'Đường cong',  icon: TrendingUp },
+  { key: 'bar',      label: 'Cột',         icon: BarChart3 },
+  { key: 'line',     label: 'Đường thẳng', icon: Activity },
+  { key: 'composed', label: 'Kết hợp',     icon: Zap },
+  { key: 'pie',      label: 'Tròn',        icon: PieChartIcon },
+];
+
+/* ────── Color palette ────── */
+const PALETTE = [
+  '#6366f1', '#8b5cf6', '#a78bfa', '#c084fc',
+  '#06b6d4', '#14b8a6', '#10b981', '#22c55e',
+  '#f59e0b', '#f97316', '#ef4444', '#ec4899',
+];
+
+export function ExpensesChart({ data: realData, totalExpectedAmount }: ExpensesChartProps) {
+  const [hoverData, setHoverData] = useState<ChartData | null>(null);
+  const [chartType, setChartType] = useState<ChartType>('area');
+  const [useDemoData, setUseDemoData] = useState(false);
+
+  const demoData = useMemo(() => generateDemoData(), []);
+  const data = useDemoData ? demoData : realData;
+  const totalAmount = useDemoData
+    ? demoData.reduce((s, d) => s + d.amount, 0)
+    : totalExpectedAmount;
+
+  const displayValue = hoverData ? formatCurrency(hoverData.amount) : formatCurrency(totalAmount);
+  const displayLabel = hoverData ? hoverData.name : 'Tổng chi';
+
+  const maxValue = Math.max(...data.map(d => d.amount), 0);
+
+  /* ── Shared axis config ── */
+  const xAxisConfig = {
+    dataKey: 'name',
+    axisLine: false,
+    tickLine: false,
+    tick: { fill: '#94a3b8', fontSize: 10, fontWeight: 600, dy: 8 } as any,
+    height: 26,
+  };
+  const yAxisConfig = {
+    axisLine: false,
+    tickLine: false,
+    tick: { fill: '#cbd5e1', fontSize: 9, fontWeight: 500 } as any,
+    tickFormatter: (v: number) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : `${v}`,
+    width: 42,
+  };
+
+  /* ── Empty state ── */
+  const EmptyState = () => (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+      <div className="size-14 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center">
+        <BarChart3 className="size-6 text-slate-300" />
+      </div>
+      <p className="text-[13px] font-bold text-slate-400">Chưa có dữ liệu chi phí</p>
+      <p className="text-[11px] text-slate-300">Bật "Data ảo" để xem demo biểu đồ</p>
+    </div>
+  );
+
+  return (
+    <div className="w-full h-full flex flex-col">
+
+      {/* ── Header ── */}
+      <div className="px-5 pt-5 pb-3 flex items-start justify-between shrink-0">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1.5">
+            Biến động chi phí theo tháng
+          </p>
+          <div className="flex items-baseline gap-2">
+            <span className="text-[26px] font-black text-slate-800 tracking-tight leading-none tabular-nums">
+              {displayValue}
+            </span>
+            <span className="text-[10px] font-bold text-slate-400">VNĐ</span>
+          </div>
+          <p className="text-[10px] text-slate-400 mt-1 font-semibold">{displayLabel}</p>
+        </div>
+
+        {/* Demo data toggle */}
+        <button
+          onClick={() => setUseDemoData(prev => !prev)}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all active:scale-95 ${
+            useDemoData 
+              ? 'bg-violet-50 border-violet-200 text-violet-600 shadow-sm' 
+              : 'bg-slate-50 border-slate-200 text-slate-400 hover:text-slate-600'
+          }`}
+        >
+          {useDemoData 
+            ? <ToggleRight className="size-3.5" strokeWidth={2.5} /> 
+            : <ToggleLeft className="size-3.5" strokeWidth={2.5} />
+          }
+          Data ảo
+        </button>
+      </div>
+
+      {/* ── Chart type selector ── */}
+      <div className="px-5 pb-3 flex items-center gap-1 overflow-x-auto shrink-0">
+        {CHART_TYPES.map(ct => {
+          const active = chartType === ct.key;
+          return (
+            <button
+              key={ct.key}
+              onClick={() => setChartType(ct.key)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap active:scale-95 ${
+                active
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
+                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 border border-transparent hover:border-slate-200'
+              }`}
+            >
+              <ct.icon className="size-3" strokeWidth={2.5} />
+              {ct.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Chart body ── */}
+      <div className="flex-1 min-h-[200px] w-full relative px-1 pb-2">
+        {data.length === 0 ? <EmptyState /> : (
+          <>
+            {/* ── AREA ── */}
+            {chartType === 'area' && (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}
+                  onMouseMove={(e) => e.activePayload?.length && setHoverData(e.activePayload[0].payload)}
+                  onMouseLeave={() => setHoverData(null)}
+                >
+                  <defs>
+                    <linearGradient id="areaFill2" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#6366f1" stopOpacity={0.2} />
+                      <stop offset="50%" stopColor="#8b5cf6" stopOpacity={0.08} />
+                      <stop offset="100%" stopColor="#6366f1" stopOpacity={0.01} />
+                    </linearGradient>
+                    <linearGradient id="areaStroke2" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#a78bfa" />
+                      <stop offset="40%" stopColor="#6366f1" />
+                      <stop offset="70%" stopColor="#8b5cf6" />
+                      <stop offset="100%" stopColor="#a78bfa" />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis {...xAxisConfig} />
+                  <YAxis {...yAxisConfig} />
+                  <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#e2e8f0', strokeDasharray: '4 4' }} />
+                  <Area type="monotone" dataKey="amount" stroke="url(#areaStroke2)" strokeWidth={2.5}
+                    fillOpacity={1} fill="url(#areaFill2)" animationDuration={1200}
+                    activeDot={{ r: 5, fill: '#6366f1', stroke: '#fff', strokeWidth: 2.5,
+                      style: { filter: 'drop-shadow(0 2px 6px rgba(99,102,241,0.5))' } }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+
+            {/* ── BAR ── */}
+            {chartType === 'bar' && (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}
+                  onMouseMove={(e) => e.activePayload?.length && setHoverData(e.activePayload[0].payload)}
+                  onMouseLeave={() => setHoverData(null)}
+                >
+                  <defs>
+                    {data.map((_, i) => (
+                      <linearGradient key={i} id={`barGrad${i}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={PALETTE[i % PALETTE.length]} stopOpacity={0.95} />
+                        <stop offset="100%" stopColor={PALETTE[i % PALETTE.length]} stopOpacity={0.6} />
+                      </linearGradient>
+                    ))}
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis {...xAxisConfig} />
+                  <YAxis {...yAxisConfig} />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
+                  <Bar dataKey="amount" radius={[8, 8, 0, 0]} animationDuration={1000} maxBarSize={40}>
+                    {data.map((_, i) => (
+                      <Cell key={i} fill={`url(#barGrad${i})`} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+
+            {/* ── LINE ── */}
+            {chartType === 'line' && (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={data} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}
+                  onMouseMove={(e) => e.activePayload?.length && setHoverData(e.activePayload[0].payload)}
+                  onMouseLeave={() => setHoverData(null)}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis {...xAxisConfig} />
+                  <YAxis {...yAxisConfig} />
+                  <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#e2e8f0', strokeDasharray: '4 4' }} />
+                  <Line type="monotone" dataKey="amount" stroke="#6366f1" strokeWidth={3}
+                    dot={{ r: 4, fill: '#6366f1', stroke: '#ffffff', strokeWidth: 2 }}
+                    activeDot={{ r: 7, fill: '#6366f1', stroke: '#ffffff', strokeWidth: 3,
+                      style: { filter: 'drop-shadow(0 3px 8px rgba(99,102,241,0.5))' } }}
+                    animationDuration={1200} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+
+            {/* ── COMPOSED (Bar + Line) ── */}
+            {chartType === 'composed' && (
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={data} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}
+                  onMouseMove={(e) => e.activePayload?.length && setHoverData(e.activePayload[0].payload)}
+                  onMouseLeave={() => setHoverData(null)}
+                >
+                  <defs>
+                    <linearGradient id="compBarFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#c4b5fd" stopOpacity={0.7} />
+                      <stop offset="100%" stopColor="#c4b5fd" stopOpacity={0.2} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis {...xAxisConfig} />
+                  <YAxis {...yAxisConfig} />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
+                  <Bar dataKey="amount" fill="url(#compBarFill)" radius={[6,6,0,0]} maxBarSize={36} animationDuration={800} />
+                  <Line type="monotone" dataKey="amount" stroke="#6366f1" strokeWidth={2.5}
+                    dot={{ r: 3.5, fill: '#6366f1', stroke: '#ffffff', strokeWidth: 2 }}
+                    activeDot={{ r: 6, fill: '#6366f1', stroke: '#ffffff', strokeWidth: 2.5,
+                      style: { filter: 'drop-shadow(0 2px 8px rgba(99,102,241,0.5))' } }}
+                    animationDuration={1200} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            )}
+
+            {/* ── PIE ── */}
+            {chartType === 'pie' && (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={data} dataKey="amount" nameKey="name" cx="50%" cy="50%"
+                    innerRadius="45%" outerRadius="78%" paddingAngle={3}
+                    cornerRadius={6} animationDuration={1200}
+                    stroke="none"
+                    onMouseEnter={(_, i) => setHoverData(data[i])}
+                    onMouseLeave={() => setHoverData(null)}
+                  >
+                    {data.map((_, i) => (
+                      <Cell key={i} fill={PALETTE[i % PALETTE.length]} fillOpacity={0.85} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<PieTooltip />} />
+                  <Legend
+                    verticalAlign="bottom"
+                    height={36}
+                    iconType="circle"
+                    iconSize={8}
+                    formatter={(value: string) => (
+                      <span className="text-[10px] font-semibold text-slate-500">{value}</span>
+                    )}
+                    wrapperStyle={{ paddingTop: '12px' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

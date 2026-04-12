@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { normalizeText } from '@/lib/utils/text-normalize';
 import { extractAmount, stripAmountTokens } from '@/lib/utils/amount-extractor';
@@ -64,6 +65,7 @@ export async function POST(request: Request) {
         .slice(0, 2);
 
       const toResult = (c: typeof bestCandidate, confidence: number, reason: string): AnalysisResult => ({
+        id: (c as any).id, // From RPC or ILIKE
         groupCode: c.group_code,
         groupTitle: c.group_title,
         subCode: c.sub_code,
@@ -77,7 +79,7 @@ export async function POST(request: Request) {
       overallMinConfidence = Math.min(overallMinConfidence, rerank.confidence);
 
       const groupBest = toResult(bestCandidate, rerank.confidence, rerank.reason);
-      const groupAlts = altCandidates.map(c => toResult(c, c.similarity_score, ''));
+      const groupAlts = altCandidates.map(c => toResult(c, (c as any).similarity_score ?? 0, ''));
 
       expenseGroups.push({
         originalDesc: ex.originalDesc,
@@ -96,32 +98,42 @@ export async function POST(request: Request) {
 
     const confidenceLevel = overallMinConfidence >= 0.85 ? 'high' : overallMinConfidence >= 0.6 ? 'medium' : 'low';
 
-    // Backwards compatibility for DB storing (uses first item)
+    // Backwards compatibility for DB storing (uses first item mainly, but sums amount to reflect multiple)
     const firstGroup = expenseGroups[0];
+    const totalAmount = expenseGroups.reduce((acc, curr) => acc + (curr.amount || 0), 0);
     const results: AnalysisResult[] = [firstGroup.bestItem, ...firstGroup.alternatives];
 
     // Persist analysis request
-    const { data: saved } = await supabase
+    const { data: saved, error: dbError } = await supabase
       .from('analysis_requests')
       .insert({
         user_id: user.id,
         organization_profile_id: orgProfileId ?? null,
         raw_description: description,
-        extracted_amount: firstGroup.amount,
-        top_result_json: results as unknown as import('@/types/database').Json,
-        selected_item_id: firstGroup.bestItem.subCode, // DB doesn't strongly FK on id, keeping a string fallback
+        extracted_amount: totalAmount,
+        top_result_json: expenseGroups as unknown as import('@/types/database').Json,
+        selected_item_id: firstGroup.bestItem.id ?? null,
         confidence: firstGroup.bestItem.confidence,
       })
       .select('id')
       .single();
 
+    if (dbError) {
+      console.error('[analyze-description] Insert history error:', dbError);
+    }
+
     const response: AnalysisResponse = {
       requestId: saved?.id ?? '',
-      amount: firstGroup.amount,
+      amount: totalAmount,
       results,
       expenseGroups,
       confidenceLevel,
     };
+
+    // Revalidate the analyze page so that server component fetches latest history
+    try {
+      revalidatePath('/analyze');
+    } catch {}
 
     return NextResponse.json(response);
   } catch (err) {

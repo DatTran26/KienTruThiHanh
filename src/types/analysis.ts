@@ -1,4 +1,5 @@
 export interface AnalysisResult {
+  id?: string;
   groupCode: string;
   groupTitle: string;
   subCode: string;

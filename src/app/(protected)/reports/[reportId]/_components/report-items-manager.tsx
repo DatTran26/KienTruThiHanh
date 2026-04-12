@@ -362,14 +362,6 @@ export function ReportItemsManager({
             </table>
           )}
         </div>
-
-        {/* Table footer */}
-        {items.length > 0 && (
-          <div className="px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 shrink-0 flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{filteredAndSortedItems.length} khoản mục</span>
-            <span className="text-xs font-bold text-slate-800 font-mono">{formatCurrency(totalAmount)}₫</span>
-          </div>
-        )}
       </div>
 
       {/* ════════════════════════════════════════════

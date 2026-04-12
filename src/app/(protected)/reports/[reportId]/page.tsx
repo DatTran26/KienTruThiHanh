@@ -40,6 +40,7 @@ export default async function ReportDetailPage({
 
   const isExported = report.status === 'exported';
   const itemCount = items?.length ?? 0;
+  const computedTotal = items?.reduce((s, i) => s + (i.amount ?? 0), 0) ?? 0;
 
   return (
     <div className="min-h-full pb-20 lg:pb-8 animate-fade-in">
@@ -138,7 +139,7 @@ export default async function ReportDetailPage({
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tổng cộng</p>
-                  <p className="text-lg font-bold text-slate-900 leading-none font-mono">{formatCurrency(report.total_amount)}₫</p>
+                  <p className="text-lg font-bold text-slate-900 leading-none font-mono">{formatCurrency(computedTotal)}₫</p>
                 </div>
               </div>
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex items-center gap-3">

@@ -8,18 +8,72 @@ import { AlertTriangle, Zap, ListTree, Receipt, Info, Plus, Save, Pencil, Minus,
 interface ResultSectionProps {
   response: AnalysisResponse;
   onAddToReport: (result: AnalysisResult | AnalysisResult[]) => void;
+  savedTargetInfo?: { id: string, name: string } | null;
 }
 
-export function ResultSection({ response, onAddToReport }: ResultSectionProps) {
+export function ResultSection({ response, onAddToReport, savedTargetInfo }: ResultSectionProps) {
   const isMulti = response.expenseGroups && response.expenseGroups.length > 1;
-  
-  const bestItems = response.expenseGroups && response.expenseGroups.length > 0 
-    ? response.expenseGroups.map(g => g.bestItem) 
+  const [localExpenseGroups, setLocalExpenseGroups] = useState<ExpenseGroup[]>(response.expenseGroups || []);
+
+  useEffect(() => {
+    if (response.expenseGroups) {
+      setLocalExpenseGroups(response.expenseGroups);
+    }
+  }, [response]);
+
+  const bestItems = localExpenseGroups.length > 0 
+    ? localExpenseGroups.map(g => g.bestItem) 
     : [response.results[0]].filter(Boolean);
     
-  const alternativeItems = response.expenseGroups && response.expenseGroups.length > 0 
-    ? response.expenseGroups.flatMap(g => g.alternatives) 
+  const alternativeItems = localExpenseGroups.length > 0 
+    ? localExpenseGroups.flatMap(g => g.alternatives) 
     : response.results.slice(1);
+
+
+  const renderWorktreeTooltip = (item: AnalysisResult, position: 'left' | 'bottom') => (
+    <div className={`absolute ${
+      position === 'left' 
+        ? 'right-full mr-4 top-1/2 -translate-y-1/2 origin-right' 
+        : 'left-1/2 -translate-x-1/2 top-full mt-2 origin-top'
+    } w-[320px] sm:w-[400px] p-4 bg-[#14182B] rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.4)] border border-[#1E2442] opacity-0 invisible group-hover/tree:opacity-100 group-hover/tree:visible transition-all duration-300 z-50 pointer-events-none scale-95 group-hover/tree:scale-100`}>
+      
+      <div className={`absolute w-3 h-3 bg-[#14182B] border-[#1E2442] rotate-45 ${
+        position === 'left' 
+          ? 'right-[-6px] top-1/2 -translate-y-1/2 border-t border-r' 
+          : 'left-1/2 -translate-x-1/2 top-[-6px] border-l border-t'
+      }`} />
+      
+      <div className="flex items-center gap-2 mb-3 px-1">
+         <ListTree className="size-3.5 text-indigo-400" />
+         <span className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-400">Worktree Phân loại</span>
+      </div>
+      
+      <div className="flex flex-col text-[12px] font-sans px-1 text-left">
+        <div className="flex items-start gap-2">
+          <div className="mt-1.5 size-1.5 rounded-full bg-indigo-500 shrink-0 shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
+          <div>
+            <span className="font-mono text-indigo-400 font-bold bg-indigo-500/10 px-1 rounded mr-1.5 leading-none">{item.groupCode}</span>
+            <span className="text-slate-300 font-medium leading-tight">{item.groupTitle}</span>
+          </div>
+        </div>
+        <div className="flex items-start gap-2 ml-[3px] border-l border-slate-700 pl-[15px] pb-1 pt-2">
+          <div className="mt-1.5 size-1.5 rounded-full bg-blue-500 shrink-0 shadow-[0_0_8px_rgba(59,130,246,0.5)] -ml-[19.5px]" />
+          <div className="flex flex-col gap-1 w-full">
+             <div>
+               <span className="font-mono text-blue-400 font-bold bg-blue-500/10 px-1 rounded mr-1.5 leading-none">{item.subCode}</span>
+               <span className="text-white font-bold leading-tight">{item.subTitle}</span>
+             </div>
+             {item.description && (
+               <div className="mt-1.5 text-[11px] text-slate-400 font-normal leading-relaxed border-t border-slate-700/60 pt-2 whitespace-pre-line line-clamp-[8]">
+                 <strong className="text-slate-300 font-medium block mb-1">Nội dung bao gồm:</strong>
+                 {item.description}
+               </div>
+             )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   const [amounts, setAmounts] = useState<number[]>([]);
   const [showReasons, setShowReasons] = useState(false);
@@ -28,6 +82,21 @@ export function ResultSection({ response, onAddToReport }: ResultSectionProps) {
   // Draft state — only used during edit mode
   const [draftRows, setDraftRows] = useState<boolean[]>([]);
   const [draftAmounts, setDraftAmounts] = useState<number[]>([]);
+
+  // Replacement state
+  const [replacingResult, setReplacingResult] = useState<AnalysisResult | null>(null);
+
+  const executeReplace = (gId: number, altItem: AnalysisResult) => {
+    setLocalExpenseGroups(prev => {
+      const newGroups = [...prev];
+      newGroups[gId] = {
+        ...newGroups[gId],
+        bestItem: altItem,
+      };
+      return newGroups;
+    });
+    setReplacingResult(null);
+  };
 
   useEffect(() => {
     if (isMulti && response.expenseGroups) {
@@ -81,6 +150,42 @@ export function ResultSection({ response, onAddToReport }: ResultSectionProps) {
   return (
     <div className="space-y-6 animate-fade-in-up">
 
+      {/* Replacement Modal */}
+      {replacingResult && (
+        <div className="fixed inset-0 bg-[#0f172a]/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl shadow-indigo-900/20 animate-scale-in border border-slate-200">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+               <h3 className="font-extrabold text-slate-800 uppercase tracking-wider text-[13px]">Chọn khoản chi cần thay thế</h3>
+               <button onClick={() => setReplacingResult(null)} className="p-1.5 hover:bg-slate-200 rounded-lg transition-colors"><X className="size-4 text-slate-500 hover:text-slate-800"/></button>
+            </div>
+            <div className="p-2 max-h-[60vh] overflow-y-auto">
+              {localExpenseGroups.map((grp, gId) => {
+                 if (visibleRows[gId] === false) return null;
+                 return (
+                    <button 
+                      key={`replace-${gId}`}
+                      onClick={() => executeReplace(gId, replacingResult)}
+                      className="w-full text-left p-4 hover:bg-amber-50 border-b border-slate-100 last:border-0 flex flex-col gap-1.5 items-start transition-colors group"
+                    >
+                      <span className="font-extrabold text-[14px] text-slate-800 group-hover:text-amber-700">{gId + 1}. {grp.originalDesc}</span>
+                      <div className="flex items-center gap-2 mt-1 w-full justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Đang phân loại:</span>
+                          <span className="bg-slate-100 group-hover:bg-amber-100 text-slate-700 group-hover:text-amber-800 font-bold px-2 py-0.5 rounded text-[11.5px] border border-slate-200 group-hover:border-amber-200">{grp.bestItem.subTitle}</span>
+                        </div>
+                        <span className="text-[10px] font-black uppercase text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">Thay thế <Zap className="size-3"/></span>
+                      </div>
+                    </button>
+                 )
+              })}
+            </div>
+            <div className="bg-slate-50 p-4 border-t border-slate-100">
+               <p className="text-[11px] text-slate-500 text-center font-medium">Việc thay thế sẽ đổi phân loại AI của khoản chi về cấu trúc mới được chọn.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Low confidence warning */}
       {response.confidenceLevel === 'low' && (
         <div className="relative p-5 rounded-2xl flex items-start gap-4 bg-gradient-to-r from-amber-50 to-orange-50/50 border-2 border-amber-200/50 shadow-inner animate-scale-in">
@@ -123,8 +228,8 @@ export function ResultSection({ response, onAddToReport }: ResultSectionProps) {
             /* =========================================
                INVOICE LAYOUT FOR MULTIPLE EXPENSES
                ========================================= */
-            <div className="rounded-[24px] overflow-hidden bg-white shadow-2xl shadow-indigo-900/10 border border-slate-200/80 animate-scale-in">
-               <div className="bg-gradient-to-r from-[#0f172a] via-[#1e1b4b] to-[#312e81] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden">
+            <div className="rounded-[24px] bg-white shadow-2xl shadow-indigo-900/10 border border-slate-200/80 animate-scale-in">
+               <div className="rounded-t-[24px] bg-gradient-to-r from-[#0f172a] via-[#1e1b4b] to-[#312e81] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden">
                   
                   {/* Background FX for Header */}
                   <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none" />
@@ -134,13 +239,21 @@ export function ResultSection({ response, onAddToReport }: ResultSectionProps) {
                      <div className="size-12 rounded-full bg-indigo-500/30 border border-indigo-400/50 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(99,102,241,0.4)] backdrop-blur-md">
                         <Receipt className="size-5 text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]" />
                      </div>
-                     <div>
-                        <h2 className="font-black uppercase tracking-widest text-[16px] !text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]" style={{color:'#ffffff'}}>
+                      <div>
+                        <h2 className="font-black uppercase tracking-widest text-[16px] !text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">
                           Bảng Bóc Tách Chi Phí
                         </h2>
-                        <p className="text-indigo-200/90 text-[12px] font-medium mt-0.5 tracking-wide">
-                          Xử lý <strong className="text-white">{bestItems.length}</strong> khoản chi tự động
-                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <p className="text-indigo-200/90 text-[12px] font-medium tracking-wide">
+                            Xử lý <strong className="text-white">{bestItems.length}</strong> khoản chi tự động
+                          </p>
+                          {savedTargetInfo && (
+                            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[9.5px] font-black tracking-widest uppercase ml-1 animate-fade-in shadow-sm">
+                              <Check size={10} strokeWidth={3} />
+                              Đã lưu: {savedTargetInfo.name}
+                            </span>
+                          )}
+                        </div>
                      </div>
                   </div>
 
@@ -184,7 +297,7 @@ export function ResultSection({ response, onAddToReport }: ResultSectionProps) {
                      const statusColor = isHigh ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_2px_8px_-2px_rgba(16,185,129,0.5)]' : 'bg-amber-500 text-white border-amber-400 shadow-[0_2px_8px_-2px_rgba(245,158,11,0.5)]';
                      
                      return (
-                       <div key={`inv-${i}`} className={`grid items-center p-4 sm:px-6 sm:py-5 hover:bg-gradient-to-r hover:from-indigo-50/40 hover:to-transparent transition-all border-b border-slate-100 last:border-0 group/row cursor-default ${
+                       <div key={`inv-${i}`} className={`relative z-10 hover:z-[60] grid items-center p-4 sm:px-6 sm:py-5 hover:bg-gradient-to-r hover:from-indigo-50/40 hover:to-transparent transition-all border-b border-slate-100 last:border-0 group/row cursor-default ${
                          isEditMode
                            ? 'grid-cols-[auto_auto_1fr_130px_160px]'
                            : 'grid-cols-[auto_1fr_150px] sm:grid-cols-[auto_1fr_130px_160px]'
@@ -217,15 +330,16 @@ export function ResultSection({ response, onAddToReport }: ResultSectionProps) {
                            </div>
                            
                            {grp.bestItem.reason && showReasons && (
-                             <div className="mt-3 text-[11.5px] text-slate-700 bg-white/60 backdrop-blur-md border border-indigo-100/60 p-3 rounded-lg shadow-[inset_0_1px_0_#fff,0_1px_3px_rgba(0,0,0,0.02)] leading-relaxed animate-fade-in-up">
+                             <div className="relative group/tree mt-3 text-[11.5px] text-slate-700 bg-white/60 backdrop-blur-md border border-indigo-100/60 p-3 rounded-lg shadow-[inset_0_1px_0_#fff,0_1px_3px_rgba(0,0,0,0.02)] leading-relaxed animate-fade-in-up w-max max-w-full cursor-help">
                                <strong className="text-indigo-600 block mb-0.5 uppercase tracking-[0.15em] text-[9.5px]">Cơ sở phân tích:</strong>
                                {grp.bestItem.reason}
+                               {renderWorktreeTooltip(grp.bestItem, 'bottom')}
                              </div>
                            )}
                          </div>
 
                          {/* 3. MÃ NGÂN SÁCH (Hidden on mobile) */}
-                         <div className="hidden sm:flex flex-col items-end justify-center gap-2 border-l border-slate-100 pl-5 h-full">
+                         <div className="relative group/tree hidden sm:flex flex-col items-end justify-center gap-2 border-l border-slate-100 pl-5 h-full cursor-help z-10 hover:z-50">
                            <div className="flex items-center shadow-sm rounded">
                              <span className="font-mono text-[9px] font-black tracking-widest text-white bg-indigo-500 px-2 py-1 rounded-l shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">MỤC</span>
                              <span className="font-mono text-[11.5px] font-bold bg-indigo-50 text-indigo-700 px-2 py-1 rounded-r border-y border-r border-indigo-100 min-w-[3rem] text-center">{grp.bestItem.groupCode}</span>
@@ -234,6 +348,7 @@ export function ResultSection({ response, onAddToReport }: ResultSectionProps) {
                              <span className="font-mono text-[9px] font-black tracking-widest text-white bg-blue-500 px-2 py-1 rounded-l shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">T/M</span>
                              <span className="font-mono text-[11.5px] font-bold bg-blue-50 text-blue-700 px-2 py-1 rounded-r border-y border-r border-blue-100 min-w-[3rem] text-center">{grp.bestItem.subCode}</span>
                            </div>
+                           {renderWorktreeTooltip(grp.bestItem, 'left')}
                          </div>
 
                          {/* 4. SỐ TIỀN */}
@@ -275,7 +390,7 @@ export function ResultSection({ response, onAddToReport }: ResultSectionProps) {
                 </div>
                
                {/* Footer: Save All Actions */}
-               <div className="bg-slate-50/80 p-5 border-t border-slate-200/60 flex items-center justify-between gap-4">
+               <div className="rounded-b-[24px] bg-slate-50/80 p-5 border-t border-slate-200/60 flex items-center justify-between gap-4">
                  {/* Edit mode active indicator */}
                  {isEditMode && (
                    <div className="flex items-center gap-2 text-amber-600 bg-amber-50 border border-amber-200/80 px-3 py-1.5 rounded-lg text-[11px] font-bold animate-pulse">
@@ -352,8 +467,12 @@ export function ResultSection({ response, onAddToReport }: ResultSectionProps) {
                   pct >= 50 ? 'bg-amber-500 text-white border-amber-400 shadow-[0_2px_8px_-2px_rgba(245,158,11,0.5)]' :
                   'bg-rose-500 text-white border-rose-400 shadow-[0_2px_8px_-2px_rgba(225,29,72,0.5)]';
 
+                const gridColsClass = isMulti 
+                  ? "grid grid-cols-[auto_1fr_110px] sm:grid-cols-[auto_1fr_130px_250px]"
+                  : "grid grid-cols-[auto_1fr_110px] sm:grid-cols-[auto_1fr_130px_140px]";
+
                 return (
-                  <div key={`alt-${i}`} className="grid grid-cols-[auto_1fr_120px] sm:grid-cols-[auto_1fr_130px_140px] gap-5 items-center p-4 sm:px-6 sm:py-5 hover:bg-gradient-to-r hover:from-slate-50/80 hover:to-transparent transition-all border-b border-slate-100 last:border-0 group/row animate-fade-in-up" style={{ animationDelay: `${i * 60}ms` }}>
+                  <div key={`alt-${i}`} className={`relative z-10 hover:z-[60] ${gridColsClass} gap-5 items-center p-4 sm:px-6 sm:py-5 hover:bg-gradient-to-r hover:from-slate-50/80 hover:to-transparent transition-all border-b border-slate-100 last:border-0 group/row animate-fade-in-up`} style={{ animationDelay: `${i * 60}ms` }}>
                     
                     {/* 1. STT */}
                     <div className="flex shrink-0">
@@ -383,7 +502,7 @@ export function ResultSection({ response, onAddToReport }: ResultSectionProps) {
                     </div>
 
                     {/* 3. MÃ SỐ */}
-                    <div className="hidden sm:flex flex-col items-end justify-center gap-2 border-l border-slate-100 pl-5 h-full">
+                    <div className="relative group/tree hidden sm:flex flex-col items-end justify-center gap-2 border-l border-slate-100 pl-5 h-full cursor-help z-10 hover:z-50">
                       <div className="flex items-center shadow-sm rounded">
                         <span className="font-mono text-[9px] font-black tracking-widest text-slate-500 bg-slate-100 px-2 py-1 rounded-l shadow-[inset_0_1px_0_rgba(255,255,255,1)]">MỤC</span>
                         <span className="font-mono text-[11.5px] font-bold bg-white text-slate-700 px-2 py-1 rounded-r border-y border-r border-slate-200 min-w-[3rem] text-center">{r.groupCode}</span>
@@ -392,16 +511,29 @@ export function ResultSection({ response, onAddToReport }: ResultSectionProps) {
                          <span className="font-mono text-[9px] font-black tracking-widest text-slate-500 bg-slate-100 px-2 py-1 rounded-l shadow-[inset_0_1px_0_rgba(255,255,255,1)]">T/M</span>
                          <span className="font-mono text-[11.5px] font-bold bg-white text-slate-700 px-2 py-1 rounded-r border-y border-r border-slate-200 min-w-[3rem] text-center">{r.subCode}</span>
                       </div>
+                      {renderWorktreeTooltip(r, 'left')}
                     </div>
 
                     {/* 4. ACTIONS & AMOUNT */}
-                    <div className="flex flex-col items-end justify-center gap-2 border-l border-slate-100 pl-5 h-full">
-                      <button 
-                          onClick={() => onAddToReport(r)}
-                          className="px-3.5 py-2 bg-indigo-50 border border-indigo-200/60 hover:bg-indigo-600 hover:border-indigo-500 hover:text-white text-indigo-700 rounded-lg text-[10px] font-black uppercase tracking-[0.1em] shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_1px_2px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_10px_-2px_rgba(99,102,241,0.5)] transition-all focus:outline-none flex items-center gap-1.5 w-full justify-center group/btn"
-                        >
-                          <Plus className="size-3.5 transition-transform group-hover/btn:scale-125 group-hover/btn:rotate-90" /> CHỌN VÀO BÁO CÁO
-                      </button>
+                    <div className="flex flex-col items-end justify-center gap-2 border-l border-slate-100 pl-0 sm:pl-5 h-full">
+                      <div className="flex flex-col sm:flex-row gap-2 w-full hide-empty">
+                        <button 
+                            onClick={() => onAddToReport(r)}
+                            className="px-2 sm:px-3 py-2 flex-1 bg-indigo-50 border border-indigo-200/60 hover:bg-indigo-600 hover:border-indigo-500 hover:text-white text-indigo-700 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-[0.02em] sm:tracking-[0.05em] shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_1px_2px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_10px_-2px_rgba(99,102,241,0.5)] transition-all focus:outline-none flex items-center justify-center gap-1.5 group/btn"
+                          >
+                            <Plus className="size-3.5 transition-transform group-hover/btn:scale-125 group-hover/btn:rotate-90 shrink-0" />
+                            <span className="hidden sm:inline">THÊM BÁO CÁO</span>
+                            <span className="sm:hidden">THÊM</span>
+                        </button>
+                        {isMulti && (
+                          <button 
+                            onClick={() => setReplacingResult(r)}
+                            className="px-2 sm:px-3 py-2 flex-1 bg-white border border-amber-200 hover:bg-amber-500 hover:border-amber-500 hover:text-white text-amber-600 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-[0.02em] sm:tracking-[0.05em] shadow-[0_1px_2px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_10px_-2px_rgba(245,158,11,0.4)] transition-all focus:outline-none flex items-center justify-center gap-1.5"
+                          >
+                            <Zap className="size-3.5 shrink-0" /> THAY THẾ
+                          </button>
+                        )}
+                      </div>
                       <div className="flex flex-wrap items-center w-full justify-between gap-2 mt-1">
                           <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full border ${statusColor}`}>
                             {(r.confidence * 100).toFixed(0)}%

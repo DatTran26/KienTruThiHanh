@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import AnalyzeClient from '../workspace/_components/analyze-client';
-import { AnalyzeRightPanel } from './_components/analyze-right-panel';
 
 export default async function AnalyzePage() {
   const supabase = await createClient();
@@ -22,7 +21,7 @@ export default async function AnalyzePage() {
     console.log('[AnalyzePage] userId:', user.id, '→ role:', userRow?.role, '→ isAdmin:', isAdmin);
   }
 
-  // Recent analyses
+  // Recent analyses (initial SSR data)
   const { data: recentAnalyses } = await supabase
     .from('analysis_requests')
     .select('id, raw_description, confidence, extracted_amount, created_at')
@@ -59,6 +58,15 @@ export default async function AnalyzePage() {
 
   const aiModel = process.env.AI_DISPLAY_NAME ?? process.env.AI_MODEL ?? 'gpt-4o-mini';
 
+  // Pass initial SSR data as serializable props instead of a pre-rendered ReactNode
+  const rightPanelData = {
+    initialRecentAnalyses: recentAnalyses ?? [],
+    initialTotalAnalyses: totalAnalyses ?? 0,
+    initialTotalReports: totalReports ?? 0,
+    popularItems,
+    aiModel,
+  };
+
   return (
     <div className="flex h-full min-h-screen">
 
@@ -70,20 +78,10 @@ export default async function AnalyzePage() {
             activeMaster={activeMaster ?? null} 
             popularItems={popularItems}
             aiModel={aiModel} 
+            rightPanelData={rightPanelData}
           />
         </Suspense>
       </div>
-
-      {/* ── Context panel (right) — desktop only ── */}
-      <aside className="hidden xl:flex flex-col w-[440px] 2xl:w-[480px] shrink-0 border-l border-slate-200/80 bg-white overflow-y-auto z-10 shadow-[-10px_0_30px_rgba(0,0,0,0.01)] relative">
-        <AnalyzeRightPanel
-          recentAnalyses={recentAnalyses ?? []}
-          totalAnalyses={totalAnalyses ?? 0}
-          totalReports={totalReports ?? 0}
-          popularItems={popularItems}
-          aiModel={aiModel}
-        />
-      </aside>
 
     </div>
   );

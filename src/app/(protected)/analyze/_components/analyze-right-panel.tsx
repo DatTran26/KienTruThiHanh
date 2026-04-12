@@ -1,10 +1,12 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
 import {
   Clock, TrendingUp, CheckCircle, Zap,
   BookOpen, ShieldCheck, Cpu, BarChart3,
-  Activity, Wifi, Hash
+  Activity, Wifi, Hash, RefreshCw
 } from 'lucide-react';
 import Link from 'next/link';
-import { AdminMasterPanel } from './admin-master-panel';
 
 interface Analysis {
   id: string;
@@ -14,27 +16,15 @@ interface Analysis {
   created_at: string;
 }
 
-interface MasterVersion {
-  id: string;
-  file_name: string;
-  version_no: number;
-  item_count: number | null;
-  is_active: boolean;
-  doc_title: string | null;
-  doc_unit: string | null;
-  doc_period: string | null;
-  effective_date: string | null;
-  ai_model: string | null;
-  uploaded_at: string;
-  parsed_at: string | null;
-}
-
 interface Props {
-  recentAnalyses: Analysis[];
-  totalAnalyses: number;
-  totalReports: number;
+  /** Initial data from SSR (passed as fallback for first paint) */
+  initialRecentAnalyses?: Analysis[];
+  initialTotalAnalyses?: number;
+  initialTotalReports?: number;
   popularItems?: { sub_code: string, sub_title: string }[];
   aiModel?: string;
+  /** Increment this to trigger a refresh (e.g. after a new analysis) */
+  refreshTrigger?: number;
 }
 
 const STATUS_COLORS = [
@@ -57,12 +47,70 @@ function formatRelativeTime(dateStr: string): string {
 }
 
 export function AnalyzeRightPanel({ 
-  recentAnalyses, 
-  totalAnalyses, 
-  totalReports,
+  initialRecentAnalyses = [],
+  initialTotalAnalyses = 0,
+  initialTotalReports = 0,
   popularItems = [],
-  aiModel = 'gpt-4o-mini'
+  aiModel = 'gpt-4o-mini',
+  refreshTrigger = 0,
 }: Props) {
+  const [recentAnalyses, setRecentAnalyses] = useState<Analysis[]>(initialRecentAnalyses);
+  const [totalAnalyses, setTotalAnalyses] = useState(initialTotalAnalyses);
+  const [totalReports, setTotalReports] = useState(initialTotalReports);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const fetchHistory = useCallback(async () => {
+    console.log('[AnalyzeRightPanel] fetchHistory called');
+    setIsRefreshing(true);
+    try {
+      // Add cache-busting timestamp to avoid browser/Next.js caching
+      const res = await fetch(`/api/analysis-history?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        console.log('[AnalyzeRightPanel] Got', data.recentAnalyses?.length, 'analyses');
+        setRecentAnalyses(data.recentAnalyses ?? []);
+        setTotalAnalyses(data.totalAnalyses ?? 0);
+        setTotalReports(data.totalReports ?? 0);
+      } else {
+        console.error('[AnalyzeRightPanel] API returned', res.status);
+      }
+    } catch (err) {
+      console.error('[AnalyzeRightPanel] Failed to fetch history:', err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  // Sync state when server-provided props change (e.g. from router.refresh())
+  useEffect(() => {
+    if (initialRecentAnalyses.length > 0) {
+      console.log('[AnalyzeRightPanel] Server data updated, syncing', initialRecentAnalyses.length, 'items');
+      setRecentAnalyses(initialRecentAnalyses);
+    }
+  }, [initialRecentAnalyses]);
+
+  useEffect(() => {
+    setTotalAnalyses(initialTotalAnalyses);
+  }, [initialTotalAnalyses]);
+
+  useEffect(() => {
+    setTotalReports(initialTotalReports);
+  }, [initialTotalReports]);
+
+  // Also do a client-side fetch when trigger changes (belt + suspenders)
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      console.log('[AnalyzeRightPanel] refreshTrigger =', refreshTrigger, '— client-side fetch in 800ms');
+      const timer = setTimeout(() => {
+        fetchHistory();
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [refreshTrigger, fetchHistory]);
+
   const STATUSES = [
     { icon: Zap,          label: <><span className="text-amber-600 drop-shadow-sm">{aiModel}</span><span className="opacity-70"> · AI Engine</span></>, badge: 'Online',  cls: 'bg-emerald-50 text-emerald-600 border-emerald-100', dot: 'bg-emerald-500' },
     { icon: Cpu,          label: 'TABMIS · Database',      badge: 'Live',    cls: 'bg-emerald-50 text-emerald-600 border-emerald-100', dot: 'bg-emerald-500' },
@@ -132,6 +180,9 @@ export function AnalyzeRightPanel({
               <Clock className="size-3.5 text-indigo-600 font-black" />
             </div>
             <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-700">Lịch sử tra cứu gần đây</p>
+            {isRefreshing && (
+              <RefreshCw className="size-3 text-indigo-400 animate-spin ml-auto" />
+            )}
           </div>
 
           {recentAnalyses.length === 0 ? (
@@ -151,7 +202,7 @@ export function AnalyzeRightPanel({
                   <Link key={item.id} href={`/analyze?reqId=${item.id}`} className="block p-4 hover:bg-slate-50 rounded-2xl transition-colors cursor-pointer group">
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <p className="text-[13px] font-semibold text-slate-800 line-clamp-2 leading-relaxed flex-1 group-hover:text-indigo-700 transition-colors">
-                        "{item.raw_description}"
+                        &quot;{item.raw_description}&quot;
                       </p>
                       {pct != null && (
                         <span className={`text-[10px] font-black px-2 py-1 rounded-[8px] shrink-0 border shadow-sm ${
@@ -216,7 +267,7 @@ export function AnalyzeRightPanel({
           </div>
           <div className="divide-y divide-slate-100/60 p-2">
             {STATUSES.map(({ icon: Icon, label, badge, cls, dot }) => (
-              <div key={label} className="px-4 py-3 flex items-center justify-between group hover:bg-slate-50 rounded-2xl transition-colors">
+              <div key={badge} className="px-4 py-3 flex items-center justify-between group hover:bg-slate-50 rounded-2xl transition-colors">
                 <div className="flex items-center gap-3.5 text-[13px] font-bold text-slate-700">
                   <div className="size-9 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Icon className="size-4.5 text-slate-500 group-hover:text-indigo-600 transition-colors" />
@@ -237,7 +288,7 @@ export function AnalyzeRightPanel({
       {/* ── Footer ── */}
       <div className="px-7 py-4 border-t border-slate-200/80 bg-white shrink-0 flex items-center justify-between z-10 shadow-[0_-5px_20px_rgba(0,0,0,0.02)]">
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-          Baymax · v2.0
+          VKS · v2.0
         </p>
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-[8px] bg-emerald-50 border border-emerald-100">
           <span className="size-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse" />
