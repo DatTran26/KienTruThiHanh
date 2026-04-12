@@ -13,7 +13,7 @@ export async function GET(request: Request) {
 
   const { data: items, error } = await supabase
     .from('master_items')
-    .select('group_code, group_title, sub_code, sub_title, notes')
+    .select('group_code, group_title, sub_code, sub_title, description, notes')
     .eq('version_id', versionId)
     .order('id', { ascending: true });
 
@@ -27,6 +27,7 @@ export async function GET(request: Request) {
     groupTitle: item.group_title,
     subCode: item.sub_code,
     subTitle: item.sub_title,
+    description: item.description,
     notes: item.notes,
   }));
 
