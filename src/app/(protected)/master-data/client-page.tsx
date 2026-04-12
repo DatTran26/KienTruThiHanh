@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { Upload, CheckCircle2, AlertCircle, Loader2, FileSpreadsheet, SaveAll, Info, Database, Shield, ChevronRight, ChevronDown, Sparkles, Orbit, Star, Zap, Layers3, Globe2, History, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import useSWR from 'swr';
@@ -153,21 +153,41 @@ function CosmicTreeNode({ group, index }: { group: TreeGroup; index: number }) {
   );
 }
 
-export default function UploadMasterPage() {
+export default function MasterDataClientPage({ isAdmin = false }: { isAdmin?: boolean }) {
   const [status, setStatus] = useState<Status>('idle');
   const [result, setResult] = useState<UploadResult | null>(null);
   const [selectedFile, setSelectedFile] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [confirmDeployId, setConfirmDeployId] = useState<string | null>(null);
+  const [confirmMainDeploy, setConfirmMainDeploy] = useState<boolean>(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const [viewVersionId, setViewVersionId] = useState<string | null>(null);
 
   const { data: versionsRes, mutate: mutateVersions } = useSWR<{ data: MasterVersion[] }>('/api/master-versions', fetcher);
   const versions = versionsRes?.data ?? [];
 
+  // Auto-select active version initially
+  useEffect(() => {
+    if (versions.length > 0 && !viewVersionId && status === 'idle') {
+      const active = versions.find(v => v.is_active);
+      setViewVersionId(active?.id || versions[0]?.id || null);
+    }
+  }, [versions, viewVersionId, status]);
+
+  // Fetch data for the currently selected version to view (if not uploading a new file)
+  const { data: viewItemsRes, isLoading: isLoadingView } = useSWR<{ preview: PreviewRow[] }>(
+    viewVersionId && status === 'idle' ? `/api/master-items?versionId=${viewVersionId}` : null,
+    fetcher
+  );
+
+  const currentPreviewData = status === 'idle' ? viewItemsRes?.preview : result?.preview;
+
   // Build tree structure from flat preview data
   const treeData = useMemo<TreeGroup[]>(() => {
-    if (!result?.preview) return [];
+    if (!currentPreviewData) return [];
     const map = new Map<string, TreeGroup>();
-    for (const row of result.preview) {
+    for (const row of currentPreviewData) {
       const key = row.groupCode;
       if (!map.has(key)) {
         map.set(key, { groupCode: key, groupTitle: row.groupTitle, children: [] });
@@ -175,7 +195,7 @@ export default function UploadMasterPage() {
       map.get(key)!.children.push(row);
     }
     return Array.from(map.values());
-  }, [result]);
+  }, [currentPreviewData]);
 
   const filteredTree = useMemo(() => {
     if (!searchTerm.trim()) return treeData;
@@ -232,8 +252,14 @@ export default function UploadMasterPage() {
 
       if (!res.ok) { toast.error(data.error ?? 'Lỗi triển khai dữ liệu'); setStatus(result ? 'preview' : 'idle'); return; }
 
-      if (result) setStatus('done');
-      else { setStatus('idle'); mutateVersions(); }
+      if (result) {
+        setStatus('done');
+      } else {
+        setStatus('idle');
+      }
+      
+      setViewVersionId(versionToPublish);
+      mutateVersions();
       toast.success(`Cập nhật thành công: ${data.activatedItems} bản ghi đã được đưa vào sử dụng`);
     } catch {
       toast.error('Lỗi kết nối đường truyền');
@@ -242,7 +268,10 @@ export default function UploadMasterPage() {
   }
 
   async function handleRestoreVersion(versionId: string) {
-    if (!window.confirm('Bạn có chắc chắn muốn TRIỂN KHAI phiên bản này và đưa vào sử dụng làm Kho dữ liệu hiện tại?')) return;
+    setConfirmDeployId(versionId);
+  }
+
+  async function proceedDeploy(versionId?: string) {
     await handlePublish(versionId);
   }
 
@@ -252,6 +281,12 @@ export default function UploadMasterPage() {
     setSelectedFile('');
     setSearchTerm('');
     if (fileRef.current) fileRef.current.value = '';
+    
+    // Fall back to active version if we cancel upload preview
+    if (versions.length > 0) {
+      const active = versions.find(v => v.is_active);
+      setViewVersionId(active?.id || versions[0]?.id || null);
+    }
   }
 
   return (
@@ -265,10 +300,12 @@ export default function UploadMasterPage() {
               <Database className="size-3.5 text-indigo-600" />
             </div>
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Kho Dữ Liệu</span>
-            <span className="px-2 py-0.5 bg-red-50 text-red-600 border border-red-200 text-[9px] rounded-full font-bold tracking-wider flex items-center gap-1 shadow-sm">
-              <Shield className="size-2.5" />
-              ADMIN
-            </span>
+            {isAdmin && (
+              <span className="px-2 py-0.5 bg-red-50 text-red-600 border border-red-200 text-[9px] rounded-full font-bold tracking-wider flex items-center gap-1 shadow-sm">
+                <Shield className="size-2.5" />
+                ADMIN
+              </span>
+            )}
           </div>
           
           <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -287,7 +324,7 @@ export default function UploadMasterPage() {
           <div className="lg:col-span-8 flex flex-col gap-6">
 
         {/* ── Upload Zone ── */}
-        {(status === 'idle' || status === 'uploading') && (
+        {isAdmin && (status === 'idle' || status === 'uploading') && (
           <div className="animate-fade-in-up space-y-6 bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden">
             
             <label
@@ -344,54 +381,65 @@ export default function UploadMasterPage() {
         )}
 
         {/* ── Cosmic Tree Preview ── */}
-        {(status === 'preview' || status === 'publishing' || status === 'done') && result && (
+        {(status === 'preview' || status === 'publishing' || status === 'done' || (status === 'idle' && viewVersionId)) && (
           <div className="space-y-5 animate-fade-in-up">
             
-            {/* Status banner */}
-            <div className={`p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border shadow-sm ${
-              status === 'done' 
-                ? 'bg-emerald-50 border-emerald-200' 
-                : 'bg-indigo-50 border-indigo-200'
-            }`}>
-              <div className="flex items-start gap-4">
-                {status === 'done' ? (
-                  <div className="size-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 border border-emerald-200 shadow-sm">
-                    <CheckCircle2 className="size-5 text-emerald-600" />
+              {status !== 'idle' && result && (
+              <div className={`p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border shadow-sm ${
+                status === 'done' 
+                  ? 'bg-emerald-50 border-emerald-200' 
+                  : 'bg-indigo-50 border-indigo-200'
+              }`}>
+                <div className="flex items-start gap-4">
+                  {status === 'done' ? (
+                    <div className="size-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 border border-emerald-200 shadow-sm">
+                      <CheckCircle2 className="size-5 text-emerald-600" />
+                    </div>
+                  ) : (
+                    <div className="size-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0 border border-indigo-200 shadow-sm">
+                      <Sparkles className="size-5 text-indigo-600" />
+                    </div>
+                  )}
+                  <div>
+                    <h3 className={`font-bold text-base ${status === 'done' ? 'text-emerald-800' : 'text-indigo-800'}`}>
+                      {status === 'done' ? '✦ Triển khai thành công' : '✦ Chờ xác nhận ban hành'}
+                    </h3>
+                    <p className="text-sm mt-0.5 text-slate-600">
+                      <strong className="text-slate-900">{result.itemCount}</strong> tiểu mục hợp lệ • <strong className="text-slate-900">{filteredTree.length}</strong> nhóm mục • Lỗi: <strong className="text-slate-900">{result.parseErrors.length}</strong>
+                    </p>
                   </div>
-                ) : (
-                  <div className="size-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0 border border-indigo-200 shadow-sm">
-                    <Sparkles className="size-5 text-indigo-600" />
-                  </div>
-                )}
-                <div>
-                  <h3 className={`font-bold text-base ${status === 'done' ? 'text-emerald-800' : 'text-indigo-800'}`}>
-                    {status === 'done' ? '✦ Triển khai thành công' : '✦ Chờ xác nhận ban hành'}
-                  </h3>
-                  <p className="text-sm mt-0.5 text-slate-600">
-                    <strong className="text-slate-900">{result.itemCount}</strong> tiểu mục hợp lệ • <strong className="text-slate-900">{filteredTree.length}</strong> nhóm mục • Lỗi: <strong className="text-slate-900">{result.parseErrors.length}</strong>
-                  </p>
+                </div>
+                
+                <div className="flex gap-3 items-center">
+                  {isAdmin && status !== 'done' && status !== 'publishing' && (
+                    <button
+                      onClick={() => setConfirmMainDeploy(true)}
+                      className="rounded-xl px-6 py-2.5 bg-rose-600 text-white font-bold text-sm shadow-[0_2px_10px_rgb(225,29,72,0.3)] hover:bg-rose-700 hover:shadow-[0_4px_15px_rgb(225,29,72,0.4)] transition-all flex items-center gap-2 active:scale-95"
+                    >
+                      <SaveAll className="size-4" />
+                      Phê duyệt & Triển khai
+                    </button>
+                  )}
+                  {status === 'publishing' && (
+                    <button
+                      disabled
+                      className="rounded-xl px-6 py-2.5 bg-rose-600 text-white font-bold text-sm shadow-[0_2px_10px_rgb(225,29,72,0.3)] opacity-70 flex items-center gap-2 cursor-not-allowed"
+                    >
+                      <Loader2 className="size-4 animate-spin" />
+                      Đang triển khai...
+                    </button>
+                  )}
+                  {isAdmin && (
+                    <button onClick={handleReset} className="font-bold text-sm text-slate-500 hover:text-slate-800 transition-colors">
+                      {status === 'done' ? 'Trở về' : 'Hủy bỏ'}
+                    </button>
+                  )}
                 </div>
               </div>
-              
-              <div className="flex gap-3 items-center">
-                {status !== 'done' && (
-                  <button
-                    onClick={handlePublish}
-                    disabled={status === 'publishing'}
-                    className="rounded-xl px-6 py-2.5 bg-indigo-600 text-white font-bold text-sm shadow-[0_2px_10px_rgb(79,70,229,0.3)] hover:bg-indigo-700 transition-all disabled:opacity-50 flex items-center gap-2"
-                  >
-                    {status === 'publishing' ? <Loader2 className="size-4 animate-spin" /> : <SaveAll className="size-4" />}
-                    Phê duyệt & Triển khai
-                  </button>
-                )}
-                <button onClick={handleReset} className="font-bold text-sm text-slate-500 hover:text-slate-800 transition-colors">
-                  {status === 'done' ? 'Trở về' : 'Hủy bỏ'}
-                </button>
-              </div>
-            </div>
+              )}
 
             {/* Parse errors */}
-            {result.parseErrors.length > 0 && (
+            {status !== 'idle' && result && result.parseErrors.length > 0 && (
               <div className="border border-red-200 bg-red-50 rounded-2xl p-5 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
                   <AlertCircle className="size-5 shrink-0 text-red-500" />
@@ -418,12 +466,21 @@ export default function UploadMasterPage() {
                     <Layers3 className="size-4 text-indigo-600" />
                   </div>
                   <div>
-                    <h2 className="text-xs font-black text-slate-600 uppercase tracking-[0.15em]">
-                      Cây phân cấp MLNS
-                    </h2>
-                    <p className="text-[10px] font-bold text-slate-400 mt-0.5">
-                      {filteredTree.length} nhóm mục • {result.preview.length} tiểu mục
-                    </p>
+                    {isLoadingView ? (
+                      <div className="flex items-center gap-2 mt-1">
+                        <Loader2 className="size-3.5 animate-spin text-slate-400" />
+                        <span className="text-xs font-medium text-slate-500">Đang tải cấu trúc dữ liệu...</span>
+                      </div>
+                    ) : (
+                      <>
+                        <h2 className="text-xs font-black text-slate-600 uppercase tracking-[0.15em]">
+                          Cây phân cấp MLNS {viewVersionId && versions.find(v => v.id === viewVersionId) && `— v${versions.find(v => v.id === viewVersionId)?.version_no}`}
+                        </h2>
+                        <p className="text-[10px] font-bold text-slate-400 mt-0.5">
+                          {filteredTree.length} nhóm mục • {currentPreviewData?.length || 0} tiểu mục
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -445,7 +502,12 @@ export default function UploadMasterPage() {
                 scrollbarWidth: 'thin',
                 scrollbarColor: '#CBD5E1 transparent',
               }}>
-                {filteredTree.length === 0 ? (
+                {isLoadingView ? (
+                  <div className="py-12 flex flex-col items-center justify-center gap-3 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                    <Loader2 className="size-6 animate-spin text-indigo-400" />
+                    <p className="text-slate-500 font-medium text-sm">Đang đồng bộ dữ liệu Hệ thống...</p>
+                  </div>
+                ) : filteredTree.length === 0 ? (
                   <div className="py-12 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
                     <p className="text-slate-500 font-medium text-sm">Không tìm thấy kết quả cho &quot;{searchTerm}&quot;</p>
                   </div>
@@ -480,52 +542,75 @@ export default function UploadMasterPage() {
             
             <div className="overflow-y-auto p-4 space-y-3 scrollbar-thin" style={{ scrollbarWidth: 'thin', scrollbarColor: '#E2E8F0 transparent' }}>
               {versions.map((ver) => (
-                <div key={ver.id} className={`p-4 rounded-2xl flex flex-col gap-3 transition-all border ${ver.is_active ? 'bg-gradient-to-b from-indigo-50/80 to-white border-indigo-100 shadow-[0_4px_20px_-4px_rgba(99,102,241,0.15)] ring-1 ring-indigo-500/10' : 'bg-white border-slate-100 hover:border-indigo-200 hover:shadow-md'}`}>
+                <div 
+                  key={ver.id} 
+                  onClick={() => { if (status === 'idle') setViewVersionId(ver.id) }}
+                  // Ensure clickable cursor if idle
+                  className={`p-4 rounded-2xl flex flex-col gap-3 relative transition-all ${status === 'idle' ? 'cursor-pointer hover:shadow-md' : ''} ${
+                  ver.is_active 
+                    ? 'bg-white border-2 border-amber-400 shadow-md ring-4 ring-amber-400/10' 
+                    : viewVersionId === ver.id && status === 'idle'
+                    ? 'bg-blue-50/50 border-2 border-blue-400/50 shadow-md ring-4 ring-blue-400/10'
+                    : 'bg-white border border-slate-200 hover:border-slate-300 hover:shadow-sm'
+                }`}>
                   
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`text-[10px] font-black font-mono px-2 py-0.5 rounded text-white shadow-sm ${ver.is_active ? 'bg-indigo-600' : 'bg-slate-400'}`}>
-                        v{ver.version_no}
-                      </span>
-                      {ver.is_active && (
-                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 border border-indigo-200 flex items-center gap-1 uppercase tracking-wider">
-                          <CheckCircle2 className="size-3" /> Đang sử dụng
-                        </span>
-                      )}
+                  {/* Subtle active glow */}
+                  {ver.is_active && (
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/10 blur-2xl rounded-full pointer-events-none" />
+                  )}
+
+                  <div className="flex items-start justify-between gap-3 relative z-10">
+                    <div className="flex items-center gap-2">
+                       <span className={`px-2 py-0.5 rounded text-[11px] font-black font-mono shadow-sm border ${
+                          ver.is_active ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-100 text-slate-500 border-slate-200'
+                       }`}>
+                          v{ver.version_no}
+                       </span>
+                       {ver.is_active && (
+                         <span className="px-2.5 py-0.5 rounded flex items-center gap-1.5 text-[10.5px] font-black bg-slate-900 text-yellow-300 border border-slate-800 uppercase tracking-widest shadow-sm">
+                            <CheckCircle2 className="size-3.5 text-yellow-400/80" /> Đang sử dụng
+                         </span>
+                       )}
                     </div>
-                    {status === 'idle' && !ver.is_active && (
+                    
+                    
+                    {isAdmin && status === 'idle' && !ver.is_active && (
                       <button
-                        onClick={() => handleRestoreVersion(ver.id)}
-                        className="shrink-0 px-3 py-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700 font-bold text-[10px] uppercase text-slate-600 rounded-lg transition-all shadow-sm active:scale-95"
+                        onClick={(e) => { e.stopPropagation(); handleRestoreVersion(ver.id); }}
+                        className="shrink-0 px-3 py-1.5 bg-rose-50 border border-rose-200 hover:border-rose-500 hover:bg-rose-600 hover:text-white font-bold text-[10px] uppercase text-rose-700 rounded-lg transition-all shadow-sm active:scale-95"
                       >
                         Triển khai
                       </button>
                     )}
                   </div>
                   
-                  <div>
-                    <h4 className="text-[13px] font-bold text-slate-800 leading-tight line-clamp-2" title={ver.file_name}>
+                  <div className="relative z-10">
+                    <h4 className={`text-[13.5px] font-bold leading-snug line-clamp-2 ${
+                      ver.is_active ? 'text-indigo-950' : 'text-slate-800'
+                    }`} title={ver.doc_title || ver.file_name}>
                       {ver.doc_title || ver.file_name}
                     </h4>
-                    <div className="flex items-center gap-3 mt-2">
-                       <span className="text-[11px] text-slate-500 flex items-center gap-1">
-                          <Clock className="size-3 text-slate-400" /> {formatDate(ver.uploaded_at)}
+                    <div className="flex items-center gap-1.5 mt-2">
+                       <Clock className="size-3 text-slate-400" />
+                       <span className="text-[11.5px] font-medium text-slate-500">
+                          {formatDate(ver.uploaded_at)}
                        </span>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2 pt-3 mt-1 border-t border-slate-100/80 overflow-x-auto scrollbar-none">
-                    <span className="text-[11px] font-medium shrink-0 text-slate-500 flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
-                      <Layers3 className="size-3.5 text-indigo-400" />
-                      <strong className="text-slate-700">{ver.item_count}</strong> khoản mục
-                    </span>
+                  <div className="flex flex-wrap items-center gap-2 pt-3 mt-1 border-t border-slate-100 relative z-10">
+                    <div className="flex items-center gap-1.5 px-2 py-1.5 rounded bg-slate-50 border border-slate-200 shadow-sm shrink-0">
+                      <Layers3 className="size-3.5 text-indigo-500" />
+                      <span className="text-[11px] font-medium text-slate-600"><strong className="text-slate-900">{ver.item_count}</strong> khoản mục</span>
+                    </div>
                     {ver.doc_period && (
-                      <span className="text-[11px] font-medium shrink-0 text-slate-500 flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
-                        <Orbit className="size-3.5 text-indigo-400" />
-                        <span className="text-slate-700">{ver.doc_period}</span>
-                      </span>
+                      <div className="flex items-center gap-1.5 px-2 py-1.5 rounded bg-slate-50 border border-slate-200 shadow-sm min-w-0 max-w-full">
+                        <Orbit className="size-3.5 text-indigo-500 shrink-0" />
+                        <span className="text-[11px] font-medium text-slate-600 truncate">{ver.doc_period}</span>
+                      </div>
                     )}
                   </div>
+                  
                 </div>
               ))}
             </div>
@@ -534,6 +619,45 @@ export default function UploadMasterPage() {
         
         </div>
       </div>
+
+      {/* ── Confirm Modals ── */}
+      {(confirmDeployId || confirmMainDeploy) && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[2rem] shadow-2xl max-w-[400px] w-full p-8 animate-in zoom-in-95 duration-200 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-rose-500 to-rose-400" />
+            <div className="flex flex-col items-center text-center gap-5">
+              <div className="size-16 rounded-full bg-rose-50 flex items-center justify-center border-[6px] border-rose-500/10">
+                <AlertCircle className="size-7 text-rose-600" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-black text-slate-800 tracking-tight">Xác nhận Triển khai</h3>
+                <p className="text-[13px] text-slate-500 font-medium leading-relaxed px-2">
+                  Hành động này sẽ thay đổi Khung cấu trúc Dữ liệu chính thức của toàn hệ thống bằng phiên bản này. Bạn chắc chắn muốn tiếp tục?
+                </p>
+              </div>
+              <div className="flex gap-3 w-full mt-4">
+                <button
+                  onClick={() => { setConfirmDeployId(null); setConfirmMainDeploy(false); }}
+                  className="flex-1 px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[13px] uppercase tracking-wide transition-all active:scale-95"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  onClick={() => {
+                    const id = confirmDeployId || undefined;
+                    setConfirmDeployId(null);
+                    setConfirmMainDeploy(false);
+                    proceedDeploy(id);
+                  }}
+                  className="flex-1 px-4 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-[0_4px_15px_-3px_rgba(225,29,72,0.4)] font-bold text-[13px] uppercase tracking-wide transition-all active:scale-95"
+                >
+                  Vâng, Triển khai
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

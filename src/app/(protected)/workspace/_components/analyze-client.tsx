@@ -261,7 +261,7 @@ export default function AnalyzeClient({
                 Phân loại AI
               </span>
               <span className="text-slate-200">/</span>
-              <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.15em] text-slate-600 px-2.5 py-1 rounded-[8px] border border-slate-200 bg-white shadow-sm">
+              <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.15em] text-amber-600 px-2.5 py-1 rounded-[8px] border border-amber-200 bg-amber-50 shadow-sm">
                 <span className="relative flex size-1.5">
                   <span className="absolute inset-0 rounded-full bg-emerald-400 opacity-70 animate-ping" />
                   <span className="relative size-1.5 rounded-full bg-emerald-500" />
@@ -303,14 +303,14 @@ export default function AnalyzeClient({
         {/* Input card & Tips Container — Light Liquid Glass */}
         {state !== 'results' && state !== 'supplement' && state !== 'supplement-loading' && (
           <div className="flex flex-col xl:flex-row items-stretch gap-6 mb-6">
-            <div className="rounded-3xl overflow-hidden bg-white border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-900/5 backdrop-blur-xl flex-1 max-w-full transition-all">
+            <div className="rounded-3xl overflow-hidden bg-white border-2 border-amber-700/40 shadow-[0_8px_30px_rgba(180,83,9,0.08)] ring-1 ring-amber-900/5 backdrop-blur-xl flex-1 max-w-full transition-all">
               {/* Card header */}
-              <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-                <div className={`size-10 rounded-xl flex items-center justify-center shadow-sm ${reportIdParam ? 'bg-emerald-50 border border-emerald-100' : 'bg-indigo-50 border border-indigo-100'}`}>
+              <div className="flex items-center gap-3 px-6 py-4 border-b border-amber-100/50 bg-amber-50/20">
+                <div className={`size-10 rounded-xl flex items-center justify-center shadow-sm ${reportIdParam ? 'bg-emerald-50 border border-emerald-100' : 'bg-amber-50 border border-amber-200/60'}`}>
                   {reportIdParam ? (
                     <Database className="size-5 text-emerald-600" strokeWidth={2.5} />
                   ) : (
-                    <Sparkles className="size-5 text-indigo-600" strokeWidth={2.5} />
+                    <Sparkles className="size-5 text-amber-600" strokeWidth={2.5} />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -388,8 +388,8 @@ export default function AnalyzeClient({
                   <ShieldCheck className="size-3 text-slate-400" strokeWidth={2.5} />
                   Mã hóa đầu cuối
                 </span>
-                <span className="flex items-center gap-1.5 text-[10px] font-bold text-violet-600 ml-auto">
-                  <Zap className="size-3 text-violet-500" strokeWidth={2.5} />
+                <span className="flex items-center gap-1.5 text-[10px] font-bold text-amber-600 ml-auto">
+                  <Zap className="size-3 text-amber-500" strokeWidth={2.5} />
                   {aiModel}
                 </span>
               </div>
@@ -531,23 +531,23 @@ export default function AnalyzeClient({
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3 ml-1">Quy trình tra cứu</p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
-                  { step: '01', title: 'Nhập mô tả', desc: 'Gõ hoặc dán nội dung hoá đơn, nghiệp vụ kế toán cần tra cứu', icon: <PencilLine className="size-5 text-indigo-600" />, iconBg: 'bg-indigo-50 border-indigo-100', dot: 'bg-indigo-400' },
-                  { step: '02', title: 'AI phân tích', desc: `${aiModel} đối chiếu với cơ sở dữ liệu chuẩn TABMIS và đề xuất tiểu mục`, icon: <BrainCircuit className="size-5 text-violet-600" />, iconBg: 'bg-violet-50 border-violet-100', dot: 'bg-violet-400' },
-                  { step: '03', title: 'Lưu báo cáo', desc: 'Xác nhận kết quả và ghi nhận vào phiếu hạch toán kế toán', icon: <CheckCircle2 className="size-5 text-emerald-600" />, iconBg: 'bg-emerald-50 border-emerald-100', dot: 'bg-emerald-400' },
-                ].map(({ step, title, desc, icon, iconBg }) => (
-                  <div key={step} className="relative bg-white rounded-3xl p-5 border border-slate-200/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06)] transition-all duration-300 group hover:-translate-y-1 overflow-hidden cursor-default">
-                    <div className="absolute top-0 right-0 p-4 opacity-[0.02] group-hover:scale-110 group-hover:opacity-[0.04] transition-all origin-center pointer-events-none">
-                       <span className="font-mono text-8xl font-black text-slate-900">{step}</span>
+                  { step: '01', title: 'Nhập mô tả', desc: 'Gõ hoặc dán nội dung hoá đơn, nghiệp vụ kế toán cần tra cứu', icon: <PencilLine className="size-5 text-indigo-600" />, iconBg: 'bg-indigo-50 border-indigo-100', customBorder: 'border-slate-200/80 hover:border-amber-200/50' },
+                  { step: '02', title: 'Baymax phân tích', desc: <><span className="font-bold text-amber-500">{aiModel}</span> đối chiếu với cơ sở dữ liệu chuẩn TABMIS và đề xuất tiểu mục</>, icon: <Zap className="size-5 text-amber-500 fill-amber-500/20" strokeWidth={2.5} />, iconBg: 'bg-gradient-to-br from-amber-50 to-orange-50/50 border-amber-200/60 shadow-[0_0_15px_rgba(245,158,11,0.15)] ring-1 ring-amber-500/10', customBorder: 'border-amber-200/60 shadow-[0_4px_20px_rgba(245,158,11,0.08)] ring-1 ring-amber-500/10' },
+                  { step: '03', title: 'Lưu báo cáo', desc: 'Xác nhận kết quả và ghi nhận vào phiếu hạch toán kế toán', icon: <CheckCircle2 className="size-5 text-emerald-600" />, iconBg: 'bg-emerald-50 border-emerald-100', customBorder: 'border-slate-200/80 hover:border-amber-200/50' },
+                ].map(({ step, title, desc, icon, iconBg, customBorder }) => (
+                  <div key={step} className={`relative bg-white rounded-3xl p-5 border ${customBorder} hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06)] transition-all duration-300 group hover:-translate-y-1 overflow-hidden cursor-default`}>
+                    <div className="absolute top-0 right-0 p-4 opacity-[0.02] group-hover:scale-110 group-hover:opacity-[0.05] transition-all origin-center pointer-events-none">
+                       <span className="font-mono text-8xl font-black text-slate-900 group-hover:text-amber-500 transition-colors">{step}</span>
                     </div>
                     <div className="flex flex-col gap-3 relative z-10">
                       <div className="flex items-center justify-between">
                          <div className={`size-12 rounded-2xl ${iconBg} border flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform`}>
                            {icon}
                          </div>
-                         <span className="text-[10px] font-black tracking-[0.2em] text-slate-300 uppercase me-1">Bước {step}</span>
+                         <span className="text-[10px] font-black tracking-[0.2em] text-slate-300 group-hover:text-amber-400/70 transition-colors uppercase me-1">Bước {step}</span>
                       </div>
                       <div className="mt-2">
-                        <h3 className="text-[15px] font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">{title}</h3>
+                        <h3 className="text-[15px] font-bold text-slate-800 group-hover:text-amber-600 transition-colors">{title}</h3>
                         <p className="text-[12px] text-slate-500 leading-relaxed mt-1 font-medium">{desc}</p>
                       </div>
                     </div>

@@ -34,14 +34,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <div
               className="size-10 rounded-xl flex items-center justify-center shrink-0"
               style={{
-                background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                boxShadow: '0 2px 12px rgba(37,99,235,0.4)',
+                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                boxShadow: '0 2px 12px rgba(245,158,11,0.4)',
               }}
             >
               <Zap className="size-5 text-white" strokeWidth={2.5} />
             </div>
             <div>
-              <p className="text-white font-bold text-[15px] tracking-tight leading-none">KienTru ThiHanh</p>
+              <p className="text-white font-bold text-[15px] tracking-tight leading-none">Baymax ThiHanh</p>
               <p className="text-[9px] font-bold uppercase tracking-[0.28em] mt-1"
                 style={{ color: 'rgba(255,255,255,0.35)' }}>
                 Cổng Dữ Liệu Nội Bộ
@@ -54,14 +54,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <div
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6 text-[10px] font-bold uppercase tracking-[0.18em]"
               style={{
-                background: 'rgba(37,99,235,0.18)',
-                border: '1px solid rgba(37,99,235,0.3)',
-                color: 'rgba(147,197,253,0.9)',
+                background: 'rgba(245,158,11,0.18)',
+                border: '1px solid rgba(245,158,11,0.3)',
+                color: 'rgba(251,191,36,0.9)',
               }}
             >
               <span className="relative flex size-1.5">
-                <span className="absolute inset-0 rounded-full bg-blue-400 opacity-70 animate-ping" />
-                <span className="relative size-1.5 rounded-full bg-blue-400" />
+                <span className="absolute inset-0 rounded-full bg-amber-400 opacity-70 animate-ping" />
+                <span className="relative size-1.5 rounded-full bg-amber-400" />
               </span>
               Hệ thống đang hoạt động
             </div>
@@ -71,7 +71,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               style={{ fontSize: 'clamp(1.7rem, 2.8vw, 2.4rem)', color: '#ffffff' }}
             >
               Hệ thống Tra cứu<br />
-              <span style={{ color: '#93c5fd' }}>Định danh Chi phí</span>
+              <span style={{ color: '#fbbf24' }}>Định danh Chi phí</span>
             </h1>
 
             <p

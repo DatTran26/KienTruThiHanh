@@ -64,7 +64,7 @@ export function AnalyzeRightPanel({
   aiModel = 'gpt-4o-mini'
 }: Props) {
   const STATUSES = [
-    { icon: Zap,          label: `${aiModel} · AI Engine`, badge: 'Online',  cls: 'bg-emerald-50 text-emerald-600 border-emerald-100', dot: 'bg-emerald-500' },
+    { icon: Zap,          label: <><span className="text-amber-600 drop-shadow-sm">{aiModel}</span><span className="opacity-70"> · AI Engine</span></>, badge: 'Online',  cls: 'bg-emerald-50 text-emerald-600 border-emerald-100', dot: 'bg-emerald-500' },
     { icon: Cpu,          label: 'TABMIS · Database',      badge: 'Live',    cls: 'bg-emerald-50 text-emerald-600 border-emerald-100', dot: 'bg-emerald-500' },
     { icon: Wifi,         label: 'API Gateway',            badge: 'Stable',  cls: 'bg-blue-50 text-blue-600 border-blue-100',          dot: 'bg-blue-500' },
     { icon: ShieldCheck,  label: 'TLS 1.3 · Mã hóa',     badge: 'Secured', cls: 'bg-slate-50 text-slate-600 border-slate-200',        dot: null },
@@ -237,7 +237,7 @@ export function AnalyzeRightPanel({
       {/* ── Footer ── */}
       <div className="px-7 py-4 border-t border-slate-200/80 bg-white shrink-0 flex items-center justify-between z-10 shadow-[0_-5px_20px_rgba(0,0,0,0.02)]">
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-          KienTru · v2.0
+          Baymax · v2.0
         </p>
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-[8px] bg-emerald-50 border border-emerald-100">
           <span className="size-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse" />

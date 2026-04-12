@@ -72,7 +72,7 @@ export function DescriptionForm({ onSubmit, isLoading }: DescriptionFormProps) {
         <button
           type="submit"
           disabled={isLoading}
-          className="flex items-center gap-2.5 px-7 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-black text-[12px] uppercase tracking-widest rounded-xl transition-all disabled:opacity-50 shrink-0 active:scale-[0.97] shadow-[0_4px_15px_-3px_rgba(99,102,241,0.4)] hover:shadow-[0_8px_25px_-5px_rgba(99,102,241,0.5)]"
+          className="flex items-center gap-2.5 px-7 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-black text-[12px] uppercase tracking-widest rounded-xl transition-all disabled:opacity-50 shrink-0 active:scale-[0.97] shadow-[0_4px_15px_-3px_rgba(245,158,11,0.4)] hover:shadow-[0_8px_25px_-5px_rgba(245,158,11,0.5)]"
         >
           {isLoading ? (
             <>

@@ -57,7 +57,7 @@ export default async function AnalyzePage() {
     if (items) popularItems = items;
   }
 
-  const aiModel = process.env.AI_MODEL ?? 'gpt-4o-mini';
+  const aiModel = process.env.AI_DISPLAY_NAME ?? process.env.AI_MODEL ?? 'gpt-4o-mini';
 
   return (
     <div className="flex h-full min-h-screen">
