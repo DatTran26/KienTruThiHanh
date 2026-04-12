@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send, Sparkles, Loader2, Zap, BrainCircuit, Atom } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -150,7 +152,31 @@ export function AiChatBubble() {
                     ? 'bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-700 text-white rounded-[20px] rounded-tr-[4px] shadow-indigo-500/20 shadow-lg border border-indigo-400/30 font-medium'
                     : 'bg-white/95 backdrop-blur-md border border-slate-100 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.05)] text-slate-700 rounded-[20px] rounded-tl-[4px] font-medium'
                 }`}>
-                  {msg.content}
+                  {msg.role === 'user' ? (
+                    msg.content
+                  ) : (
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        p: ({node, ...props}) => <p className="mb-2.5 last:mb-0" {...props}/>,
+                        strong: ({node, ...props}) => <strong className="font-bold text-indigo-950" {...props}/>,
+                        h1: ({node, ...props}) => <h1 className="text-lg font-extrabold text-indigo-950 mt-4 mb-2" {...props}/>,
+                        h2: ({node, ...props}) => <h2 className="text-base font-extrabold text-indigo-950 mt-4 mb-2" {...props}/>,
+                        h3: ({node, ...props}) => <h3 className="text-[15px] font-bold text-indigo-950 mt-3 mb-1.5" {...props}/>,
+                        ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-3 space-y-1" {...props}/>,
+                        ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...props}/>,
+                        li: ({node, ...props}) => <li className="pl-0.5" {...props}/>,
+                        code: ({node, ref, ...props}: any) => {
+                          const isInline = !props.className?.includes('language-');
+                          return isInline 
+                            ? <code className="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 rounded-md text-[13px] font-mono border border-indigo-100/50" {...props}/> 
+                            : <pre className="p-3 bg-slate-900 text-slate-50 rounded-xl max-w-full overflow-x-auto text-[13px] font-mono leading-normal shadow-inner my-3"><code {...props}/></pre>;
+                        },
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                  )}
                 </div>
               </div>
             ))}
