@@ -21,6 +21,7 @@ export function AiChatBubble() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-scroll to bottom of chat
   const scrollToBottom = () => {
@@ -40,7 +41,12 @@ export function AiChatBubble() {
     const userMsg = input.trim();
     const currentMessages = [...messages, { role: 'user', content: userMsg }];
     setMessages(currentMessages as ChatMessage[]);
+    
     setInput('');
+    if (textareaRef.current) {
+      textareaRef.current.style.height = '56px';
+    }
+    
     setLoading(true);
 
     try {
@@ -70,8 +76,14 @@ export function AiChatBubble() {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    e.target.style.height = '56px'; // Reset line height
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 104)}px`; // Max 3 lines (104px)
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -204,12 +216,14 @@ export function AiChatBubble() {
               {/* Outer glow on focus-within */}
               <div className="absolute -inset-1 bg-gradient-to-r from-indigo-300 to-violet-300 rounded-[22px] opacity-0 group-focus-within:opacity-50 blur transition-opacity duration-300"></div>
               
-              <input
+              <textarea
+                ref={textareaRef}
                 value={input}
-                onChange={e => setInput(e.target.value)}
+                onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
+                rows={1}
                 placeholder="Tra cứu nghiệp vụ, hỏi AI..."
-                className="relative w-full h-[56px] pl-6 pr-16 rounded-[20px] bg-slate-50 border-2 border-slate-100 focus:bg-white text-[15px] outline-none focus:border-indigo-400 text-slate-700 placeholder:text-slate-400 font-semibold transition-all shadow-sm"
+                className="relative w-full min-h-[56px] max-h-[104px] py-[16px] pl-6 pr-16 rounded-[20px] bg-slate-50 border-2 border-slate-100 focus:bg-white text-[15px] outline-none focus:border-indigo-400 text-slate-700 placeholder:text-slate-400 font-semibold transition-all shadow-sm resize-none overflow-y-auto leading-[24px]"
                 disabled={loading}
               />
               <button 
