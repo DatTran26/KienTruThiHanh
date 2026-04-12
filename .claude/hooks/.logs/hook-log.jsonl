@@ -727,3 +727,5 @@
 {"ts":"2026-04-11T12:24:06.402Z","hook":"privacy-block","event":"PreToolUse","tool":"Bash","target":"","note":"","dur":108,"status":"ok","exit":0,"error":""}
 {"ts":"2026-04-11T12:24:06.464Z","hook":"scout-block","event":"PreToolUse","tool":"","target":"","note":"","dur":0,"status":"crash","exit":0,"error":"path should be a `path.relative()`d string, but got \"D:/Projects/Git Public/KienTruThiHanh\""}
 {"ts":"2026-04-11T12:24:19.950Z","hook":"usage-quota-cache-refresh","event":"PostToolUse","tool":"Bash","target":"","note":"throttled","dur":3,"status":"skip","exit":0,"error":""}
+{"ts":"2026-04-12T15:34:41.876Z","hook":"session-init","event":"SessionStart","tool":"","target":"","note":"startup","dur":2380,"status":"ok","exit":0,"error":""}
+{"ts":"2026-04-12T15:34:42.528Z","hook":"usage-quota-cache-refresh","event":"SessionStart","tool":"","target":"","note":"fetched","dur":3077,"status":"ok","exit":0,"error":""}

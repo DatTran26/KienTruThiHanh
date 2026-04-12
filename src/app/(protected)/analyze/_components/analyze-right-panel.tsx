@@ -216,7 +216,7 @@ export function AnalyzeRightPanel({
                       )}
                     </div>
                     <div className="flex items-center gap-2 text-[11px] font-bold text-slate-400 uppercase tracking-wide">
-                      <span>{formatRelativeTime(item.created_at)}</span>
+                      <span suppressHydrationWarning>{formatRelativeTime(item.created_at)}</span>
                       {item.extracted_amount && (
                         <>
                           <span className="opacity-40">•</span>

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { CreateReportDialog } from './_components/create-report-dialog';
+import { VerifyPdfDialog } from './_components/verify-pdf-dialog';
 import { ReportListClient } from './_components/report-list-client';
 import { formatCurrency } from '@/lib/utils';
 import {
@@ -84,7 +85,8 @@ export default async function ReportsPage() {
           </p>
         </div>
 
-        <div className="mt-5 sm:mt-0">
+        <div className="mt-5 sm:mt-0 flex items-center gap-3">
+          <VerifyPdfDialog />
           <CreateReportDialog />
         </div>
       </header>
