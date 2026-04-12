@@ -1,10 +1,18 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { OrgForm } from './_components/org-form';
 import { ProfileWorkspace } from './_components/profile-workspace';
 
 export default async function ProfilePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+
+  const serviceSupabase = createServiceClient();
+  const { data: userRow } = await serviceSupabase
+    .from('users')
+    .select('role')
+    .eq('id', user!.id)
+    .single();
+  const isAdmin = (userRow as any)?.role === 'admin';
 
   const { data: profile } = await supabase
     .from('organization_profiles')
@@ -19,6 +27,7 @@ export default async function ProfilePage() {
       profile={profile} 
       isVerified={isVerified}
       userEmail={user?.email || ''}
+      isAdmin={isAdmin}
       generalForm={<OrgForm initialValues={profile ?? undefined} isVerified={isVerified} />}
     />
   );

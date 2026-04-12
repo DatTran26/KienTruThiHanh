@@ -8,14 +8,17 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+import { AdminOrgConfig } from './admin-org-config';
+
 interface ProfileWorkspaceProps {
   profile: any;
   isVerified: boolean;
   userEmail: string;
   generalForm: React.ReactNode;
+  isAdmin?: boolean;
 }
 
-const TABS = [
+const BASE_TABS = [
   { id: 'overview', label: 'Thông tin chung', icon: Building2 },
   { id: 'banking', label: 'Tài khoản ngân hàng', icon: Landmark },
   { id: 'structure', label: 'Cơ cấu tổ chức', icon: Users },
@@ -23,8 +26,13 @@ const TABS = [
   { id: 'settings', label: 'Cài đặt hệ thống', icon: Settings },
 ];
 
-export function ProfileWorkspace({ profile, isVerified, userEmail, generalForm }: ProfileWorkspaceProps) {
+export function ProfileWorkspace({ profile, isVerified, userEmail, generalForm, isAdmin }: ProfileWorkspaceProps) {
   const [activeTab, setActiveTab] = useState('overview');
+
+  const TABS = [
+    ...BASE_TABS,
+    ...(isAdmin ? [{ id: 'admin_config', label: '⚙️ Tham số Định danh', icon: Database }] : []),
+  ];
 
   const steps = [
     { label: 'Xác thực Đơn vị', done: true },
@@ -203,7 +211,7 @@ export function ProfileWorkspace({ profile, isVerified, userEmail, generalForm }
         )}
 
         {/* Coming Soon Placeholders for other tabs */}
-        {activeTab !== 'overview' && (
+        {activeTab !== 'overview' && activeTab !== 'admin_config' && (
           <div className="bg-white rounded-3xl border border-slate-200/80 p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-900/5 flex flex-col items-center justify-center text-center min-h-[400px]">
              <div className="size-20 rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-6 shadow-inner">
                {activeTab === 'banking' && <Landmark className="size-8 text-slate-300" />}
@@ -219,6 +227,11 @@ export function ProfileWorkspace({ profile, isVerified, userEmail, generalForm }
                Quay lại Tổng quan
              </button>
           </div>
+        )}
+
+        {/* Admin Tools */}
+        {activeTab === 'admin_config' && (
+           <AdminOrgConfig />
         )}
 
       </div>

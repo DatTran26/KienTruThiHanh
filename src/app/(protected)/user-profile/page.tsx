@@ -1,7 +1,6 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { Mail, ShieldCheck, Building2, KeyRound, CalendarDays, Zap, FileSymlink, LogOut, ExternalLink, ShieldAlert, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
-import { AdminOrgConfig } from './_components/admin-org-config';
 
 export default async function UserProfilePage() {
   const supabase = await createClient();
@@ -213,12 +212,10 @@ export default async function UserProfilePage() {
                      <p className="text-[12px] text-slate-500 font-medium">Bảo vệ phiên làm việc</p>
                    </div>
                  </div>
-                 <span className="text-slate-300 group-hover:text-indigo-500 font-bold transition-colors">→</span>
+                  <span className="text-slate-300 group-hover:text-indigo-500 font-bold transition-colors">→</span>
               </button>
             </div>
           </div>
-
-          {isAdmin && <AdminOrgConfig />}
         </div>
       </div>
     </div>
