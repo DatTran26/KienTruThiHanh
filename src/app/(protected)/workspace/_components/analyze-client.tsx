@@ -131,26 +131,38 @@ export default function AnalyzeClient({
         return;
       }
 
-      const results = data.top_result_json as AnalysisResult[];
-      if (!results || results.length === 0) {
+      const rawJson = data.top_result_json as any;
+      const amount = data.extracted_amount;
+      const confidence = data.confidence || 0;
+
+      // Detect format: new ExpenseGroup[] has 'bestItem', old AnalysisResult[] has 'groupCode'
+      let expenseGroups: ExpenseGroup[];
+      let results: AnalysisResult[];
+
+      if (Array.isArray(rawJson) && rawJson.length > 0 && rawJson[0].bestItem) {
+        // New format: ExpenseGroup[]
+        expenseGroups = rawJson as ExpenseGroup[];
+        results = [expenseGroups[0].bestItem, ...expenseGroups[0].alternatives];
+      } else if (Array.isArray(rawJson) && rawJson.length > 0) {
+        // Old format: AnalysisResult[]
+        results = rawJson as AnalysisResult[];
+        expenseGroups = [{
+          originalDesc: data.raw_description,
+          amount: amount,
+          bestItem: results[0],
+          alternatives: results.slice(1),
+        }];
+      } else {
         setErrorMsg('Dữ liệu lịch sử không hợp lệ.');
         setState('error');
         return;
       }
-
-      const amount = data.extracted_amount;
-      const confidence = data.confidence || 0;
       
       const restoredResponse: AnalysisResponse = {
         requestId: data.id,
         amount: amount,
-        results: results,
-        expenseGroups: [{
-          originalDesc: data.raw_description,
-          amount: amount,
-          bestItem: results[0],
-          alternatives: results.slice(1)
-        }],
+        results,
+        expenseGroups,
         confidenceLevel: confidence >= 0.85 ? 'high' : confidence >= 0.6 ? 'medium' : 'low'
       };
 
