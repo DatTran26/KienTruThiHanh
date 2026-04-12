@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bot, X, Send, Sparkles, Loader2, Zap, BrainCircuit, Wand2 } from 'lucide-react';
+import { Bot, X, Send, Sparkles, Loader2, Zap, BrainCircuit, Atom } from 'lucide-react';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -62,7 +62,7 @@ export function AiChatBubble() {
       
       {/* ── Chat Window ── */}
       {isOpen && (
-        <div className="mb-5 w-[400px] h-[600px] pointer-events-auto bg-white/70 backdrop-blur-3xl rounded-[28px] shadow-[0_20px_80px_-15px_rgba(0,0,0,0.2)] border border-white/80 overflow-hidden flex flex-col animate-in slide-in-from-bottom-12 fade-in zoom-in-95 duration-500 origin-bottom-right">
+        <div className="mb-5 w-[400px] max-w-[calc(100vw-48px)] h-[600px] max-h-[calc(100vh-140px)] pointer-events-auto bg-white/70 backdrop-blur-3xl rounded-[28px] shadow-[0_20px_80px_-15px_rgba(0,0,0,0.2)] border border-white/80 overflow-hidden flex flex-col animate-in slide-in-from-bottom-12 fade-in zoom-in-95 duration-500 origin-bottom-right">
           
           {/* Advanced Bright Glass Header */}
           <div className="relative px-6 py-5 bg-gradient-to-r from-indigo-50 to-white/90 border-b border-indigo-100 flex items-center justify-between shrink-0 overflow-hidden">
@@ -75,7 +75,7 @@ export function AiChatBubble() {
               <div className="relative size-12 rounded-full p-[1px] bg-gradient-to-br from-indigo-300 to-violet-400 shadow-lg shadow-indigo-200/50">
                 <div className="relative h-full w-full rounded-full bg-white flex items-center justify-center">
                   <div className="absolute -top-0.5 -right-0.5 size-3.5 rounded-full bg-emerald-400 border-[2px] border-white shadow-sm"></div>
-                  <Bot className="size-6 text-indigo-600" />
+                  <Atom className="size-6 text-indigo-600" />
                 </div>
               </div>
               
@@ -108,7 +108,7 @@ export function AiChatBubble() {
           <div className="flex-1 overflow-y-auto p-5 space-y-6 scroll-smooth bg-gradient-to-b from-slate-50/50 to-slate-100/30 relative">
             {/* Background watermark */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03]">
-              <BrainCircuit className="size-64 text-indigo-900" />
+              <Atom className="size-64 text-indigo-900 animate-[spin_60s_linear_infinite]" />
             </div>
 
             {messages.map((msg, idx) => (
@@ -123,7 +123,7 @@ export function AiChatBubble() {
                      }}
                 >
                   {msg.role === 'assistant' 
-                    ? <Zap className="size-4.5 text-indigo-700" />
+                    ? <Atom className="size-4.5 text-indigo-700" />
                     : <span className="font-bold text-slate-500 text-[10px] uppercase">You</span>
                   }
                 </div>
@@ -141,7 +141,7 @@ export function AiChatBubble() {
             {loading && (
               <div className="relative z-10 flex gap-3 max-w-[85%] animate-in fade-in duration-300">
                 <div className="size-9 shrink-0 rounded-full bg-gradient-to-br from-indigo-50 to-indigo-100 border-2 border-white flex items-center justify-center shadow-sm">
-                  <Zap className="size-4.5 text-indigo-600" />
+                  <Atom className="size-4.5 text-indigo-600" />
                 </div>
                 <div className="px-5 py-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-100 shadow-sm text-slate-500 rounded-tl-sm flex items-center gap-1.5 h-[52px]">
                   <div className="flex gap-1.5">
