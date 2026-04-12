@@ -230,45 +230,47 @@ export function ReportItemsManager({
       <div className="flex-1 min-w-0 flex flex-col border-r-0 lg:border-r border-slate-200">
 
         {/* Toolbar */}
-        <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 shrink-0">
-          <div className="relative w-full sm:w-[220px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400 pointer-events-none" />
+        <div className="px-5 py-4 border-b border-slate-200/70 bg-white/60 backdrop-blur-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0 z-20">
+          <div className="relative w-full sm:w-[280px]">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 pointer-events-none drop-shadow-sm" strokeWidth={2.5} />
             <input
-              type="text" placeholder="Tìm kiếm..." value={searchTerm}
+              type="text" placeholder="Tìm kiếm khoản mục..." value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full h-8 pl-8 pr-3 rounded-lg bg-white border border-slate-200 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/10 text-slate-700 placeholder:text-slate-400"
+              className="w-full h-10 pl-10 pr-4 rounded-xl bg-slate-50/50 border border-slate-200/80 text-sm outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 text-slate-700 placeholder:text-slate-400 transition-all font-medium drop-shadow-sm"
             />
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <button 
               onClick={() => setShowGroupDetails(p => !p)} 
-              className={`flex items-center justify-center gap-2 h-8 px-3.5 rounded-lg text-[11px] font-bold transition-all duration-300 border ${
+              className={`flex items-center justify-center gap-2 h-10 px-4 rounded-xl text-[12px] font-black uppercase tracking-wider transition-all duration-300 border ${
                 showGroupDetails 
-                  ? 'bg-indigo-600 text-white border-transparent shadow-[0_4px_12px_rgba(79,70,229,0.25)] hover:bg-indigo-700' 
-                  : 'bg-white border-indigo-100 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-sm'
+                  ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white border-transparent shadow-[0_4px_20px_rgba(79,70,229,0.3)] hover:shadow-[0_6px_25px_rgba(79,70,229,0.4)] hover:-translate-y-0.5' 
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300 shadow-sm hover:shadow-md'
               }`}
             >
-              {showGroupDetails ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
+              <div className={`flex items-center justify-center size-5 rounded-md ${showGroupDetails ? 'bg-white/20' : 'bg-slate-100'} transition-colors`}>
+                {showGroupDetails ? <ChevronUp className="size-3.5" strokeWidth={3} /> : <ChevronDown className="size-3.5" strokeWidth={3} />}
+              </div>
               {showGroupDetails ? 'Ẩn chi tiết nhóm' : 'Hiển thị chi tiết từng nhóm'}
             </button>
 
             <button 
               onClick={() => setShowMasterData(p => !p)} 
-              className={`flex items-center justify-center gap-2 h-8 px-3.5 rounded-lg text-[11px] font-bold transition-all duration-300 border ${
+              className={`flex items-center justify-center gap-2.5 h-10 px-4 rounded-xl text-[12px] font-black uppercase tracking-wider transition-all duration-300 border ${
                 showMasterData 
-                  ? 'bg-emerald-500 text-white border-transparent shadow-[0_4px_12px_rgba(16,185,129,0.25)] hover:bg-emerald-600' 
-                  : 'bg-white border-emerald-100 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm'
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-transparent shadow-[0_4px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_6px_25px_rgba(16,185,129,0.4)] hover:-translate-y-0.5' 
+                  : 'bg-gradient-to-br from-white to-emerald-50/30 border-emerald-200/60 text-emerald-700 hover:border-emerald-300 shadow-sm hover:shadow-md'
               }`}
             >
-              <Database className="size-3.5" />
+              <Database className="size-4 drop-shadow-sm" strokeWidth={2.5} />
               Tra cứu Kho dữ liệu
             </button>
           </div>
         </div>
 
         {/* Table */}
-        <div className="flex-1 overflow-y-auto overflow-x-auto">
+        <div className="flex-1 overflow-y-auto overflow-x-auto relative">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full p-8 text-center">
               <div className="size-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4 border border-slate-200">
@@ -278,80 +280,82 @@ export function ReportItemsManager({
               <p className="text-xs text-slate-400 max-w-[220px]">Sử dụng bảng nhập bên phải để thêm khoản mục mới</p>
             </div>
           ) : (
-            <table className="w-full text-sm text-left">
-              <thead className="text-[9px] text-slate-500 uppercase tracking-wider bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
+            <table className="w-full text-sm text-left border-collapse">
+              <thead className="text-[10px] text-slate-500 font-black uppercase tracking-[0.15em] bg-slate-50/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-10 shadow-sm">
                 <tr>
-                  <th className="px-3 py-2.5 w-10 font-bold"><Hash className="size-3 opacity-50" /></th>
-                  <th className="px-3 py-2.5 font-bold cursor-pointer group hover:bg-slate-100/50" onClick={() => handleSort('group_code')}>
-                    <div className="flex items-center gap-1">Nhóm <SortIcon columnKey="group_code" /></div>
+                  <th className="px-4 py-3.5 w-12 text-center"><Hash className="size-3.5 opacity-50 mx-auto" /></th>
+                  <th className="px-4 py-3.5 cursor-pointer group hover:bg-slate-100/60 transition-colors" onClick={() => handleSort('group_code')}>
+                    <div className="flex items-center gap-1.5">NHÓM MỤC <SortIcon columnKey="group_code" /></div>
                   </th>
-                  <th className="px-3 py-2.5 font-bold cursor-pointer group hover:bg-slate-100/50" onClick={() => handleSort('sub_code')}>
-                    <div className="flex items-center gap-1">T.Mục <SortIcon columnKey="sub_code" /></div>
+                  <th className="px-4 py-3.5 cursor-pointer group hover:bg-slate-100/60 transition-colors" onClick={() => handleSort('sub_code')}>
+                    <div className="flex items-center gap-1.5">TIỂU MỤC <SortIcon columnKey="sub_code" /></div>
                   </th>
-                  <th className="px-3 py-2.5 font-bold cursor-pointer group hover:bg-slate-100/50" onClick={() => handleSort('expense_content')}>
-                    <div className="flex items-center gap-1">Nội dung <SortIcon columnKey="expense_content" /></div>
+                  <th className="px-4 py-3.5 cursor-pointer group hover:bg-slate-100/60 transition-colors" onClick={() => handleSort('expense_content')}>
+                    <div className="flex items-center gap-1.5">NỘI DUNG CHI PHÍ <SortIcon columnKey="expense_content" /></div>
                   </th>
-                  <th className="px-3 py-2.5 text-right font-bold cursor-pointer group hover:bg-slate-100/50" onClick={() => handleSort('amount')}>
-                    <div className="flex items-center justify-end gap-1">Số tiền <SortIcon columnKey="amount" /></div>
+                  <th className="px-4 py-3.5 text-right cursor-pointer group hover:bg-slate-100/60 transition-colors" onClick={() => handleSort('amount')}>
+                    <div className="flex items-center justify-end gap-1.5">SỐ TIỀN <SortIcon columnKey="amount" /></div>
                   </th>
-                  <th className="px-2 py-2.5 w-10"></th>
+                  <th className="px-3 py-3.5 w-12 text-center"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100/60">
                 {groupedItems.length === 0 ? (
-                  <tr><td colSpan={6} className="py-6 text-center text-slate-400 text-xs">Không tìm thấy &quot;{searchTerm}&quot;</td></tr>
+                  <tr><td colSpan={6} className="py-10 text-center font-medium text-slate-400 text-sm">Không tìm thấy &quot;{searchTerm}&quot;</td></tr>
                 ) : groupedItems.map(group => (
                   <Fragment key={group.group_code}>
                     {/* Header Row for Group */}
-                    <tr className="bg-slate-50/80 hover:bg-slate-100 transition-colors cursor-pointer group/header border-t border-b border-slate-200 shadow-[0_1px_2px_rgb(0,0,0,0.02)]" onClick={() => setShowGroupDetails(p => !p)}>
-                      <td className="px-3 py-3 w-10 text-center">
-                        <div className={`mx-auto size-6 rounded-md flex items-center justify-center transition-colors border ${showGroupDetails ? 'bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm' : 'bg-white border-slate-200 text-slate-400'}`}>
-                          <ChevronRight className={`size-4 transition-transform ${showGroupDetails ? 'rotate-90' : ''}`} />
+                    <tr className="bg-gradient-to-r from-slate-50/50 via-white to-slate-50/50 hover:from-white hover:to-indigo-50/20 transition-all cursor-pointer group/header border-b border-slate-200/60" onClick={() => setShowGroupDetails(p => !p)}>
+                      <td className="px-4 py-4 w-12 text-center">
+                        <div className={`mx-auto size-7 rounded-lg flex items-center justify-center transition-all duration-300 border ${showGroupDetails ? 'bg-indigo-500 border-indigo-600 text-white shadow-md shadow-indigo-500/30' : 'bg-white border-slate-200 text-slate-400 shadow-sm group-hover/header:border-indigo-300 group-hover/header:text-indigo-500'}`}>
+                          <ChevronRight className={`size-4 stroke-[3px] transition-transform duration-300 ${showGroupDetails ? 'rotate-90' : ''}`} />
                         </div>
                       </td>
-                      <td colSpan={3} className="px-3 py-3">
-                        <div className="flex items-center gap-2.5">
-                          <span className={`text-[13px] font-bold ${group.group_code === 'Chưa gán mã nhóm' ? 'text-amber-600' : 'text-slate-800'}`}>
-                            {group.group_code === 'Chưa gán mã nhóm' ? '⚠️ Khoản chi chưa gán mã nhóm' : `Nhóm mục: ${group.group_code}`}
-                          </span>
-                          <span className="text-[10px] text-slate-600 font-bold px-2 py-0.5 rounded-full bg-white border border-slate-200/80 shadow-sm">
-                            {group.items.length} khoản mục
+                      <td colSpan={3} className="px-4 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`px-2.5 py-1 rounded-md border shadow-sm font-mono text-[13px] font-black tracking-widest ${group.group_code === 'Chưa gán mã nhóm' ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-slate-800 border-slate-900 text-white'}`}>
+                            {group.group_code === 'Chưa gán mã nhóm' ? '⚠️ UNTAGGED' : `NHÓM: ${group.group_code}`}
+                          </div>
+                          <span className="text-[11px] font-bold text-slate-500 px-3 py-1 rounded-full bg-white border border-slate-200/80 shadow-sm flex items-center gap-1.5">
+                            <Layers3 className="size-3" strokeWidth={2.5}/> {group.items.length} KHOẢN MỤC
                           </span>
                         </div>
                       </td>
-                      <td className="px-3 py-3 text-right">
-                        <span className="font-mono text-[13px] font-bold text-indigo-700">{formatCurrency(group.amount)}</span>
+                      <td className="px-4 py-4 text-right">
+                        <span className="font-mono text-[16px] font-black text-indigo-600 bg-indigo-50/50 px-3 py-1.5 rounded-lg border border-indigo-100/50 tabular-nums">
+                          {formatCurrency(group.amount)} <span className="text-[10px] text-indigo-400">VND</span>
+                        </span>
                       </td>
                       <td></td>
                     </tr>
                     
                     {/* Detail Rows */}
                     {showGroupDetails && group.items.map((item, idx) => (
-                      <tr key={item.id} className="bg-white hover:bg-indigo-50/40 transition-colors group/row text-slate-600 relative">
-                        <td className="px-3 py-3 font-mono text-[10px] text-slate-400 pl-6 text-right">
-                          {idx + 1}
+                      <tr key={item.id} className="bg-white hover:bg-slate-50/80 transition-colors group/row border-b border-dashed border-slate-100">
+                        <td className="px-4 py-3.5 font-mono text-[11px] font-bold text-slate-300 pl-8 text-right">
+                          {String(idx + 1).padStart(2, '0')}
                         </td>
-                        <td className="px-3 py-2.5 text-slate-300 text-center">
-                          <span className="font-mono text-[9px]">-</span>
+                        <td className="px-4 py-3.5 text-center">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-200 inline-block"></span>
                         </td>
-                        <td className="px-3 py-2">
-                          <span className="font-mono text-[10px] font-bold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded border border-indigo-200">
+                        <td className="px-4 py-3.5">
+                          <span className="font-mono text-[11px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded-md border border-slate-200 shadow-[inset_0_1px_0_white]">
                             {item.sub_code ?? '—'}
                           </span>
                         </td>
-                        <td className="px-3 py-2 max-w-[200px]">
-                          <span className="text-slate-800 text-xs font-medium leading-snug line-clamp-2">{item.expense_content}</span>
-                          {item.note && <p className="text-slate-400 text-[10px] mt-0.5 line-clamp-1">{item.note}</p>}
+                        <td className="px-4 py-3.5 max-w-[280px]">
+                          <span className="text-slate-700 text-[13px] font-semibold leading-relaxed block mb-0.5">{item.expense_content}</span>
+                          {item.note && <div className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-100"><PenLine className="size-3" /> {item.note}</div>}
                         </td>
-                        <td className="px-3 py-2 text-right">
-                          <span className="font-mono text-xs font-bold text-slate-500">{formatCurrency(item.amount)}</span>
+                        <td className="px-4 py-3.5 text-right">
+                          <span className="font-mono text-[14px] font-bold text-slate-600 tabular-nums">{formatCurrency(item.amount)}</span>
                         </td>
-                        <td className="px-2 py-2 text-center">
+                        <td className="px-3 py-3.5 text-center">
                           <button
                             onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }} disabled={deletingId === item.id}
-                            className="size-7 rounded-md flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover/row:opacity-100 disabled:opacity-50"
+                            className="size-8 mx-auto rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 hover:shadow-sm transition-all opacity-0 group-hover/row:opacity-100 disabled:opacity-50"
                           >
-                            {deletingId === item.id ? <Loader2 className="size-3 animate-spin" /> : <Trash2 className="size-3" />}
+                            {deletingId === item.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
                           </button>
                         </td>
                       </tr>

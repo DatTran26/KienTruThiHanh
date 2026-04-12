@@ -194,8 +194,9 @@ export function AnalyzeRightPanel({
               <p className="text-[12px] text-slate-500 font-medium">Kết quả đối chiếu sẽ sớm hiển thị ở đây</p>
             </div>
           ) : (
-            <div className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-900/5 divide-y divide-slate-100 p-2">
-              {recentAnalyses.map((item) => {
+            <div className="bg-white rounded-3xl border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-900/5 p-2 pr-1 max-h-[420px] overflow-y-auto custom-scrollbar">
+              <div className="divide-y divide-slate-100">
+                {recentAnalyses.map((item) => {
                 const pct = item.confidence ? Math.round(item.confidence * 100) : null;
                 const isHigh = pct != null && pct >= 85;
                 return (
@@ -228,6 +229,7 @@ export function AnalyzeRightPanel({
                   </Link>
                 );
               })}
+              </div>
             </div>
           )}
         </div>

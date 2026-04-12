@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ResultCard } from './result-card';
-import type { AnalysisResponse, AnalysisResult } from '@/types/analysis';
+import type { AnalysisResponse, AnalysisResult, ExpenseGroup } from '@/types/analysis';
 import { AlertTriangle, Zap, ListTree, Receipt, Info, Plus, Save, Pencil, Minus, Check, X } from 'lucide-react';
 
 interface ResultSectionProps {

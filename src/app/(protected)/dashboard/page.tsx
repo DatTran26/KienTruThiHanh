@@ -7,6 +7,7 @@ import {
   Target, 
   Sparkles, 
   Clock, 
+  Calendar,
   ArrowRight,
   ArrowUpRight,
   TrendingUp,
@@ -34,7 +35,7 @@ export default async function DashboardPage() {
       .limit(5),
     supabase
       .from('reports')
-      .select('id, report_name, total_amount, status, created_at')
+      .select('id, report_name, status, created_at, report_items(amount)')
       .order('created_at', { ascending: false })
       .limit(4),
     supabase
@@ -42,27 +43,32 @@ export default async function DashboardPage() {
       .select('*', { count: 'exact', head: true }),
     supabase
       .from('reports')
-      .select('created_at, total_amount')
+      .select('created_at, report_items(amount)')
       .order('created_at', { ascending: true })
   ]);
 
   // Aggregate monthly data for chart
-  const monthlyData: Record<string, number> = {};
+  const monthlyData: Record<string, number> = {
+    'Thg 1': 0, 'Thg 2': 0, 'Thg 3': 0, 'Thg 4': 0,
+    'Thg 5': 0, 'Thg 6': 0, 'Thg 7': 0, 'Thg 8': 0,
+    'Thg 9': 0, 'Thg 10': 0, 'Thg 11': 0, 'Thg 12': 0,
+  };
   let totalExpectedAmount = 0;
   
   if (allReports) {
     for (const r of allReports) {
-      if (!r.total_amount) continue;
-      totalExpectedAmount += r.total_amount;
+      const realTotal = (r.report_items as any[])?.reduce((k, i) => k + (i.amount || 0), 0) || 0;
+      if (!realTotal) continue;
+      totalExpectedAmount += realTotal;
       const date = new Date(r.created_at);
       const monthLabel = `Thg ${date.getMonth() + 1}`;
-      monthlyData[monthLabel] = (monthlyData[monthLabel] || 0) + r.total_amount;
+      monthlyData[monthLabel] = (monthlyData[monthLabel] || 0) + realTotal;
     }
   }
 
   const chartData = Object.keys(monthlyData).map(k => ({
     name: k,
-    amount: monthlyData[k]
+    amount: monthlyData[k] || 0
   }));
 
   const getUserName = (email?: string) => {
@@ -75,7 +81,12 @@ export default async function DashboardPage() {
     return Math.round(avg * 100);
   })();
 
-  const totalReportAmount = recentReports?.reduce((s, r) => s + (r.total_amount ?? 0), 0) ?? 0;
+  const mappedRecentReports = recentReports?.map(r => {
+    const realTotal = (r.report_items as any[])?.reduce((k, i) => k + (i.amount || 0), 0) || 0;
+    return { ...r, total_amount: realTotal };
+  }) ?? [];
+
+  const totalReportAmount = mappedRecentReports.reduce((s, r) => s + r.total_amount, 0);
 
   const stats = [
     {
@@ -84,8 +95,9 @@ export default async function DashboardPage() {
       icon: Search,
       bg: 'bg-blue-500',
       lightBg: 'bg-blue-50',
-      borderColor: 'border-blue-100',
+      borderColor: 'border-blue-200/50',
       textColor: 'text-blue-600',
+      textGradient: 'from-blue-600 to-indigo-600',
       change: '+2 tuần này',
     },
     {
@@ -94,8 +106,9 @@ export default async function DashboardPage() {
       icon: FileText,
       bg: 'bg-violet-500',
       lightBg: 'bg-violet-50',
-      borderColor: 'border-violet-100',
+      borderColor: 'border-violet-200/50',
       textColor: 'text-violet-600',
+      textGradient: 'from-violet-600 to-purple-600',
       change: formatCurrency(totalReportAmount) + ' đ',
     },
     {
@@ -104,8 +117,9 @@ export default async function DashboardPage() {
       icon: Target,
       bg: 'bg-emerald-500',
       lightBg: 'bg-emerald-50',
-      borderColor: 'border-emerald-100',
+      borderColor: 'border-emerald-200/50',
       textColor: 'text-emerald-600',
+      textGradient: 'from-emerald-600 to-teal-600',
       change: 'Trung bình AI',
     },
     {
@@ -114,8 +128,9 @@ export default async function DashboardPage() {
       icon: Activity,
       bg: 'bg-amber-500',
       lightBg: 'bg-amber-50',
-      borderColor: 'border-amber-100',
+      borderColor: 'border-amber-200/50',
       textColor: 'text-amber-600',
+      textGradient: 'from-amber-500 to-orange-600',
       change: 'Gần đây',
     },
   ];
@@ -152,14 +167,23 @@ export default async function DashboardPage() {
             </p>
           </div>
 
-          <div className="hidden @md:flex flex-col items-end gap-1 text-right">
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl px-4 py-2.5 border border-slate-200/60 shadow-sm">
-              <p className="text-[12px] font-bold text-slate-700">
-                {now.toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-              </p>
-              <p className="text-[10px] font-mono text-slate-400 mt-0.5">
-                Lần cập nhật: {now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
-              </p>
+          <div className="hidden @md:flex items-center gap-3 relative group">
+            {/* Ambient hover glow */}
+            <div className="absolute inset-0 bg-indigo-400/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            
+            <div className="relative flex flex-col items-end bg-gradient-to-br from-white/95 to-slate-50/90 backdrop-blur-xl rounded-2xl px-5 py-3 border border-white shadow-[0_4px_25px_rgba(0,0,0,0.04)] ring-1 ring-slate-200/50 group-hover:-translate-y-0.5 group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-300">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Calendar className="size-4 text-indigo-500 drop-shadow-sm" strokeWidth={2.5} />
+                <p className="text-[14px] font-black bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent tracking-tight">
+                  {now.toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 bg-slate-100/80 px-2 py-0.5 rounded-md border border-slate-200/60">
+                <Clock className="size-3 text-slate-500" strokeWidth={2.5} />
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest tabular-nums">
+                  Cập nhật • {now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -173,24 +197,24 @@ export default async function DashboardPage() {
           {stats.map((s, i) => (
             <div
               key={i}
-              className="relative group rounded-2xl bg-white border border-slate-200/70 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.06)] transition-all duration-300 overflow-hidden"
+              className="relative group rounded-2xl bg-gradient-to-br from-white to-slate-50 border border-slate-200/60 p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden"
               style={{ animationDelay: `${i * 50}ms` }}
             >
               {/* Hover glow */}
-              <div className={`absolute -top-8 -right-8 size-24 ${s.bg} opacity-0 group-hover:opacity-[0.06] rounded-full blur-2xl transition-opacity duration-500`} />
+              <div className={`absolute -top-10 -right-10 size-32 ${s.bg} opacity-5 group-hover:opacity-15 rounded-full blur-2xl transition-opacity duration-500`} />
               
-              <div className="flex justify-between items-start mb-3">
-                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">{s.label}</span>
-                <div className={`size-8 flex items-center justify-center rounded-xl ${s.lightBg} border ${s.borderColor}`}>
-                  <s.icon size={14} strokeWidth={2.5} className={s.textColor} />
+              <div className="flex justify-between items-start mb-4">
+                <span className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-500 z-10 relative">{s.label}</span>
+                <div className={`size-9 flex items-center justify-center rounded-xl bg-white border drop-shadow-sm ${s.borderColor} z-10 relative group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
+                  <s.icon size={16} strokeWidth={2.5} className={s.textColor} />
                 </div>
               </div>
-              <div className="flex items-baseline gap-2">
-                <span className={`text-[28px] @md:text-[34px] font-black tracking-tight leading-none ${s.textColor}`}>
+              <div className="flex items-baseline gap-2 z-10 relative">
+                <span className={`text-[32px] @md:text-[38px] font-black tracking-tighter leading-none bg-gradient-to-br ${s.textGradient} bg-clip-text text-transparent drop-shadow-sm`}>
                   {s.value}
                 </span>
               </div>
-              <p className="text-[10px] font-semibold text-slate-400 mt-2">{s.change}</p>
+              <p className="text-[11px] font-bold text-slate-400 mt-2 z-10 relative">{s.change}</p>
             </div>
           ))}
         </div>
@@ -303,9 +327,9 @@ export default async function DashboardPage() {
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100/80">
-                  {recentReports.map((r) => (
+                  {mappedRecentReports.map((report) => (
                     <Link
-                      key={r.id} href={`/reports/${r.id}`}
+                      key={report.id} href={`/reports/${report.id}`}
                       className="flex justify-between items-center p-3 rounded-xl hover:bg-slate-50/80 transition-all group/item"
                     >
                       <div className="flex items-center gap-3 min-w-0">
@@ -313,16 +337,16 @@ export default async function DashboardPage() {
                           <FileText size={13} className="text-violet-500" />
                         </div>
                         <div className="flex flex-col gap-0.5 min-w-0">
-                          <span className="text-[12.5px] font-bold text-slate-800 truncate group-hover/item:text-indigo-700 transition-colors">{r.report_name}</span>
+                          <span className="text-[12.5px] font-bold text-slate-800 truncate group-hover/item:text-indigo-700 transition-colors">{report.report_name}</span>
                           <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-medium">
-                            <span className="font-mono">#{r.id.split('-')[0]}</span>
+                            <span className="font-mono">#{report.id.split('-')[0]}</span>
                             <span className="size-0.5 rounded-full bg-slate-300" />
-                            <span>{new Date(r.created_at).toLocaleDateString('vi-VN')}</span>
+                            <span>{new Date(report.created_at).toLocaleDateString('vi-VN')}</span>
                           </div>
                         </div>
                       </div>
                       <span className="text-[11.5px] font-black text-indigo-600 shrink-0 tabular-nums">
-                        {formatCurrency(r.total_amount)} đ
+                        {formatCurrency(report.total_amount)} đ
                       </span>
                     </Link>
                   ))}

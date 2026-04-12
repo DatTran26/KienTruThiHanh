@@ -18,11 +18,16 @@ export default async function ReportsPage() {
 
   const { data: reports } = await supabase
     .from('reports')
-    .select('id, report_name, report_code, total_amount, status, created_at')
+    .select('id, report_name, report_code, status, created_at, report_items(amount)')
     .order('created_at', { ascending: false });
 
+  const mappedReports = reports?.map(r => {
+    const realTotal = (r.report_items as any[])?.reduce((k, i) => k + (i.amount || 0), 0) || 0;
+    return { ...r, total_amount: realTotal };
+  }) ?? [];
+
   // Aggregate stats
-  const totalAmount = reports?.reduce((s, r) => s + (r.total_amount ?? 0), 0) ?? 0;
+  const totalAmount = mappedReports.reduce((s, r) => s + r.total_amount, 0);
   const totalCount  = reports?.length ?? 0;
   const draftCount  = reports?.filter(r => r.status === 'draft').length ?? 0;
   const exportedCount = totalCount - draftCount;
@@ -108,7 +113,7 @@ export default async function ReportsPage() {
 
       {/* ── REPORTS GRID / EMPTY STATE ── */}
       <div className="flex-1 mt-2">
-        <ReportListClient reports={reports || []} />
+        <ReportListClient reports={mappedReports} />
       </div>
 
     </div>

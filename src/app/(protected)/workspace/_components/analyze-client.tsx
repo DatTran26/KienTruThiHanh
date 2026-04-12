@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { DescriptionForm } from './description-form';
 import { ResultSection } from './result-section';
-import type { AnalysisResponse, AnalysisResult } from '@/types/analysis';
+import type { AnalysisResponse, AnalysisResult, ExpenseGroup } from '@/types/analysis';
 import { Sparkles, FileText, X, Save, AlertCircle, Cpu, ShieldCheck, PencilLine, Plus, BrainCircuit, Zap, CheckCircle2, ChevronRight, Database, CheckCircle, Target, Activity, LayoutDashboard } from 'lucide-react';
 
 import { AdminMasterPanel } from '@/app/(protected)/analyze/_components/admin-master-panel';

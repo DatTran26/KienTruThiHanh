@@ -14,7 +14,7 @@ export default async function MasterDataPage() {
     .select('role')
     .eq('id', user.id)
     .single();
-  const isAdmin = userRow?.role === 'admin';
+  const isAdmin = (userRow as any)?.role === 'admin';
 
   return <MasterDataClientPage isAdmin={isAdmin} />;
 }

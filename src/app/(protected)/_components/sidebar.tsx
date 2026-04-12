@@ -19,7 +19,7 @@ const mainNavItems = [
   { href: '/analyze',     label: 'Phân loại AI',  icon: Sparkles,        desc: 'Định danh chi phí' },
   { href: '/dashboard',   label: 'Tổng quan',      icon: LayoutDashboard, desc: 'Thống kê hệ thống' },
   { href: '/reports',     label: 'Báo cáo',        icon: FileText,        desc: 'Quản lý hồ sơ' },
-  { href: '/profile',     label: 'Hồ sơ Tổ chức', icon: Building2,       desc: 'Thông tin đơn vị' },
+  { href: '/workspace',   label: 'Hồ sơ Tổ chức', icon: Building2,       desc: 'Thông tin đơn vị' },
   { href: '/master-data', label: 'Kho Dữ liệu',   icon: Database,        desc: 'Dữ liệu chuẩn' },
 ];
 
@@ -28,7 +28,7 @@ const mobileNavItems = [
   { href: '/dashboard',   label: 'Tổng quan', icon: LayoutDashboard },
   { href: '/master-data', label: 'Kho dữ liệu', icon: Database },
   { href: '/reports',     label: 'Báo cáo',   icon: FileText },
-  { href: '/profile',     label: 'Hồ sơ',     icon: Building2 },
+  { href: '/workspace',   label: 'Hồ sơ',     icon: Building2 },
 ];
 
 interface SidebarProps {
@@ -40,10 +40,7 @@ export function Sidebar({ userEmail, isAdmin = false }: SidebarProps) {
   const router   = useRouter();
   const pathname = usePathname();
 
-  const isActive = (href: string) =>
-    href === '/analyze'
-      ? pathname === '/analyze' || pathname === '/workspace'
-      : pathname.startsWith(href);
+  const isActive = (href: string) => pathname.startsWith(href);
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -117,21 +114,24 @@ export function Sidebar({ userEmail, isAdmin = false }: SidebarProps) {
         {/* ── User + Logout ── */}
         <div className="p-4 border-t border-[#1E2442]/60 bg-[#14182B]">
           {userEmail && (
-            <div className="flex items-center gap-3.5 px-3 py-3 rounded-xl hover:bg-[#1E2442]/50 transition-colors cursor-pointer mb-2 group border border-transparent hover:border-slate-700/50">
+            <button 
+              onClick={() => router.push('/user-profile')}
+              className="w-full text-left flex items-center gap-3.5 px-3 py-3 rounded-xl hover:bg-[#1E2442]/50 transition-colors cursor-pointer mb-2 group border border-transparent hover:border-slate-700/50 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+            >
               <div
-                className="size-10 rounded-full flex items-center justify-center shrink-0 text-[14px] font-bold text-slate-900 bg-slate-100 shadow-inner"
+                className="size-10 rounded-full flex items-center justify-center shrink-0 text-[14px] font-bold text-slate-900 bg-slate-100 shadow-inner group-hover:bg-amber-100 group-hover:text-amber-700 transition-colors"
               >
                 {userEmail[0].toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-bold text-slate-100 truncate shadow-sm">
+                <p className="text-[13px] font-bold text-slate-100 truncate shadow-sm group-hover:text-amber-400 transition-colors">
                   Admin
                 </p>
                 <p className="text-[11.5px] font-medium text-slate-500 truncate group-hover:text-slate-400 transition-colors">
                   {userEmail}
                 </p>
               </div>
-            </div>
+            </button>
           )}
 
           <button
