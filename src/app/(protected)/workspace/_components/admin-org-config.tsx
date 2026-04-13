@@ -418,7 +418,7 @@ export function AdminOrgConfig() {
         {/* Tab 3: Create User Forcefully */}
         {activeTab === 'users' && (
           <div className="animate-fade-in">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            <div className={cn("grid gap-6", bulkResults.length > 0 && !isBulkCreating ? "grid-cols-1 lg:grid-cols-3 items-stretch" : "grid-cols-1 lg:grid-cols-2 items-start")}>
             
               {/* SINGLE CREATION */}
               <form className="space-y-6 border border-slate-200/80 bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition relative" onSubmit={handleCreateUser}>
@@ -518,10 +518,8 @@ export function AdminOrgConfig() {
                 )}
               </form>
 
-              {/* RIGHT COLUMN: Bulk Creation + Results */}
-              <div className="space-y-6">
-                {/* BULK CREATION */}
-                <div className="space-y-6 border border-slate-200/80 bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition flex flex-col">
+              {/* BULK CREATION */}
+              <div className="space-y-6 border border-slate-200/80 bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition flex flex-col">
                   <div className="mb-4 flex items-center justify-between">
                     <div>
                       <h4 className="text-[15px] font-bold text-slate-800 flex items-center gap-2 mb-1">
@@ -597,11 +595,11 @@ export function AdminOrgConfig() {
                       <Wand2 className="size-4" /> Tự động Khởi tạo
                     </button>
                   )}
-                </div>
+              </div>
 
-                {/* BULK RESULTS TABLE — same column, below bulk card */}
-                {bulkResults.length > 0 && !isBulkCreating && (
-                  <div className="border border-slate-200/80 bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden">
+              {/* BULK RESULTS TABLE — third column */}
+              {bulkResults.length > 0 && !isBulkCreating && (
+                <div className="border border-slate-200/80 bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col">
                     {/* Header */}
                     <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
                       <div className="flex items-center gap-2.5">
@@ -636,7 +634,7 @@ export function AdminOrgConfig() {
                     </div>
 
                     {/* Table */}
-                    <div className="overflow-y-auto max-h-[360px]">
+                    <div className="overflow-y-auto flex-1">
                       <table className="w-full text-left">
                         <thead className="sticky top-0 z-10">
                           <tr className="bg-slate-50 border-b border-slate-200">
@@ -688,9 +686,8 @@ export function AdminOrgConfig() {
                         </tbody>
                       </table>
                     </div>
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
 
             </div>
           </div>
