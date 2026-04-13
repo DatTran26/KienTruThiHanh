@@ -55,7 +55,7 @@ export function AdminOrgConfig() {
           .single();
           
         if (settingsData) {
-          setAllowRegistration(settingsData.allow_registration);
+          setAllowRegistration((settingsData as any).allow_registration);
         }
       } catch (err) {
         console.error(err);
@@ -95,7 +95,7 @@ export function AdminOrgConfig() {
     const newValue = !allowRegistration;
     try {
       const supabase = createClient();
-      const { error } = await supabase.from('system_settings').update({ allow_registration: newValue }).eq('id', 1);
+      const { error } = await (supabase.from('system_settings') as any).update({ allow_registration: newValue }).eq('id', 1);
       
       if (error) throw error;
       
