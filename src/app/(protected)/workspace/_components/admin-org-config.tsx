@@ -418,7 +418,7 @@ export function AdminOrgConfig() {
         {/* Tab 3: Create User Forcefully */}
         {activeTab === 'users' && (
           <div className="animate-fade-in">
-            <div className={cn("grid gap-6 items-start", bulkResults.length > 0 && !isBulkCreating ? "grid-cols-1 xl:grid-cols-[1fr_1fr_1.5fr] lg:grid-cols-[1fr_1fr] " : "grid-cols-1 lg:grid-cols-2")}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             
               {/* SINGLE CREATION */}
               <form className="space-y-6 border border-slate-200/80 bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition relative" onSubmit={handleCreateUser}>
@@ -518,176 +518,179 @@ export function AdminOrgConfig() {
                 )}
               </form>
 
-              {/* BULK CREATION */}
-              <div className="space-y-6 border border-slate-200/80 bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition flex flex-col h-full">
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <h4 className="text-[15px] font-bold text-slate-800 flex items-center gap-2 mb-1">
-                      <Database className="size-4 text-emerald-500" /> Tạo Hàng loạt
-                    </h4>
-                    <p className="text-[12.5px] text-slate-500 leading-relaxed font-medium">
-                      Tùy chỉnh số lượng và tỷ lệ để tự động sinh hàng loạt.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex-1 grid gap-4 place-content-start">
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Tổng Số lượng Mới</label>
-                    <input
-                      type="number"
-                      min={1}
-                      max={100}
-                      value={bulkTotal}
-                      onChange={e => {
-                        const val = Number(e.target.value);
-                        if (val >= 0 && val <= 100) setBulkTotal(val);
-                        if (bulkAdminCount > val) setBulkAdminCount(val);
-                      }}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 text-[15px] font-bold outline-none focus:bg-white focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10 transition-all font-mono"
-                    />
-                  </div>
-
-                  <div className="space-y-4 mt-2 p-4 bg-slate-50 border border-slate-100 rounded-xl">
-                    <div className="flex items-center justify-between">
-                       <span className="text-[12px] font-bold text-rose-600 flex items-center gap-1.5"><ShieldCheck className="size-3.5" /> Admin: {bulkAdminCount}</span>
-                       <span className="text-[12px] font-bold text-blue-600 flex items-center gap-1.5"><UserPlus className="size-3.5" /> User: {bulkTotal - bulkAdminCount}</span>
-                    </div>
-                  
-                    <input 
-                      type="range" 
-                      min={0} 
-                      max={bulkTotal || 1} 
-                      value={bulkAdminCount} 
-                      onChange={e => setBulkAdminCount(Number(e.target.value))}
-                      className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-rose-500"
-                    />
-                    <div className="flex justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                       <span>0</span>
-                       <span>Tỉ lệ</span>
-                       <span>{bulkTotal}</span>
-                    </div>
-                  </div>
-
-                  {/* Progress */}
-                  {isBulkCreating && (
-                    <div className="space-y-2 mt-2">
-                      <div className="flex justify-between text-[11px] font-bold text-emerald-600 uppercase tracking-wider">
-                        <span>Tiến trình tạo</span>
-                        <span>{Math.round((bulkProgress.current / bulkProgress.total) * 100)}%</span>
-                      </div>
-                      <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                        <div className="bg-gradient-to-r from-emerald-400 to-emerald-600 h-2.5 rounded-full transition-all duration-300" style={{ width: `${(bulkProgress.current / bulkProgress.total) * 100}%` }}></div>
-                      </div>
-                      <p className="text-[11px] font-semibold text-slate-500 text-center animate-pulse">
-                        Đang xử lý {bulkProgress.current}/{bulkProgress.total}... Vui lòng không đóng trang.
+              {/* RIGHT COLUMN: Bulk Creation + Results */}
+              <div className="space-y-6">
+                {/* BULK CREATION */}
+                <div className="space-y-6 border border-slate-200/80 bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition flex flex-col">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div>
+                      <h4 className="text-[15px] font-bold text-slate-800 flex items-center gap-2 mb-1">
+                        <Database className="size-4 text-emerald-500" /> Tạo Hàng loạt
+                      </h4>
+                      <p className="text-[12.5px] text-slate-500 leading-relaxed font-medium">
+                        Tùy chỉnh số lượng và tỷ lệ để tự động sinh hàng loạt.
                       </p>
                     </div>
+                  </div>
+
+                  <div className="flex-1 grid gap-4 place-content-start">
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Tổng Số lượng Mới</label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={100}
+                        value={bulkTotal}
+                        onChange={e => {
+                          const val = Number(e.target.value);
+                          if (val >= 0 && val <= 100) setBulkTotal(val);
+                          if (bulkAdminCount > val) setBulkAdminCount(val);
+                        }}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 text-[15px] font-bold outline-none focus:bg-white focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10 transition-all font-mono"
+                      />
+                    </div>
+
+                    <div className="space-y-4 mt-2 p-4 bg-slate-50 border border-slate-100 rounded-xl">
+                      <div className="flex items-center justify-between">
+                         <span className="text-[12px] font-bold text-rose-600 flex items-center gap-1.5"><ShieldCheck className="size-3.5" /> Admin: {bulkAdminCount}</span>
+                         <span className="text-[12px] font-bold text-blue-600 flex items-center gap-1.5"><UserPlus className="size-3.5" /> User: {bulkTotal - bulkAdminCount}</span>
+                      </div>
+                    
+                      <input 
+                        type="range" 
+                        min={0} 
+                        max={bulkTotal || 1} 
+                        value={bulkAdminCount} 
+                        onChange={e => setBulkAdminCount(Number(e.target.value))}
+                        className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-rose-500"
+                      />
+                      <div className="flex justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                         <span>0</span>
+                         <span>Tỉ lệ</span>
+                         <span>{bulkTotal}</span>
+                      </div>
+                    </div>
+
+                    {/* Progress */}
+                    {isBulkCreating && (
+                      <div className="space-y-2 mt-2">
+                        <div className="flex justify-between text-[11px] font-bold text-emerald-600 uppercase tracking-wider">
+                          <span>Tiến trình tạo</span>
+                          <span>{Math.round((bulkProgress.current / bulkProgress.total) * 100)}%</span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                          <div className="bg-gradient-to-r from-emerald-400 to-emerald-600 h-2.5 rounded-full transition-all duration-300" style={{ width: `${(bulkProgress.current / bulkProgress.total) * 100}%` }}></div>
+                        </div>
+                        <p className="text-[11px] font-semibold text-slate-500 text-center animate-pulse">
+                          Đang xử lý {bulkProgress.current}/{bulkProgress.total}... Vui lòng không đóng trang.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {!isBulkCreating && (
+                    <button
+                      onClick={handleBulkCreate}
+                      disabled={bulkTotal <= 0}
+                      className="w-full mt-auto bg-emerald-600 hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-500/20 text-white font-bold text-[14px] rounded-xl py-3.5 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25"
+                    >
+                      <Wand2 className="size-4" /> Tự động Khởi tạo
+                    </button>
                   )}
                 </div>
 
-                {!isBulkCreating && (
-                  <button
-                    onClick={handleBulkCreate}
-                    disabled={bulkTotal <= 0}
-                    className="w-full mt-auto bg-emerald-600 hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-500/20 text-white font-bold text-[14px] rounded-xl py-3.5 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25"
-                  >
-                    <Wand2 className="size-4" /> Tự động Khởi tạo
-                  </button>
-                )}
-              </div>
-
-            {/* BULK RESULTS TABLE — third column */}
-            {bulkResults.length > 0 && !isBulkCreating && (
-              <div className="border border-slate-200/80 bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden lg:col-span-2 xl:col-span-1">
-                {/* Header */}
-                <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-1.5 bg-emerald-100 rounded-lg">
-                      <ClipboardList className="size-3.5 text-emerald-600" />
-                    </div>
-                    <div>
-                      <h4 className="text-[13px] font-bold text-slate-800">Danh sách tài khoản</h4>
-                      <p className="text-[10px] text-slate-500 font-medium">{bulkResults.filter(r => r.status === 'Thành công').length}/{bulkResults.length} thành công</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={copyAllResults}
-                      className={cn(
-                        "flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all",
-                        copiedAll
-                          ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-                          : "bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 hover:border-indigo-200"
-                      )}
-                    >
-                      {copiedAll ? <ClipboardCheck className="size-3" /> : <Copy className="size-3" />}
-                      {copiedAll ? 'Đã copy!' : 'Copy all'}
-                    </button>
-                    <button
-                      onClick={downloadBulkResults}
-                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 border border-slate-200 hover:border-emerald-200 transition-all"
-                    >
-                      <Download className="size-3" /> CSV
-                    </button>
-                  </div>
-                </div>
-
-                {/* Compact Table */}
-                <div className="overflow-y-auto max-h-[500px]">
-                  <table className="w-full text-left">
-                    <thead className="sticky top-0 z-10">
-                      <tr className="bg-slate-50 border-b border-slate-200">
-                        <th className="px-3 py-2 text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] w-8">#</th>
-                        <th className="px-3 py-2 text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Email</th>
-                        <th className="px-3 py-2 text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Mật khẩu</th>
-                        <th className="px-3 py-2 text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] w-12 text-center"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {bulkResults.map((r, i) => (
-                        <tr
-                          key={i}
+                {/* BULK RESULTS TABLE — same column, below bulk card */}
+                {bulkResults.length > 0 && !isBulkCreating && (
+                  <div className="border border-slate-200/80 bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden">
+                    {/* Header */}
+                    <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-1.5 bg-emerald-100 rounded-lg">
+                          <ClipboardList className="size-3.5 text-emerald-600" />
+                        </div>
+                        <div>
+                          <h4 className="text-[13px] font-bold text-slate-800">Danh sách tài khoản</h4>
+                          <p className="text-[10px] text-slate-500 font-medium">{bulkResults.filter(r => r.status === 'Thành công').length}/{bulkResults.length} thành công</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={copyAllResults}
                           className={cn(
-                            "group/row transition-colors",
-                            copiedRow === i ? "bg-indigo-50/80" : "hover:bg-slate-50/80",
-                            r.status !== 'Thành công' && "bg-rose-50/30"
+                            "flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all",
+                            copiedAll
+                              ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                              : "bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 hover:border-indigo-200"
                           )}
                         >
-                          <td className="px-3 py-2 text-[10px] font-bold text-slate-400 tabular-nums">{i + 1}</td>
-                          <td className="px-3 py-2">
-                            <div className="text-[12px] font-semibold text-slate-700 font-mono truncate max-w-[180px]">{r.email}</div>
-                            <span className={cn(
-                              "text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded",
-                              r.role === 'admin'
-                                ? "bg-rose-100 text-rose-600"
-                                : "bg-blue-100 text-blue-600"
-                            )}>
-                              {r.role === 'admin' ? 'Admin' : 'User'}
-                            </span>
-                          </td>
-                          <td className="px-3 py-2 text-[11px] font-mono text-slate-600">{r.password}</td>
-                          <td className="px-3 py-2 text-center">
-                            <button
-                              onClick={() => copyRow(i)}
+                          {copiedAll ? <ClipboardCheck className="size-3" /> : <Copy className="size-3" />}
+                          {copiedAll ? 'Đã copy!' : 'Copy all'}
+                        </button>
+                        <button
+                          onClick={downloadBulkResults}
+                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 border border-slate-200 hover:border-emerald-200 transition-all"
+                        >
+                          <Download className="size-3" /> CSV
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Table */}
+                    <div className="overflow-y-auto max-h-[360px]">
+                      <table className="w-full text-left">
+                        <thead className="sticky top-0 z-10">
+                          <tr className="bg-slate-50 border-b border-slate-200">
+                            <th className="px-3 py-2 text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] w-8">#</th>
+                            <th className="px-3 py-2 text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Email</th>
+                            <th className="px-3 py-2 text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Mật khẩu</th>
+                            <th className="px-3 py-2 text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] w-10"></th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {bulkResults.map((r, i) => (
+                            <tr
+                              key={i}
                               className={cn(
-                                "p-1 rounded-md transition-all",
-                                copiedRow === i
-                                  ? "bg-emerald-100 text-emerald-600"
-                                  : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 opacity-0 group-hover/row:opacity-100"
+                                "group/row transition-colors",
+                                copiedRow === i ? "bg-indigo-50/80" : "hover:bg-slate-50/80",
+                                r.status !== 'Thành công' && "bg-rose-50/30"
                               )}
-                              title="Copy dòng này"
                             >
-                              {copiedRow === i ? <ClipboardCheck className="size-3" /> : <Copy className="size-3" />}
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                              <td className="px-3 py-2 text-[10px] font-bold text-slate-400 tabular-nums">{i + 1}</td>
+                              <td className="px-3 py-2">
+                                <div className="text-[12px] font-semibold text-slate-700 font-mono">{r.email}</div>
+                                <span className={cn(
+                                  "text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded",
+                                  r.role === 'admin'
+                                    ? "bg-rose-100 text-rose-600"
+                                    : "bg-blue-100 text-blue-600"
+                                )}>
+                                  {r.role === 'admin' ? 'Admin' : 'User'}
+                                </span>
+                              </td>
+                              <td className="px-3 py-2 text-[11px] font-mono text-slate-600">{r.password}</td>
+                              <td className="px-3 py-2 text-center">
+                                <button
+                                  onClick={() => copyRow(i)}
+                                  className={cn(
+                                    "p-1 rounded-md transition-all",
+                                    copiedRow === i
+                                      ? "bg-emerald-100 text-emerald-600"
+                                      : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 opacity-0 group-hover/row:opacity-100"
+                                  )}
+                                  title="Copy dòng này"
+                                >
+                                  {copiedRow === i ? <ClipboardCheck className="size-3" /> : <Copy className="size-3" />}
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
 
             </div>
           </div>
