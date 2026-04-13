@@ -12,7 +12,7 @@ export default async function RegisterLayout({ children }: { children: React.Rea
     .eq('id', 1)
     .single();
 
-  if (settings && settings.allow_registration === false) {
+  if (settings && (settings as any).allow_registration === false) {
     return (
       <div className="w-full text-center">
         <h2 className="text-[28px] font-bold text-slate-800 tracking-tight leading-tight mb-4">
