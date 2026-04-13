@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       .eq('id', user.id)
       .single();
 
-    if (!callerRow || callerRow.role !== 'admin') {
+    if (!callerRow || (callerRow as any).role !== 'admin') {
       return NextResponse.json({ error: 'Chỉ Admin mới có quyền thực hiện thao tác này.' }, { status: 403 });
     }
 
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     // 5. Explicitly insert/update the assigned role in the `users` table
     const { error: insertError } = await serviceRoleClient
       .from('users')
-      .upsert({ id: newUserId, role, email }, { onConflict: 'id' });
+      .upsert({ id: newUserId, role, email } as any, { onConflict: 'id' });
 
     if (insertError) {
       // Rollback is complex, but at least report error
