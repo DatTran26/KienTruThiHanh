@@ -32,6 +32,7 @@ export function AdminOrgConfig() {
   const [bulkResults, setBulkResults] = useState<{email: string, password: string, role: string, status: string}[]>([]);
   const [copiedRow, setCopiedRow] = useState<number | null>(null);
   const [copiedAll, setCopiedAll] = useState(false);
+  const [singleCreateSuccess, setSingleCreateSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -142,7 +143,9 @@ export function AdminOrgConfig() {
         toast.error(data.error || 'Lỗi tạo tài khoản');
       } else {
         toast.success(data.message);
+        setSingleCreateSuccess(newUser.email);
         setNewUser({ email: '', password: '', role: 'user' });
+        setTimeout(() => setSingleCreateSuccess(null), 4000);
       }
     } catch {
       toast.error('Lỗi kết nối máy chủ');
@@ -504,6 +507,15 @@ export function AdminOrgConfig() {
                   {isCreatingUser ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
                   Khởi tạo
                 </button>
+
+                {singleCreateSuccess && (
+                  <div className="flex items-center gap-2 px-4 py-2.5 bg-emerald-50 border border-emerald-200 rounded-xl animate-fade-in">
+                    <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+                    <p className="text-[12px] font-semibold text-emerald-700 truncate">
+                      Đã tạo thành công <span className="font-mono font-bold">{singleCreateSuccess}</span>
+                    </p>
+                  </div>
+                )}
               </form>
 
               {/* BULK CREATION */}
