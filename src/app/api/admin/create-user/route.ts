@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const validatedData = schema.safeParse(body);
     if (!validatedData.success) {
-      return NextResponse.json({ error: validatedData.error.errors[0].message }, { status: 400 });
+      return NextResponse.json({ error: validatedData.error.issues[0].message }, { status: 400 });
     }
 
     const { email, password, role } = validatedData.data;
