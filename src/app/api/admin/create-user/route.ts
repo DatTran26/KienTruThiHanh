@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient, createServiceClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -10,16 +10,22 @@ const schema = z.object({
 
 export async function POST(req: Request) {
   try {
-    // 1. Authenticate the caller
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // 1. Authenticate the caller via Bearer token (more reliable than cookies on production)
+    const authHeader = req.headers.get('Authorization');
+    const token = authHeader?.replace('Bearer ', '');
 
-    if (authError || !user) {
+    if (!token) {
       return NextResponse.json({ error: 'Không có quyền truy cập.' }, { status: 401 });
     }
 
-    // 2. Verify admin role
     const serviceRoleClient = createServiceClient();
+    const { data: { user }, error: authError } = await serviceRoleClient.auth.getUser(token);
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.' }, { status: 401 });
+    }
+
+    // 2. Verify admin role
     const { data: callerRow } = await serviceRoleClient
       .from('users')
       .select('role')
