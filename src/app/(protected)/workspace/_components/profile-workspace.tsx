@@ -30,7 +30,7 @@ export function ProfileWorkspace({ profile, isVerified, userEmail, generalForm, 
 
   const TABS = [
     ...BASE_TABS,
-    ...(isAdmin ? [{ id: 'admin_config', label: 'Tham số Định danh', icon: Database }] : []),
+    ...(isAdmin ? [{ id: 'admin_config', label: 'Quản trị Hệ thống', icon: Database }] : []),
   ];
 
   const steps = [

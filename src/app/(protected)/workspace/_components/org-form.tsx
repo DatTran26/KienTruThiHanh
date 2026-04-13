@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader2, ShieldCheck, Database, Info } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { ValidationResult } from './validation-result';
 import type { OrgValidationResult } from '@/lib/matching/org-validator';
 
@@ -35,6 +36,7 @@ export function OrgForm({ initialValues, isVerified }: OrgFormProps) {
   });
 
   async function onSubmit(values: FormValues) {
+    setHighlight(false);
     setIsLoading(true);
     setResult(null);
     setErrorMsg('');
@@ -57,11 +59,29 @@ export function OrgForm({ initialValues, isVerified }: OrgFormProps) {
     }
   }
 
-  return (
-    <div className="space-y-10 animate-fade-in-up w-full">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+  // Inside the component body
+  const [highlight, setHighlight] = useState(false);
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+  useEffect(() => {
+    const onHighlight = () => {
+      setHighlight(true);
+      // Scroll smoothly to form
+      const el = document.getElementById('org-form-container');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+    window.addEventListener('highlight-org-inputs', onHighlight);
+    return () => window.removeEventListener('highlight-org-inputs', onHighlight);
+  }, []);
+
+  return (
+    <>
+      {highlight && (
+        <div className="fixed inset-0 z-[100] bg-[#020817]/70 backdrop-blur-[3px] animate-fade-in pointer-events-none transition-all duration-300" />
+      )}
+      <div id="org-form-container" suppressHydrationWarning className={cn("space-y-10 animate-fade-in-up w-full transition-all duration-500", highlight && "relative z-[101]")}>
+        <form onSubmit={handleSubmit(onSubmit)} className={cn("space-y-8 transition-all duration-500", highlight && "bg-white p-6 -mx-4 sm:-mx-8 sm:p-8 rounded-[2rem] shadow-[0_0_60px_rgba(245,158,11,0.25)] ring-1 ring-amber-500/30")}>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
           {/* Unit name */}
           <div className="space-y-2 md:col-span-2 group/field">
@@ -69,12 +89,12 @@ export function OrgForm({ initialValues, isVerified }: OrgFormProps) {
               <span>Tên đơn vị sự nghiệp <span className="text-red-500">*</span></span>
               {errors.unit_name && <span className="text-red-500 font-bold normal-case tracking-normal animate-shake">{errors.unit_name.message}</span>}
             </label>
-            <div className="relative">
+            <div className="relative" suppressHydrationWarning>
               <input
                 id="unit_name"
                 {...register('unit_name')}
                 placeholder="Ví dụ: BỆNH VIỆN ĐA KHOA..."
-                className="w-full h-12 bg-slate-50 border border-slate-200 rounded-[1.25rem] px-5 text-sm uppercase font-black tracking-tight text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none placeholder:text-slate-400/60 placeholder:font-bold"
+                className={cn("w-full h-12 bg-slate-50 border border-slate-200 rounded-[1.25rem] px-5 text-sm uppercase font-black tracking-tight text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none placeholder:text-slate-400/60 placeholder:font-bold", highlight && "ring-4 ring-amber-500/30 border-amber-500 bg-amber-50 animate-shake")}
               />
               <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none opacity-0 group-focus-within/field:opacity-100 transition-opacity">
                 <Database className="size-4 text-indigo-400" />
@@ -88,12 +108,12 @@ export function OrgForm({ initialValues, isVerified }: OrgFormProps) {
               <span>Địa chỉ trụ sở chính <span className="text-red-500">*</span></span>
               {errors.address && <span className="text-red-500 font-bold normal-case tracking-normal animate-shake">{errors.address.message}</span>}
             </label>
-            <div className="relative">
+            <div className="relative" suppressHydrationWarning>
               <input
                 id="address"
                 {...register('address')}
                 placeholder="Số nhà, Đường, Quận/Huyện, Tỉnh/Thành phố..."
-                className="w-full h-12 bg-slate-50 border border-slate-200 rounded-[1.25rem] px-5 text-sm font-bold text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none placeholder:text-slate-400/60"
+                className={cn("w-full h-12 bg-slate-50 border border-slate-200 rounded-[1.25rem] px-5 text-sm font-bold text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none placeholder:text-slate-400/60", highlight && "ring-4 ring-amber-500/30 border-amber-500 bg-amber-50 animate-shake")}
               />
               <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none opacity-0 group-focus-within/field:opacity-100 transition-opacity">
                 <ShieldCheck className="size-4 text-indigo-400" />
@@ -111,7 +131,7 @@ export function OrgForm({ initialValues, isVerified }: OrgFormProps) {
               id="tax_code"
               {...register('tax_code')}
               placeholder="0312xxxxxx"
-              className="w-full h-12 bg-slate-50 border border-slate-200 rounded-[1.25rem] px-5 text-lg font-black tracking-[0.2em] text-indigo-600 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none placeholder:text-slate-400/60 placeholder:tracking-normal placeholder:font-bold"
+              className={cn("w-full h-12 bg-slate-50 border border-slate-200 rounded-[1.25rem] px-5 text-lg font-black tracking-[0.2em] text-indigo-600 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none placeholder:text-slate-400/60 placeholder:tracking-normal placeholder:font-bold", highlight && "ring-4 ring-amber-500/30 border-amber-500 bg-amber-50 animate-shake")}
             />
           </div>
         </div>
@@ -161,5 +181,6 @@ export function OrgForm({ initialValues, isVerified }: OrgFormProps) {
         </div>
       )}
     </div>
+    </>
   );
 }

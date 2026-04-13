@@ -12,7 +12,9 @@ import { Loader2, Mail, Lock, Eye, EyeOff, ArrowRight, BrainCircuit, ShieldCheck
 import { cn } from '@/lib/utils';
 
 const schema = z.object({
-  email: z.string().email('Email không hợp lệ'),
+  email: z.string().email('Email không hợp lệ').refine(e => !e.endsWith('@gov.vn'), {
+    message: 'Tên miền @gov.vn không có thực (Vui lòng dùng ví dụ: @vks.gov.vn)',
+  }),
   password: z.string().min(6, 'Mật khẩu tối thiểu 6 ký tự'),
   confirmPassword: z.string(),
 }).refine(d => d.password === d.confirmPassword, {
@@ -58,7 +60,14 @@ export default function RegisterPage() {
         email: data.email,
         password: data.password,
       });
-      if (error) { toast.error(error.message); return; }
+      if (error) {
+        if (error.message.includes('rate limit')) {
+          toast.error('Gửi email quá giới hạn. Vui lòng tắt "Confirm email" trong Supabase Auth Settings hoặc thử lại sau 1 giờ.');
+        } else {
+          toast.error(error.message);
+        }
+        return;
+      }
       toast.success('Đăng ký thành công! Đang chuyển hướng...');
       router.push('/workspace');
       router.refresh();
@@ -112,7 +121,7 @@ export default function RegisterPage() {
             <input
               id="reg-email"
               type="email"
-              placeholder="canbo@gov.vn"
+              placeholder="canbo@vks.gov.vn"
               autoComplete="email"
               className={inputCls(!!errors.email)}
               {...register('email')}

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
@@ -13,6 +14,8 @@ import {
   LogOut,
   Zap,
   ChevronRight,
+  User,
+  X,
 } from 'lucide-react';
 
 const mainNavItems = [
@@ -34,11 +37,13 @@ const mobileNavItems = [
 interface SidebarProps {
   userEmail?: string;
   isAdmin?: boolean;
+  isProfileComplete?: boolean;
 }
 
-export function Sidebar({ userEmail, isAdmin = false }: SidebarProps) {
+export function Sidebar({ userEmail, isAdmin = false, isProfileComplete = true }: SidebarProps) {
   const router   = useRouter();
   const pathname = usePathname();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const isActive = (href: string) => pathname.startsWith(href);
 
@@ -85,7 +90,17 @@ export function Sidebar({ userEmail, isAdmin = false }: SidebarProps) {
                 return (
                   <button
                     key={href}
-                    onClick={() => router.push(href)}
+                    onClick={() => {
+                      if (!isProfileComplete && href !== '/workspace' && href !== '/logout') {
+                        toast.error('Vui lòng hoàn thiện Tên, Địa chỉ và Mã số thuế trước khi sử dụng các chức năng khác.');
+                        if (pathname !== '/workspace') {
+                          router.push('/workspace');
+                        }
+                        setTimeout(() => window.dispatchEvent(new CustomEvent('highlight-org-inputs')), 300);
+                        return;
+                      }
+                      router.push(href);
+                    }}
                     className={cn(
                       'w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-left transition-all duration-200 group relative',
                       active
@@ -148,21 +163,65 @@ export function Sidebar({ userEmail, isAdmin = false }: SidebarProps) {
       </aside>
 
       {/* ════════════════════════════════════════
+          MOBILE PROFILE BUBBLE
+          ════════════════════════════════════════ */}
+      {showProfileMenu && (
+        <div className="lg:hidden fixed inset-0 z-50 flex flex-col justify-end">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowProfileMenu(false)} />
+          <div className="relative mb-[70px] mx-4 p-2 bg-[#14182B] border border-[#1E2442] shadow-2xl rounded-2xl flex flex-col animate-fade-in animate-slide-up">
+            <button
+              onClick={() => { setShowProfileMenu(false); router.push('/user-profile'); }}
+              className={cn("flex flex-col items-center gap-2 p-3 rounded-xl transition-all", pathname === '/user-profile' ? "bg-amber-500/15 text-amber-400" : "text-slate-300 hover:bg-[#1E2442]")}
+            >
+               <User className="size-6" />
+               <span className="text-[11px] font-bold tracking-wide">Hồ sơ Cán bộ</span>
+            </button>
+            <div className="h-px w-full bg-[#1E2442] my-1" />
+            <button
+              onClick={() => { setShowProfileMenu(false); router.push('/workspace'); }}
+              className={cn("flex flex-col items-center gap-2 p-3 rounded-xl transition-all", pathname === '/workspace' ? "bg-blue-500/15 text-blue-400" : "text-slate-300 hover:bg-[#1E2442]")}
+            >
+               <Building2 className="size-6" />
+               <span className="text-[11px] font-bold tracking-wide">Hồ sơ Đơn vị</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════
           MOBILE BOTTOM NAV
           ════════════════════════════════════════ */}
       <nav
-        className="lg:hidden fixed bottom-0 inset-x-0 z-50 flex items-center h-16"
+        className="lg:hidden fixed bottom-0 inset-x-0 z-[60] flex items-center h-16"
         style={{
           background: '#0d1b2a',
           borderTop: '1px solid rgba(255,255,255,0.08)',
         }}
       >
         {mobileNavItems.map(({ href, label, icon: Icon }) => {
-          const active = isActive(href);
+          const isProfileTab = href === '/workspace';
+          const active = isProfileTab ? (pathname === '/workspace' || pathname === '/user-profile') : isActive(href);
+          
           return (
             <button
               key={href}
-              onClick={() => router.push(href)}
+              onClick={() => {
+                if (isProfileTab) {
+                  setShowProfileMenu(!showProfileMenu);
+                  return;
+                }
+                setShowProfileMenu(false);
+                
+                if (!isProfileComplete && href !== '/workspace' && href !== '/logout') {
+                  toast.error('Vui lòng hoàn thiện Tên, Địa chỉ và Mã số thuế trước khi sử dụng các chức năng khác.');
+                  if (pathname !== '/workspace') {
+                    router.push('/workspace');
+                  }
+                  setTimeout(() => window.dispatchEvent(new CustomEvent('highlight-org-inputs')), 300);
+                  return;
+                }
+                router.push(href);
+              }}
               className={cn(
                 'flex-1 flex flex-col items-center justify-center gap-1 py-2 transition-colors duration-150',
                 active ? 'text-blue-400' : 'text-white/35',
