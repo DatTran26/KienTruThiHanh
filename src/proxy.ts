@@ -27,6 +27,11 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
+  // For API routes, just refresh the session and pass through (no redirects)
+  if (pathname.startsWith('/api')) {
+    return supabaseResponse;
+  }
+
   const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/register');
   const isPublicRoute = isAuthRoute || pathname === '/';
 
@@ -60,10 +65,9 @@ export const config = {
      * Match all request paths except:
      * - _next/static (static files)
      * - _next/image (image optimization)
-     * - api (API routes)
      * - favicon.ico
      * - Any file with an extension (.css, .js, .png, etc.)
      */
-    '/((?!_next/static|_next/image|api|favicon.ico|.*\\..*).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)',
   ],
 };
