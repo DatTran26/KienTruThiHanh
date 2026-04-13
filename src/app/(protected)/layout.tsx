@@ -32,9 +32,9 @@ export default async function ProtectedLayout({ children }: { children: React.Re
       .maybeSingle();
     if (refData) {
       profile = {
-        unit_name: refData.unit_name,
-        address: refData.address,
-        tax_code: refData.tax_code,
+        unit_name: refData.unit_name || '',
+        address: refData.address || '',
+        tax_code: refData.tax_code || '',
       };
     }
   }
