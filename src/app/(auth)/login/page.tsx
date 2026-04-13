@@ -10,7 +10,7 @@ export default async function LoginPage() {
     .eq('id', 1)
     .single();
 
-  const allowRegistration = settings?.allow_registration ?? true;
+  const allowRegistration = (settings as any)?.allow_registration ?? true;
 
   return <LoginForm allowRegistration={allowRegistration} />;
 }
