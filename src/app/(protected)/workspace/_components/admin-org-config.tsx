@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Settings, Save, Loader2, AlertCircle, Database, Building2, MapPin, Power, UserPlus, Mail, Lock, ShieldCheck, Wand2, Download, Copy, CheckCircle2, ClipboardList, ClipboardCheck } from 'lucide-react';
 import { toast } from 'sonner';
@@ -33,6 +33,21 @@ export function AdminOrgConfig() {
   const [copiedRow, setCopiedRow] = useState<number | null>(null);
   const [copiedAll, setCopiedAll] = useState(false);
   const [singleCreateSuccess, setSingleCreateSuccess] = useState<string | null>(null);
+
+  // Ref to measure the form card height
+  const formRef = useRef<HTMLFormElement>(null);
+  const [formHeight, setFormHeight] = useState<number>(0);
+
+  useEffect(() => {
+    if (!formRef.current) return;
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setFormHeight(entry.contentRect.height + 48); // + padding
+      }
+    });
+    observer.observe(formRef.current);
+    return () => observer.disconnect();
+  }, [activeTab]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -418,10 +433,10 @@ export function AdminOrgConfig() {
         {/* Tab 3: Create User Forcefully */}
         {activeTab === 'users' && (
           <div className="animate-fade-in">
-            <div className={cn("grid gap-6", bulkResults.length > 0 && !isBulkCreating ? "grid-cols-1 lg:grid-cols-3 items-stretch" : "grid-cols-1 lg:grid-cols-2 items-start")}>
+            <div className={cn("grid gap-6 items-start", bulkResults.length > 0 && !isBulkCreating ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1 lg:grid-cols-2")}>
             
               {/* SINGLE CREATION */}
-              <form className="space-y-6 border border-slate-200/80 bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition relative" onSubmit={handleCreateUser}>
+              <form ref={formRef} className="space-y-6 border border-slate-200/80 bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition relative" onSubmit={handleCreateUser}>
                 {/* Divider for desktop */}
                 <div className="hidden lg:block absolute -right-4 top-10 bottom-10 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent" />
               
@@ -519,7 +534,7 @@ export function AdminOrgConfig() {
               </form>
 
               {/* BULK CREATION */}
-              <div className="space-y-6 border border-slate-200/80 bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition flex flex-col">
+              <div className="space-y-6 border border-slate-200/80 bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition flex flex-col overflow-hidden" style={formHeight ? { maxHeight: formHeight } : undefined}>
                   <div className="mb-4 flex items-center justify-between">
                     <div>
                       <h4 className="text-[15px] font-bold text-slate-800 flex items-center gap-2 mb-1">
@@ -599,7 +614,7 @@ export function AdminOrgConfig() {
 
               {/* BULK RESULTS TABLE — third column */}
               {bulkResults.length > 0 && !isBulkCreating && (
-                <div className="border border-slate-200/80 bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col">
+                <div className="border border-slate-200/80 bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col" style={formHeight ? { maxHeight: formHeight } : undefined}>
                     {/* Header */}
                     <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
                       <div className="flex items-center gap-2.5">
