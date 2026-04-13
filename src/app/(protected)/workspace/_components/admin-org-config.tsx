@@ -272,7 +272,7 @@ export function AdminOrgConfig() {
       <div className="absolute top-0 right-0 w-80 h-80 bg-violet-100/40 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-100/40 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
-      <div className="relative z-10 max-w-2xl mx-auto">
+      <div className={cn("relative z-10 mx-auto transition-all duration-300", activeTab === 'users' ? "max-w-6xl" : "max-w-2xl")}>
         <div className="flex flex-col md:flex-row items-center md:items-start gap-4 mb-6 pb-5 border-b border-slate-200/50">
           <div className="p-3 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl shadow-lg shadow-indigo-200/50 group/icon relative">
              <div className="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover/icon:opacity-100 transition-opacity" />
