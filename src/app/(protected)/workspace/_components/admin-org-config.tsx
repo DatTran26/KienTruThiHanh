@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Settings, Save, Loader2, AlertCircle, Database, Building2, MapPin, Power, UserPlus, Mail, Lock, ShieldCheck, Wand2, Download, Copy, CheckCircle2 } from 'lucide-react';
+import { Settings, Save, Loader2, AlertCircle, Database, Building2, MapPin, Power, UserPlus, Mail, Lock, ShieldCheck, Wand2, Download, Copy, CheckCircle2, ClipboardList, ClipboardCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
@@ -30,6 +30,8 @@ export function AdminOrgConfig() {
   const [isBulkCreating, setIsBulkCreating] = useState(false);
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
   const [bulkResults, setBulkResults] = useState<{email: string, password: string, role: string, status: string}[]>([]);
+  const [copiedRow, setCopiedRow] = useState<number | null>(null);
+  const [copiedAll, setCopiedAll] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -209,6 +211,23 @@ export function AdminOrgConfig() {
     document.body.removeChild(link);
   };
 
+  const copyRow = (index: number) => {
+    const r = bulkResults[index];
+    const text = `${r.email}\t${r.password}\t${r.role}`;
+    navigator.clipboard.writeText(text);
+    setCopiedRow(index);
+    setTimeout(() => setCopiedRow(null), 1500);
+  };
+
+  const copyAllResults = () => {
+    const header = 'Email\tPassword\tRole';
+    const rows = bulkResults.map(r => `${r.email}\t${r.password}\t${r.role}`);
+    navigator.clipboard.writeText([header, ...rows].join('\n'));
+    setCopiedAll(true);
+    toast.success('Đã copy toàn bộ bảng!');
+    setTimeout(() => setCopiedAll(false), 2000);
+  };
+
   if (isLoading) {
     return (
       <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-[2rem] p-8 mt-8 border border-indigo-100 flex items-center justify-center h-48">
@@ -383,186 +402,281 @@ export function AdminOrgConfig() {
 
         {/* Tab 3: Create User Forcefully */}
         {activeTab === 'users' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in items-start">
+          <div className="space-y-6 animate-fade-in">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
             
-            {/* SINGLE CREATION */}
-            <form className="space-y-6 border border-slate-200/80 bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition relative" onSubmit={handleCreateUser}>
-              {/* Divider for desktop */}
-              <div className="hidden lg:block absolute -right-4 top-10 bottom-10 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent" />
+              {/* SINGLE CREATION */}
+              <form className="space-y-6 border border-slate-200/80 bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition relative" onSubmit={handleCreateUser}>
+                {/* Divider for desktop */}
+                <div className="hidden lg:block absolute -right-4 top-10 bottom-10 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent" />
               
-              <div className="mb-4">
-                <h4 className="text-[15px] font-bold text-slate-800 flex items-center gap-2 mb-1">
-                  <UserPlus className="size-4 text-blue-500" /> Tạo Đơn lẻ
-                </h4>
-                <p className="text-[12.5px] text-slate-500 leading-relaxed font-medium">
-                  Tạo một tài khoản trực tiếp qua Service Role, user có thể đăng nhập ngay.
-                </p>
-              </div>
-
-              <div className="grid gap-4">
-                <div className="space-y-1.5 focus-within:text-blue-600 transition-colors">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Email</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 pointer-events-none" />
-                    <input
-                      type="email"
-                      required
-                      value={newUser.email}
-                      onChange={e => setNewUser(v => ({ ...v, email: e.target.value }))}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-slate-700 text-[14px] font-medium outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all"
-                      placeholder="user@vks.gov.vn"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 focus-within:text-blue-600 transition-colors">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Mật khẩu khởi tạo</label>
-                  <div className="relative group/pwd">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 pointer-events-none" />
-                    <input
-                      type="text"
-                      required
-                      minLength={6}
-                      value={newUser.password}
-                      onChange={e => setNewUser(v => ({ ...v, password: e.target.value }))}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-12 py-3 text-slate-700 text-[14px] font-medium outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all font-mono"
-                      placeholder="Mật khẩu (trên 6 ký tự)"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-                        const pwd = Array.from({length: 12}, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
-                        setNewUser(v => ({ ...v, password: pwd }));
-                      }}
-                      title="Tạo mật khẩu ngẫu nhiên"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 focus:outline-none rounded-lg transition-colors cursor-pointer"
-                    >
-                      <Wand2 className="size-4" />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 focus-within:text-blue-600 transition-colors">
-                   <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Vai trò (Role)</label>
-                   <div className="flex gap-3">
-                     <button
-                       type="button"
-                       onClick={() => setNewUser(v => ({ ...v, role: 'user' }))}
-                       className={cn("flex-1 px-4 py-3 rounded-xl border flex items-center justify-center gap-2 text-[14px] font-bold transition-all", newUser.role === 'user' ? "border-blue-500 bg-blue-50 text-blue-700 shadow-sm" : "border-slate-200 text-slate-500 bg-slate-50 hover:bg-slate-100")}
-                     >
-                       Người dùng
-                     </button>
-                     <button
-                       type="button"
-                       onClick={() => setNewUser(v => ({ ...v, role: 'admin' }))}
-                       className={cn("flex-1 px-4 py-3 rounded-xl border flex items-center justify-center gap-2 text-[14px] font-bold transition-all", newUser.role === 'admin' ? "border-rose-500 bg-rose-50 text-rose-700 shadow-sm" : "border-slate-200 text-slate-500 bg-slate-50 hover:bg-slate-100")}
-                     >
-                       <ShieldCheck className="size-4" /> Quản trị viên
-                     </button>
-                   </div>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isCreatingUser || !newUser.email || !newUser.password}
-                className="w-full bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-500/20 text-white font-bold text-[14px] rounded-xl py-3.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25"
-              >
-                {isCreatingUser ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
-                Khởi tạo
-              </button>
-            </form>
-
-            {/* BULK CREATION */}
-            <div className="space-y-6 border border-slate-200/80 bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition flex flex-col h-full">
-              <div className="mb-4 flex items-center justify-between">
-                <div>
+                <div className="mb-4">
                   <h4 className="text-[15px] font-bold text-slate-800 flex items-center gap-2 mb-1">
-                    <Database className="size-4 text-emerald-500" /> Tạo Hàng loạt
+                    <UserPlus className="size-4 text-blue-500" /> Tạo Đơn lẻ
                   </h4>
                   <p className="text-[12.5px] text-slate-500 leading-relaxed font-medium">
-                    Tùy chỉnh số lượng và tỷ lệ để tự động sinh hàng loạt.
+                    Tạo một tài khoản trực tiếp qua Service Role, user có thể đăng nhập ngay.
                   </p>
                 </div>
-                {bulkResults.length > 0 && !isBulkCreating && (
-                  <button onClick={downloadBulkResults} className="p-2 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors">
-                    <Download className="size-4" />
+
+                <div className="grid gap-4">
+                  <div className="space-y-1.5 focus-within:text-blue-600 transition-colors">
+                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Email</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 pointer-events-none" />
+                      <input
+                        type="email"
+                        required
+                        value={newUser.email}
+                        onChange={e => setNewUser(v => ({ ...v, email: e.target.value }))}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-slate-700 text-[14px] font-medium outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all"
+                        placeholder="user@vks.gov.vn"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 focus-within:text-blue-600 transition-colors">
+                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Mật khẩu khởi tạo</label>
+                    <div className="relative group/pwd">
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 pointer-events-none" />
+                      <input
+                        type="text"
+                        required
+                        minLength={6}
+                        value={newUser.password}
+                        onChange={e => setNewUser(v => ({ ...v, password: e.target.value }))}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-12 py-3 text-slate-700 text-[14px] font-medium outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all font-mono"
+                        placeholder="Mật khẩu (trên 6 ký tự)"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+                          const pwd = Array.from({length: 12}, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+                          setNewUser(v => ({ ...v, password: pwd }));
+                        }}
+                        title="Tạo mật khẩu ngẫu nhiên"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 focus:outline-none rounded-lg transition-colors cursor-pointer"
+                      >
+                        <Wand2 className="size-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 focus-within:text-blue-600 transition-colors">
+                     <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Vai trò (Role)</label>
+                     <div className="flex gap-3">
+                       <button
+                         type="button"
+                         onClick={() => setNewUser(v => ({ ...v, role: 'user' }))}
+                         className={cn("flex-1 px-4 py-3 rounded-xl border flex items-center justify-center gap-2 text-[14px] font-bold transition-all", newUser.role === 'user' ? "border-blue-500 bg-blue-50 text-blue-700 shadow-sm" : "border-slate-200 text-slate-500 bg-slate-50 hover:bg-slate-100")}
+                       >
+                         Người dùng
+                       </button>
+                       <button
+                         type="button"
+                         onClick={() => setNewUser(v => ({ ...v, role: 'admin' }))}
+                         className={cn("flex-1 px-4 py-3 rounded-xl border flex items-center justify-center gap-2 text-[14px] font-bold transition-all", newUser.role === 'admin' ? "border-rose-500 bg-rose-50 text-rose-700 shadow-sm" : "border-slate-200 text-slate-500 bg-slate-50 hover:bg-slate-100")}
+                       >
+                         <ShieldCheck className="size-4" /> Quản trị viên
+                       </button>
+                     </div>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isCreatingUser || !newUser.email || !newUser.password}
+                  className="w-full bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-500/20 text-white font-bold text-[14px] rounded-xl py-3.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25"
+                >
+                  {isCreatingUser ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
+                  Khởi tạo
+                </button>
+              </form>
+
+              {/* BULK CREATION */}
+              <div className="space-y-6 border border-slate-200/80 bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition flex flex-col h-full">
+                <div className="mb-4 flex items-center justify-between">
+                  <div>
+                    <h4 className="text-[15px] font-bold text-slate-800 flex items-center gap-2 mb-1">
+                      <Database className="size-4 text-emerald-500" /> Tạo Hàng loạt
+                    </h4>
+                    <p className="text-[12.5px] text-slate-500 leading-relaxed font-medium">
+                      Tùy chỉnh số lượng và tỷ lệ để tự động sinh hàng loạt.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex-1 grid gap-4 place-content-start">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Tổng Số lượng Mới</label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={bulkTotal}
+                      onChange={e => {
+                        const val = Number(e.target.value);
+                        if (val >= 0 && val <= 100) setBulkTotal(val);
+                        if (bulkAdminCount > val) setBulkAdminCount(val);
+                      }}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 text-[15px] font-bold outline-none focus:bg-white focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10 transition-all font-mono"
+                    />
+                  </div>
+
+                  <div className="space-y-4 mt-2 p-4 bg-slate-50 border border-slate-100 rounded-xl">
+                    <div className="flex items-center justify-between">
+                       <span className="text-[12px] font-bold text-rose-600 flex items-center gap-1.5"><ShieldCheck className="size-3.5" /> Admin: {bulkAdminCount}</span>
+                       <span className="text-[12px] font-bold text-blue-600 flex items-center gap-1.5"><UserPlus className="size-3.5" /> User: {bulkTotal - bulkAdminCount}</span>
+                    </div>
+                  
+                    <input 
+                      type="range" 
+                      min={0} 
+                      max={bulkTotal || 1} 
+                      value={bulkAdminCount} 
+                      onChange={e => setBulkAdminCount(Number(e.target.value))}
+                      className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-rose-500"
+                    />
+                    <div className="flex justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                       <span>0</span>
+                       <span>Tỉ lệ</span>
+                       <span>{bulkTotal}</span>
+                    </div>
+                  </div>
+
+                  {/* Progress */}
+                  {isBulkCreating && (
+                    <div className="space-y-2 mt-2">
+                      <div className="flex justify-between text-[11px] font-bold text-emerald-600 uppercase tracking-wider">
+                        <span>Tiến trình tạo</span>
+                        <span>{Math.round((bulkProgress.current / bulkProgress.total) * 100)}%</span>
+                      </div>
+                      <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                        <div className="bg-gradient-to-r from-emerald-400 to-emerald-600 h-2.5 rounded-full transition-all duration-300" style={{ width: `${(bulkProgress.current / bulkProgress.total) * 100}%` }}></div>
+                      </div>
+                      <p className="text-[11px] font-semibold text-slate-500 text-center animate-pulse">
+                        Đang xử lý {bulkProgress.current}/{bulkProgress.total}... Vui lòng không đóng trang.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {!isBulkCreating && (
+                  <button
+                    onClick={handleBulkCreate}
+                    disabled={bulkTotal <= 0}
+                    className="w-full mt-auto bg-emerald-600 hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-500/20 text-white font-bold text-[14px] rounded-xl py-3.5 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25"
+                  >
+                    <Wand2 className="size-4" /> Tự động Khởi tạo
                   </button>
                 )}
               </div>
 
-              <div className="flex-1 grid gap-4 place-content-start">
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Tổng Số lượng Mới</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={100}
-                    value={bulkTotal}
-                    onChange={e => {
-                      const val = Number(e.target.value);
-                      if (val >= 0 && val <= 100) setBulkTotal(val);
-                      if (bulkAdminCount > val) setBulkAdminCount(val);
-                    }}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 text-[15px] font-bold outline-none focus:bg-white focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10 transition-all font-mono"
-                  />
-                </div>
-
-                <div className="space-y-4 mt-2 p-4 bg-slate-50 border border-slate-100 rounded-xl">
-                  <div className="flex items-center justify-between">
-                     <span className="text-[12px] font-bold text-rose-600 flex items-center gap-1.5"><ShieldCheck className="size-3.5" /> Admin: {bulkAdminCount}</span>
-                     <span className="text-[12px] font-bold text-blue-600 flex items-center gap-1.5"><UserPlus className="size-3.5" /> User: {bulkTotal - bulkAdminCount}</span>
-                  </div>
-                  
-                  <input 
-                    type="range" 
-                    min={0} 
-                    max={bulkTotal || 1} 
-                    value={bulkAdminCount} 
-                    onChange={e => setBulkAdminCount(Number(e.target.value))}
-                    className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-rose-500"
-                  />
-                  <div className="flex justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                     <span>0</span>
-                     <span>Tỉ lệ</span>
-                     <span>{bulkTotal}</span>
-                  </div>
-                </div>
-
-                {/* Progress / Status Area */}
-                {isBulkCreating ? (
-                  <div className="space-y-2 mt-2">
-                    <div className="flex justify-between text-[11px] font-bold text-emerald-600 uppercase tracking-wider">
-                      <span>Tiến trình tạo</span>
-                      <span>{Math.round((bulkProgress.current / bulkProgress.total) * 100)}%</span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                      <div className="bg-gradient-to-r from-emerald-400 to-emerald-600 h-2.5 rounded-full transition-all duration-300" style={{ width: `${(bulkProgress.current / bulkProgress.total) * 100}%` }}></div>
-                    </div>
-                    <p className="text-[11px] font-semibold text-slate-500 text-center animate-pulse">
-                      Đang xử lý {bulkProgress.current}/{bulkProgress.total}... Vui lòng không đóng trang.
-                    </p>
-                  </div>
-                ) : (
-                  bulkResults.length > 0 && (
-                    <div className="mt-2 text-center text-[12px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-2 rounded-lg flex items-center justify-center gap-2">
-                      <CheckCircle2 className="size-4" /> Đã hoàn tất {bulkResults.length} tài khoản 
-                    </div>
-                  )
-                )}
-              </div>
-
-              {!isBulkCreating && (
-                <button
-                  onClick={handleBulkCreate}
-                  disabled={bulkTotal <= 0}
-                  className="w-full mt-auto bg-emerald-600 hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-500/20 text-white font-bold text-[14px] rounded-xl py-3.5 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25"
-                >
-                  <Wand2 className="size-4" /> Tự động Khởi tạo
-                </button>
-              )}
             </div>
+
+            {/* BULK RESULTS TABLE — full width below the cards */}
+            {bulkResults.length > 0 && !isBulkCreating && (
+              <div className="border border-slate-200/80 bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden">
+                {/* Header */}
+                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-emerald-100 rounded-xl">
+                      <ClipboardList className="size-4 text-emerald-600" />
+                    </div>
+                    <div>
+                      <h4 className="text-[14px] font-bold text-slate-800">Danh sách tài khoản đã tạo</h4>
+                      <p className="text-[11px] text-slate-500 font-medium">{bulkResults.filter(r => r.status === 'Thành công').length}/{bulkResults.length} thành công</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={copyAllResults}
+                      className={cn(
+                        "flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold transition-all",
+                        copiedAll
+                          ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                          : "bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 hover:border-indigo-200"
+                      )}
+                    >
+                      {copiedAll ? <ClipboardCheck className="size-3.5" /> : <Copy className="size-3.5" />}
+                      {copiedAll ? 'Đã copy!' : 'Copy tất cả'}
+                    </button>
+                    <button
+                      onClick={downloadBulkResults}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 border border-slate-200 hover:border-emerald-200 transition-all"
+                    >
+                      <Download className="size-3.5" /> Tải CSV
+                    </button>
+                  </div>
+                </div>
+
+                {/* Table */}
+                <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                  <table className="w-full text-left">
+                    <thead className="sticky top-0 z-10">
+                      <tr className="bg-slate-50 border-b border-slate-200">
+                        <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] w-10">#</th>
+                        <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Email</th>
+                        <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Mật khẩu</th>
+                        <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] w-24">Vai trò</th>
+                        <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] w-28">Trạng thái</th>
+                        <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] w-16 text-center">Copy</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {bulkResults.map((r, i) => (
+                        <tr
+                          key={i}
+                          className={cn(
+                            "group/row transition-colors",
+                            copiedRow === i ? "bg-indigo-50/80" : "hover:bg-slate-50/80",
+                            r.status !== 'Thành công' && "bg-rose-50/30"
+                          )}
+                        >
+                          <td className="px-4 py-2.5 text-[11px] font-bold text-slate-400 tabular-nums">{i + 1}</td>
+                          <td className="px-4 py-2.5 text-[13px] font-semibold text-slate-700 font-mono">{r.email}</td>
+                          <td className="px-4 py-2.5 text-[13px] font-mono text-slate-600 tracking-wide">{r.password}</td>
+                          <td className="px-4 py-2.5">
+                            <span className={cn(
+                              "text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg",
+                              r.role === 'admin'
+                                ? "bg-rose-100 text-rose-600 border border-rose-200"
+                                : "bg-blue-100 text-blue-600 border border-blue-200"
+                            )}>
+                              {r.role === 'admin' ? 'Admin' : 'User'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2.5">
+                            <span className={cn(
+                              "text-[11px] font-bold flex items-center gap-1",
+                              r.status === 'Thành công' ? "text-emerald-600" : "text-rose-600"
+                            )}>
+                              {r.status === 'Thành công' ? <CheckCircle2 className="size-3.5" /> : <AlertCircle className="size-3.5" />}
+                              {r.status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2.5 text-center">
+                            <button
+                              onClick={() => copyRow(i)}
+                              className={cn(
+                                "p-1.5 rounded-lg transition-all",
+                                copiedRow === i
+                                  ? "bg-emerald-100 text-emerald-600"
+                                  : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 opacity-0 group-hover/row:opacity-100"
+                              )}
+                              title="Copy dòng này"
+                            >
+                              {copiedRow === i ? <ClipboardCheck className="size-3.5" /> : <Copy className="size-3.5" />}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
 
           </div>
         )}
