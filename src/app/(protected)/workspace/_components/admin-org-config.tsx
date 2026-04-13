@@ -414,8 +414,8 @@ export function AdminOrgConfig() {
 
         {/* Tab 3: Create User Forcefully */}
         {activeTab === 'users' && (
-          <div className="space-y-6 animate-fade-in">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          <div className="animate-fade-in">
+            <div className={cn("grid gap-6 items-start", bulkResults.length > 0 && !isBulkCreating ? "grid-cols-1 xl:grid-cols-[1fr_1fr_1.5fr] lg:grid-cols-[1fr_1fr] " : "grid-cols-1 lg:grid-cols-2")}>
             
               {/* SINGLE CREATION */}
               <form className="space-y-6 border border-slate-200/80 bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition relative" onSubmit={handleCreateUser}>
@@ -585,55 +585,51 @@ export function AdminOrgConfig() {
                 )}
               </div>
 
-            </div>
-
-            {/* BULK RESULTS TABLE — full width below the cards */}
+            {/* BULK RESULTS TABLE — third column */}
             {bulkResults.length > 0 && !isBulkCreating && (
-              <div className="border border-slate-200/80 bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden">
+              <div className="border border-slate-200/80 bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden lg:col-span-2 xl:col-span-1">
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-emerald-100 rounded-xl">
-                      <ClipboardList className="size-4 text-emerald-600" />
+                <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 bg-emerald-100 rounded-lg">
+                      <ClipboardList className="size-3.5 text-emerald-600" />
                     </div>
                     <div>
-                      <h4 className="text-[14px] font-bold text-slate-800">Danh sách tài khoản đã tạo</h4>
-                      <p className="text-[11px] text-slate-500 font-medium">{bulkResults.filter(r => r.status === 'Thành công').length}/{bulkResults.length} thành công</p>
+                      <h4 className="text-[13px] font-bold text-slate-800">Danh sách tài khoản</h4>
+                      <p className="text-[10px] text-slate-500 font-medium">{bulkResults.filter(r => r.status === 'Thành công').length}/{bulkResults.length} thành công</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <button
                       onClick={copyAllResults}
                       className={cn(
-                        "flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold transition-all",
+                        "flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all",
                         copiedAll
                           ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
                           : "bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 hover:border-indigo-200"
                       )}
                     >
-                      {copiedAll ? <ClipboardCheck className="size-3.5" /> : <Copy className="size-3.5" />}
-                      {copiedAll ? 'Đã copy!' : 'Copy tất cả'}
+                      {copiedAll ? <ClipboardCheck className="size-3" /> : <Copy className="size-3" />}
+                      {copiedAll ? 'Đã copy!' : 'Copy all'}
                     </button>
                     <button
                       onClick={downloadBulkResults}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 border border-slate-200 hover:border-emerald-200 transition-all"
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 border border-slate-200 hover:border-emerald-200 transition-all"
                     >
-                      <Download className="size-3.5" /> Tải CSV
+                      <Download className="size-3" /> CSV
                     </button>
                   </div>
                 </div>
 
-                {/* Table */}
-                <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                {/* Compact Table */}
+                <div className="overflow-y-auto max-h-[500px]">
                   <table className="w-full text-left">
                     <thead className="sticky top-0 z-10">
                       <tr className="bg-slate-50 border-b border-slate-200">
-                        <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] w-10">#</th>
-                        <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Email</th>
-                        <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Mật khẩu</th>
-                        <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] w-24">Vai trò</th>
-                        <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] w-28">Trạng thái</th>
-                        <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] w-16 text-center">Copy</th>
+                        <th className="px-3 py-2 text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] w-8">#</th>
+                        <th className="px-3 py-2 text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Email</th>
+                        <th className="px-3 py-2 text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Mật khẩu</th>
+                        <th className="px-3 py-2 text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] w-12 text-center"></th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -646,40 +642,31 @@ export function AdminOrgConfig() {
                             r.status !== 'Thành công' && "bg-rose-50/30"
                           )}
                         >
-                          <td className="px-4 py-2.5 text-[11px] font-bold text-slate-400 tabular-nums">{i + 1}</td>
-                          <td className="px-4 py-2.5 text-[13px] font-semibold text-slate-700 font-mono">{r.email}</td>
-                          <td className="px-4 py-2.5 text-[13px] font-mono text-slate-600 tracking-wide">{r.password}</td>
-                          <td className="px-4 py-2.5">
+                          <td className="px-3 py-2 text-[10px] font-bold text-slate-400 tabular-nums">{i + 1}</td>
+                          <td className="px-3 py-2">
+                            <div className="text-[12px] font-semibold text-slate-700 font-mono truncate max-w-[180px]">{r.email}</div>
                             <span className={cn(
-                              "text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg",
+                              "text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded",
                               r.role === 'admin'
-                                ? "bg-rose-100 text-rose-600 border border-rose-200"
-                                : "bg-blue-100 text-blue-600 border border-blue-200"
+                                ? "bg-rose-100 text-rose-600"
+                                : "bg-blue-100 text-blue-600"
                             )}>
                               {r.role === 'admin' ? 'Admin' : 'User'}
                             </span>
                           </td>
-                          <td className="px-4 py-2.5">
-                            <span className={cn(
-                              "text-[11px] font-bold flex items-center gap-1",
-                              r.status === 'Thành công' ? "text-emerald-600" : "text-rose-600"
-                            )}>
-                              {r.status === 'Thành công' ? <CheckCircle2 className="size-3.5" /> : <AlertCircle className="size-3.5" />}
-                              {r.status}
-                            </span>
-                          </td>
-                          <td className="px-4 py-2.5 text-center">
+                          <td className="px-3 py-2 text-[11px] font-mono text-slate-600">{r.password}</td>
+                          <td className="px-3 py-2 text-center">
                             <button
                               onClick={() => copyRow(i)}
                               className={cn(
-                                "p-1.5 rounded-lg transition-all",
+                                "p-1 rounded-md transition-all",
                                 copiedRow === i
                                   ? "bg-emerald-100 text-emerald-600"
                                   : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 opacity-0 group-hover/row:opacity-100"
                               )}
                               title="Copy dòng này"
                             >
-                              {copiedRow === i ? <ClipboardCheck className="size-3.5" /> : <Copy className="size-3.5" />}
+                              {copiedRow === i ? <ClipboardCheck className="size-3" /> : <Copy className="size-3" />}
                             </button>
                           </td>
                         </tr>
@@ -690,6 +677,7 @@ export function AdminOrgConfig() {
               </div>
             )}
 
+            </div>
           </div>
         )}
 
