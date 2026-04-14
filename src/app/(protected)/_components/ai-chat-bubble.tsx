@@ -12,6 +12,7 @@ interface ChatMessage {
 
 export function AiChatBubble() {
   const [isOpen, setIsOpen] = useState(false);
+  const [hiddenByProfileMenu, setHiddenByProfileMenu] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     { 
       role: 'assistant', 
@@ -33,6 +34,16 @@ export function AiChatBubble() {
       setTimeout(scrollToBottom, 150); // slight delay for animation
     }
   }, [messages, isOpen]);
+
+  // Listen for mobile profile-menu toggle to hide/show this bubble
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      setHiddenByProfileMenu(!!detail?.open);
+    };
+    window.addEventListener('profile-menu-toggle', handler);
+    return () => window.removeEventListener('profile-menu-toggle', handler);
+  }, []);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -254,7 +265,7 @@ export function AiChatBubble() {
       )}
 
       {/* ── Fancy Toggler Pill Button ── */}
-      {!isOpen && (
+      {!isOpen && !hiddenByProfileMenu && (
         <div className="fixed bottom-[110px] right-6 z-50 flex flex-col items-end pointer-events-none">
           <button
             onClick={() => setIsOpen(true)}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
@@ -44,6 +44,11 @@ export function Sidebar({ userEmail, isAdmin = false, isProfileComplete = true }
   const router   = useRouter();
   const pathname = usePathname();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  // Broadcast profile menu state to sibling components (e.g. AiChatBubble)
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('profile-menu-toggle', { detail: { open: showProfileMenu } }));
+  }, [showProfileMenu]);
 
   const isActive = (href: string) => pathname.startsWith(href);
 
