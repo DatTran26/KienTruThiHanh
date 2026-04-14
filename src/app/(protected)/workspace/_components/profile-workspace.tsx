@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   Building2, ShieldCheck, CheckCircle2, Circle,
   Landmark, Users, FileText, Settings, Key, Star,
@@ -26,7 +27,25 @@ const BASE_TABS = [
 ];
 
 export function ProfileWorkspace({ profile, isVerified, userEmail, generalForm, isAdmin }: ProfileWorkspaceProps) {
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState('overview');
+
+  // Deep link support: ?tab=org|system|users navigates to admin_config
+  // ?tab=overview|banking|structure|documents navigates to that tab directly
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (!tabParam) return;
+
+    const adminSubTabs = ['org', 'system', 'users'];
+    const directTabs = ['overview', 'banking', 'structure', 'documents', 'admin_config'];
+
+    if (adminSubTabs.includes(tabParam) && isAdmin) {
+      // Navigate to admin config panel — the sub-tab will be handled by AdminOrgConfig
+      setActiveTab('admin_config');
+    } else if (directTabs.includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams, isAdmin]);
 
   const TABS = [
     ...BASE_TABS,
@@ -254,7 +273,7 @@ export function ProfileWorkspace({ profile, isVerified, userEmail, generalForm, 
 
         {/* Admin Tools */}
         {activeTab === 'admin_config' && (
-          <AdminOrgConfig />
+          <AdminOrgConfig initialTab={searchParams.get('tab') as any} />
         )}
 
       </div>

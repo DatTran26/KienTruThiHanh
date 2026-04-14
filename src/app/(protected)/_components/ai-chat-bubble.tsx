@@ -1,9 +1,12 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Bot, X, Send, Sparkles, Loader2, Zap, BrainCircuit, Atom } from 'lucide-react';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { Bot, X, Send, Sparkles, Loader2, Zap, BrainCircuit, Atom, ExternalLink, ArrowRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import type { QuickChip } from '@/lib/aurora-knowledge-base';
+import { getQuickChips } from '@/lib/aurora-knowledge-base';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -11,18 +14,41 @@ interface ChatMessage {
 }
 
 export function AiChatBubble() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [hiddenByProfileMenu, setHiddenByProfileMenu] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     { 
       role: 'assistant', 
-      content: 'Chào Admin, Hệ thống Trí tuệ Nhân tạo VKS đã sẵn sàng. Bạn muốn tra cứu công văn, kiểm tra nhóm mục chi phí hay phân tích biến động dòng tiền hôm nay?' 
+      content: 'Chào anh/chị! 🌟 Em là **Aurora AI**, trợ lý thông minh của hệ thống VKS. Em có thể giúp anh/chị:\n- 📊 **Thống kê** chi phí, báo cáo, hoá đơn\n- 🧭 **Hướng dẫn** sử dụng từng tính năng\n- 📝 **Tra cứu** nghiệp vụ MLNS\n\nAnh/chị cần em hỗ trợ gì nào? 💖' 
     }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [chips, setChips] = useState<QuickChip[]>([]);
+  const [showChips, setShowChips] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const chipsContainerRef = useRef<HTMLDivElement>(null);
+
+  // Load quick chips on open
+  useEffect(() => {
+    if (isOpen) {
+      setChips(getQuickChips());
+    }
+  }, [isOpen]);
+
+  // Show chips again when AI finishes responding
+  useEffect(() => {
+    if (!loading && messages.length > 1) {
+      // Delay slightly so it doesn't flash during rapid interactions
+      const timer = setTimeout(() => {
+        setChips(getQuickChips());
+        setShowChips(true);
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, messages.length]);
 
   // Auto-scroll to bottom of chat
   const scrollToBottom = () => {
@@ -31,7 +57,7 @@ export function AiChatBubble() {
 
   useEffect(() => {
     if (isOpen) {
-      setTimeout(scrollToBottom, 150); // slight delay for animation
+      setTimeout(scrollToBottom, 150);
     }
   }, [messages, isOpen]);
 
@@ -45,15 +71,16 @@ export function AiChatBubble() {
     return () => window.removeEventListener('profile-menu-toggle', handler);
   }, []);
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
+  const handleSend = async (messageOverride?: string) => {
+    const userMsg = (messageOverride || input).trim();
+    if (!userMsg) return;
 
     // Add user message
-    const userMsg = input.trim();
     const currentMessages = [...messages, { role: 'user', content: userMsg }];
     setMessages(currentMessages as ChatMessage[]);
     
     setInput('');
+    setShowChips(false); // Hide chips while sending
     if (textareaRef.current) {
       textareaRef.current.style.height = '56px';
     }
@@ -87,6 +114,16 @@ export function AiChatBubble() {
     }
   };
 
+  const handleChipClick = (chip: QuickChip) => {
+    handleSend(chip.message);
+  };
+
+  // ── Internal link handler for deep navigation ──
+  const handleInternalLink = (href: string) => {
+    router.push(href);
+    setIsOpen(false); // Close chat after navigating
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     e.target.style.height = '56px'; // Reset line height
@@ -99,6 +136,50 @@ export function AiChatBubble() {
       handleSend();
     }
   };
+
+  // ── Markdown custom renderers ──
+  const markdownComponents = useMemo(() => ({
+    p: ({node, ...props}: any) => <p className="mb-2.5 last:mb-0" {...props}/>,
+    strong: ({node, ...props}: any) => <strong className="font-bold text-indigo-950" {...props}/>,
+    h1: ({node, ...props}: any) => <h1 className="text-lg font-extrabold text-indigo-950 mt-4 mb-2" {...props}/>,
+    h2: ({node, ...props}: any) => <h2 className="text-base font-extrabold text-indigo-950 mt-4 mb-2" {...props}/>,
+    h3: ({node, ...props}: any) => <h3 className="text-[15px] font-bold text-indigo-950 mt-3 mb-1.5" {...props}/>,
+    ul: ({node, ...props}: any) => <ul className="list-disc pl-5 mb-2 space-y-1 marker:text-indigo-400" {...props}/>,
+    ol: ({node, ...props}: any) => <ol className="list-decimal pl-5 mb-2 space-y-1 marker:text-indigo-400" {...props}/>,
+    li: ({node, ...props}: any) => <li className="pl-0.5 leading-relaxed" {...props}/>,
+    // ── Deep Link Renderer ──
+    a: ({node, href, children, ...props}: any) => {
+      const isInternal = href && href.startsWith('/') && !href.startsWith('//');
+      if (isInternal) {
+        return (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleInternalLink(href);
+            }}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-gradient-to-r from-indigo-50 to-violet-50 border border-indigo-200/60 text-indigo-700 font-bold text-[13px] hover:from-indigo-100 hover:to-violet-100 hover:border-indigo-300 transition-all active:scale-95 cursor-pointer shadow-sm group/link"
+          >
+            <ArrowRight className="size-3 text-indigo-500 group-hover/link:translate-x-0.5 transition-transform" />
+            {children}
+          </button>
+        );
+      }
+      // External links
+      return (
+        <a href={href} target="_blank" rel="noopener noreferrer" className="text-indigo-600 underline underline-offset-2 hover:text-indigo-800 inline-flex items-center gap-0.5" {...props}>
+          {children}
+          <ExternalLink className="size-3 inline-block ml-0.5" />
+        </a>
+      );
+    },
+    code: ({node, ref, ...props}: any) => {
+      const isInline = !props.className?.includes('language-');
+      return isInline 
+        ? <code className="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 rounded-md text-[13px] font-mono border border-indigo-100/50" {...props}/> 
+        : <pre className="p-3 bg-slate-900 text-slate-50 rounded-xl max-w-full overflow-x-auto text-[13px] font-mono leading-normal shadow-inner my-3"><code {...props}/></pre>;
+    },
+  }), []);
 
   return (
     <>
@@ -146,8 +227,8 @@ export function AiChatBubble() {
             </button>
           </div>
 
-          {/* Message List (Glassy Area) */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-7 scroll-smooth bg-gradient-to-b from-slate-50/50 to-slate-100/30 relative">
+          {/* Message List */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth bg-gradient-to-b from-slate-50/50 to-slate-100/30 relative">
             {/* Background watermark */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03]">
               <Atom className="size-80 text-indigo-900 animate-[spin_60s_linear_infinite]" />
@@ -156,46 +237,31 @@ export function AiChatBubble() {
             {messages.map((msg, idx) => (
               <div 
                 key={idx} 
-                className={`relative z-10 flex gap-4 max-w-[90%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''} animate-in slide-in-from-bottom-2 fade-in duration-300`}
+                className={`relative z-10 flex gap-3 max-w-[90%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''} animate-in slide-in-from-bottom-2 fade-in duration-300`}
               >
-                <div className="size-10 shrink-0 rounded-full flex items-center justify-center shadow-sm"
+                <div className="size-9 shrink-0 rounded-full flex items-center justify-center shadow-sm"
                      style={{ 
                        background: msg.role === 'assistant' ? 'linear-gradient(135deg, #eef2ff, #c7d2fe)' : 'linear-gradient(135deg, #f8fafc, #e2e8f0)',
                        border: '2px solid rgba(255,255,255,0.9)'
                      }}
                 >
                   {msg.role === 'assistant' 
-                    ? <Atom className="size-5 text-indigo-700" />
-                    : <span className="font-bold text-slate-500 text-[11px] uppercase">You</span>
+                    ? <Atom className="size-4.5 text-indigo-700" />
+                    : <span className="font-bold text-slate-500 text-[10px] uppercase">You</span>
                   }
                 </div>
                 
-                <div className={`px-5 py-4 text-[14.5px] leading-relaxed shadow-sm ${
+                <div className={`px-4 py-3.5 text-[14px] leading-relaxed shadow-sm ${
                   msg.role === 'user' 
-                    ? 'whitespace-pre-wrap bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-700 text-white rounded-[20px] rounded-tr-[4px] shadow-indigo-500/20 shadow-lg border border-indigo-400/30 font-medium'
-                    : 'bg-white/95 backdrop-blur-md border border-slate-100 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.05)] text-slate-700 rounded-[20px] rounded-tl-[4px] font-medium'
+                    ? 'whitespace-pre-wrap bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-700 text-white rounded-[18px] rounded-tr-[4px] shadow-indigo-500/20 shadow-lg border border-indigo-400/30 font-medium'
+                    : 'bg-white/95 backdrop-blur-md border border-slate-100 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.05)] text-slate-700 rounded-[18px] rounded-tl-[4px] font-medium'
                 }`}>
                   {msg.role === 'user' ? (
                     msg.content
                   ) : (
                     <ReactMarkdown 
                       remarkPlugins={[remarkGfm]}
-                      components={{
-                        p: ({node, ...props}) => <p className="mb-2.5 last:mb-0" {...props}/>,
-                        strong: ({node, ...props}) => <strong className="font-bold text-indigo-950" {...props}/>,
-                        h1: ({node, ...props}) => <h1 className="text-lg font-extrabold text-indigo-950 mt-4 mb-2" {...props}/>,
-                        h2: ({node, ...props}) => <h2 className="text-base font-extrabold text-indigo-950 mt-4 mb-2" {...props}/>,
-                        h3: ({node, ...props}) => <h3 className="text-[15px] font-bold text-indigo-950 mt-3 mb-1.5" {...props}/>,
-                        ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-2 space-y-1 marker:text-indigo-400" {...props}/>,
-                        ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-2 space-y-1 marker:text-indigo-400" {...props}/>,
-                        li: ({node, ...props}) => <li className="pl-0.5 leading-relaxed" {...props}/>,
-                        code: ({node, ref, ...props}: any) => {
-                          const isInline = !props.className?.includes('language-');
-                          return isInline 
-                            ? <code className="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 rounded-md text-[13px] font-mono border border-indigo-100/50" {...props}/> 
-                            : <pre className="p-3 bg-slate-900 text-slate-50 rounded-xl max-w-full overflow-x-auto text-[13px] font-mono leading-normal shadow-inner my-3"><code {...props}/></pre>;
-                        },
-                      }}
+                      components={markdownComponents}
                     >
                       {msg.content}
                     </ReactMarkdown>
@@ -205,11 +271,11 @@ export function AiChatBubble() {
             ))}
             
             {loading && (
-              <div className="relative z-10 flex gap-4 max-w-[85%] animate-in fade-in duration-300">
-                <div className="size-10 shrink-0 rounded-full bg-gradient-to-br from-indigo-50 to-indigo-100 border-2 border-white flex items-center justify-center shadow-sm">
-                  <Atom className="size-5 text-indigo-600" />
+              <div className="relative z-10 flex gap-3 max-w-[85%] animate-in fade-in duration-300">
+                <div className="size-9 shrink-0 rounded-full bg-gradient-to-br from-indigo-50 to-indigo-100 border-2 border-white flex items-center justify-center shadow-sm">
+                  <Atom className="size-4.5 text-indigo-600" />
                 </div>
-                <div className="px-5 py-4 rounded-[20px] bg-white/95 backdrop-blur-md border border-slate-100 shadow-sm text-slate-500 rounded-tl-[4px] flex items-center gap-1.5 h-[56px]">
+                <div className="px-4 py-3.5 rounded-[18px] bg-white/95 backdrop-blur-md border border-slate-100 shadow-sm text-slate-500 rounded-tl-[4px] flex items-center gap-1.5 h-[52px]">
                   <div className="flex gap-1.5">
                     <span className="size-2.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
                     <span className="size-2.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
@@ -218,8 +284,31 @@ export function AiChatBubble() {
                 </div>
               </div>
             )}
+
             <div ref={messagesEndRef} />
           </div>
+
+          {/* ── Quick Chips (above input, right-aligned) ── */}
+          {showChips && chips.length > 0 && !loading && (
+            <div className="px-6 pt-3 pb-1.5 bg-white/80 backdrop-blur-sm shrink-0 animate-in fade-in duration-300">
+              <div className="flex flex-wrap justify-end gap-1.5" ref={chipsContainerRef}>
+                {chips.map((chip, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleChipClick(chip)}
+                    className="flex items-center gap-1.5 pl-3 pr-2 py-1.5 rounded-full bg-gradient-to-r from-indigo-50 to-violet-50 border border-indigo-200/60 hover:border-indigo-400 hover:from-indigo-100 hover:to-violet-100 text-[11.5px] font-semibold text-indigo-700 hover:text-indigo-800 transition-all active:scale-95 shadow-sm hover:shadow-md group/chip animate-in fade-in slide-in-from-bottom-1 duration-300"
+                    style={{ animationDelay: `${idx * 60}ms` }}
+                  >
+                    <span className="text-[13px]">{chip.icon}</span>
+                    <span className="whitespace-nowrap">{chip.label}</span>
+                    <span className="size-5 rounded-full bg-indigo-500/10 group-hover/chip:bg-indigo-500 flex items-center justify-center transition-all ml-0.5">
+                      <Send className="size-2.5 text-indigo-500 group-hover/chip:text-white transition-colors" />
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Advanced Input Area */}
           <div className="px-6 py-6 pb-8 bg-white backdrop-blur-xl border-t border-slate-100 shadow-[0_-10px_40px_rgba(0,0,0,0.02)] shrink-0 sm:rounded-bl-[32px]">
@@ -233,12 +322,12 @@ export function AiChatBubble() {
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 rows={1}
-                placeholder="Tra cứu nghiệp vụ, hỏi AI..."
+                placeholder="Hỏi về thống kê, hướng dẫn, nghiệp vụ..."
                 className="relative w-full min-h-[56px] max-h-[104px] py-[16px] pl-6 pr-16 rounded-[20px] bg-slate-50 border-2 border-slate-100 focus:bg-white text-[15px] outline-none focus:border-indigo-400 text-slate-700 placeholder:text-slate-400 font-semibold transition-all shadow-sm resize-none overflow-y-auto leading-[24px]"
                 disabled={loading}
               />
               <button 
-                onClick={handleSend}
+                onClick={() => handleSend()}
                 disabled={!input.trim() || loading}
                 className="absolute right-2.5 size-11 rounded-[16px] bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center text-white transition-all shadow-md shadow-indigo-600/20 active:scale-95"
               >

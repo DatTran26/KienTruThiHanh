@@ -7,9 +7,11 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 
-export function AdminOrgConfig() {
+export function AdminOrgConfig({ initialTab }: { initialTab?: 'org' | 'system' | 'users' | null }) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'org' | 'system' | 'users'>('org');
+  const [activeTab, setActiveTab] = useState<'org' | 'system' | 'users'>(
+    (initialTab && ['org', 'system', 'users'].includes(initialTab)) ? initialTab : 'org'
+  );
   
   // Org State
   const [isLoading, setIsLoading] = useState(true);
