@@ -345,12 +345,12 @@ export function ResultSection({ response, onAddToReport, savedTargetInfo }: Resu
                          {/* 3. MÃ NGÂN SÁCH (Hidden on mobile) */}
                          <div className="relative group/tree hidden sm:flex flex-col items-end justify-center gap-2 border-l border-slate-100 pl-5 h-full cursor-help z-10 hover:z-50">
                            <div className="flex items-center shadow-sm rounded">
-                             <span className="font-mono text-[9px] font-black tracking-widest text-white bg-indigo-500 px-2 py-1 rounded-l shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">MỤC</span>
-                             <span className="font-mono text-[11.5px] font-bold bg-indigo-50 text-indigo-700 px-2 py-1 rounded-r border-y border-r border-indigo-100 min-w-[3rem] text-center">{grp.bestItem.groupCode}</span>
+                             <span className="font-mono text-[12px] font-black tracking-widest text-white bg-indigo-500 px-2.5 py-1.5 rounded-l shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">MỤC</span>
+                             <span className="font-mono text-[15px] font-bold bg-indigo-50 text-indigo-700 px-2.5 py-1.5 rounded-r border-y border-r border-indigo-100 min-w-[3.5rem] text-center">{grp.bestItem.groupCode}</span>
                            </div>
                            <div className="flex items-center shadow-sm rounded">
-                             <span className="font-mono text-[9px] font-black tracking-widest text-white bg-blue-500 px-2 py-1 rounded-l shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">T/M</span>
-                             <span className="font-mono text-[11.5px] font-bold bg-blue-50 text-blue-700 px-2 py-1 rounded-r border-y border-r border-blue-100 min-w-[3rem] text-center">{grp.bestItem.subCode}</span>
+                             <span className="font-mono text-[12px] font-black tracking-widest text-white bg-blue-500 px-2.5 py-1.5 rounded-l shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">T/M</span>
+                             <span className="font-mono text-[15px] font-bold bg-blue-50 text-blue-700 px-2.5 py-1.5 rounded-r border-y border-r border-blue-100 min-w-[3.5rem] text-center">{grp.bestItem.subCode}</span>
                            </div>
                            {renderWorktreeTooltip(grp.bestItem, 'left')}
                          </div>
@@ -508,12 +508,12 @@ export function ResultSection({ response, onAddToReport, savedTargetInfo }: Resu
                     {/* 3. MÃ SỐ */}
                     <div className="relative group/tree hidden sm:flex flex-col items-end justify-center gap-2 border-l border-slate-100 pl-5 h-full cursor-help z-10 hover:z-50">
                       <div className="flex items-center shadow-sm rounded">
-                        <span className="font-mono text-[9px] font-black tracking-widest text-slate-500 bg-slate-100 px-2 py-1 rounded-l shadow-[inset_0_1px_0_rgba(255,255,255,1)]">MỤC</span>
-                        <span className="font-mono text-[11.5px] font-bold bg-white text-slate-700 px-2 py-1 rounded-r border-y border-r border-slate-200 min-w-[3rem] text-center">{r.groupCode}</span>
+                        <span className="font-mono text-[12px] font-black tracking-widest text-slate-500 bg-slate-100 px-2.5 py-1.5 rounded-l shadow-[inset_0_1px_0_rgba(255,255,255,1)]">MỤC</span>
+                        <span className="font-mono text-[15px] font-bold bg-white text-slate-700 px-2.5 py-1.5 rounded-r border-y border-r border-slate-200 min-w-[3.5rem] text-center">{r.groupCode}</span>
                       </div>
                       <div className="flex items-center shadow-sm rounded">
-                         <span className="font-mono text-[9px] font-black tracking-widest text-slate-500 bg-slate-100 px-2 py-1 rounded-l shadow-[inset_0_1px_0_rgba(255,255,255,1)]">T/M</span>
-                         <span className="font-mono text-[11.5px] font-bold bg-white text-slate-700 px-2 py-1 rounded-r border-y border-r border-slate-200 min-w-[3rem] text-center">{r.subCode}</span>
+                         <span className="font-mono text-[12px] font-black tracking-widest text-slate-500 bg-slate-100 px-2.5 py-1.5 rounded-l shadow-[inset_0_1px_0_rgba(255,255,255,1)]">T/M</span>
+                         <span className="font-mono text-[15px] font-bold bg-white text-slate-700 px-2.5 py-1.5 rounded-r border-y border-r border-slate-200 min-w-[3.5rem] text-center">{r.subCode}</span>
                       </div>
                       {renderWorktreeTooltip(r, 'left')}
                     </div>

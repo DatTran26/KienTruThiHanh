@@ -56,13 +56,13 @@ export function ResultCard({ result, isBest = false, onAddToReport, originalDesc
       {/* Codes Header */}
       <div className="relative flex border-b border-slate-200/50 bg-white/40 group/tree cursor-help z-10 hover:z-50">
         <div className="flex-1 flex flex-wrap gap-2.5 items-center px-5 py-3.5">
-          <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold bg-white/80 text-slate-600 px-3 py-1.5 rounded-lg border border-slate-200/80 shadow-sm shrink-0">
-            <span className="text-slate-400">MỤC</span>
-            <span className="text-slate-800">{result.groupCode}</span>
+          <div className="flex items-center gap-2 font-mono font-bold bg-white/80 text-slate-600 px-3.5 py-2 rounded-lg border border-slate-200/80 shadow-sm shrink-0">
+            <span className="text-[13px] text-slate-400 tracking-wide">MỤC</span>
+            <span className="text-[15px] text-slate-800 font-extrabold">{result.groupCode}</span>
           </div>
-          <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold bg-indigo-50/80 text-indigo-700 px-3 py-1.5 rounded-lg border border-indigo-100/80 shadow-sm shrink-0">
-            <span className="text-indigo-400">TIỂU MỤC</span>
-            <span className="text-indigo-800 font-extrabold">{result.subCode}</span>
+          <div className="flex items-center gap-2 font-mono font-bold bg-indigo-50/80 text-indigo-700 px-3.5 py-2 rounded-lg border border-indigo-100/80 shadow-sm shrink-0">
+            <span className="text-[13px] text-indigo-400 tracking-wide">TIỂU MỤC</span>
+            <span className="text-[15px] text-indigo-800 font-extrabold">{result.subCode}</span>
           </div>
         </div>
 
